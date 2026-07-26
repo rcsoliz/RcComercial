@@ -1,0 +1,68 @@
+namespace RcComercial.Domain.Common;
+
+/// <summary>Valores permitidos, alineados con los CHECK constraints de la BD.</summary>
+public static class EstadosVenta
+{
+    public const string Completada = "COMPLETADA";
+    public const string Anulada = "ANULADA";
+}
+
+public static class EstadosSiat
+{
+    public const string SinFactura = "SIN_FACTURA";
+    public const string Pendiente = "PENDIENTE";
+    public const string Emitida = "EMITIDA";
+    public const string Rechazada = "RECHAZADA";
+    public const string Contingencia = "CONTINGENCIA";
+}
+
+public static class MetodosPago
+{
+    public const string Efectivo = "EFECTIVO";
+    public const string Qr = "QR";
+    public const string Tarjeta = "TARJETA";
+    public const string Transferencia = "TRANSFERENCIA";
+}
+
+public static class TiposMovimiento
+{
+    public const string Compra = "COMPRA";
+    public const string Venta = "VENTA";
+    public const string Ajuste = "AJUSTE";
+    public const string Merma = "MERMA";
+    public const string Vencimiento = "VENCIMIENTO";
+    public const string Transferencia = "TRANSFERENCIA";
+    public const string Devolucion = "DEVOLUCION";
+    public const string InventarioInicial = "INVENTARIO_INICIAL";
+}
+
+public static class ClasificacionesFarmacia
+{
+    public const string Libre = "LIBRE";
+    public const string Receta = "RECETA";
+    public const string Psicotropico = "PSICOTROPICO";
+    public const string Estupefaciente = "ESTUPEFACIENTE";
+}
+
+public static class Permisos
+{
+    public const string VentasCrear = "ventas.crear";
+    public const string VentasAnular = "ventas.anular";
+    public const string VentasDescuento = "ventas.descuento";
+    public const string VentasVerHistorial = "ventas.ver_historial";
+    public const string CajaAbrirCerrar = "caja.abrir_cerrar";
+    public const string CajaVerTodas = "caja.ver_todas";
+    public const string InventarioVer = "inventario.ver";
+    public const string InventarioAjustar = "inventario.ajustar";
+    public const string InventarioVerCostos = "inventario.ver_costos";
+    public const string ComprasCrear = "compras.crear";
+    public const string ComprasAnular = "compras.anular";
+    public const string ProductosCrearEditar = "productos.crear_editar";
+    public const string ProductosEliminar = "productos.eliminar";
+    public const string ProductosCambiarPrecios = "productos.cambiar_precios";
+    public const string ReportesVer = "reportes.ver";
+    public const string AdminUsuarios = "admin.usuarios";
+    public const string AdminRoles = "admin.roles";
+    public const string AdminConfiguracion = "admin.configuracion";
+    public const string AdminSucursales = "admin.sucursales";
+}
