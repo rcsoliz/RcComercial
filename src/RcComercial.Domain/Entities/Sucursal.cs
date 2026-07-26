@@ -9,4 +9,7 @@ public class Sucursal : BaseEntity, ITenantEntity
     public string? Direccion { get; set; }
     public int? CodigoSucursalSiat { get; set; }
     public bool Activo { get; set; } = true;
+
+    /// <summary>Código CAEB registrado (Fase 9, facturador-by-rc). Nullable: solo se exige al facturar.</summary>
+    public string? ActividadEconomica { get; set; }
 }

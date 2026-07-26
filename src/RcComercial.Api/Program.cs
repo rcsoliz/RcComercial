@@ -163,5 +163,6 @@ api.MapVentasEndpoints();
 api.MapCajaEndpoints();
 api.MapDevolucionesEndpoints();
 api.MapPanelEndpoints();
+api.MapComprasEndpoints();
 
 app.Run();

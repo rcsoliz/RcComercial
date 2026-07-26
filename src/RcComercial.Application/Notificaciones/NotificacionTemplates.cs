@@ -27,4 +27,7 @@ public static class NotificacionTemplates
     public static string Vencimientos(List<LotePorVencerDto> lotes) =>
         "Lotes por vencer en 30 días: " +
         string.Join(", ", lotes.Select(l => $"{l.ProductoNombre} lote {l.LoteNumero} vence {l.FechaVencimiento:dd/MM}")) + ".";
+
+    public static string PedidoProveedor(List<(string ProductoNombre, decimal Cantidad)> items) =>
+        "Pedido: " + string.Join(", ", items.Select(i => $"{i.ProductoNombre} x{i.Cantidad:F0}")) + ".";
 }

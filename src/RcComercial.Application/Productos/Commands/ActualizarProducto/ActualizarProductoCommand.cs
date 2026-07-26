@@ -20,4 +20,6 @@ public record ActualizarProductoCommand(
     bool ManejaLote,
     bool EsControlado,
     bool PermiteDecimales,
+    int? CodigoProductoSin,
+    int? CodigoUnidadSin,
     List<CrearProductoPresentacion> Presentaciones) : IRequest<ProductoDto?>;

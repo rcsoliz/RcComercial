@@ -24,6 +24,11 @@ public class Producto : BaseEntity, ITenantEntity, IAuditable
     public bool Activo { get; set; } = true;
     public Guid? ProductoMaestroId { get; set; }
 
+    // Facturación (Fase 9, facturador-by-rc): nullable a propósito, solo se
+    // exigen al facturar; la tienda que no factura no está obligada a llenarlos.
+    public int? CodigoProductoSin { get; set; }
+    public int? CodigoUnidadSin { get; set; }
+
     public ProductoFarmacia? FichaFarmacia { get; set; }
     public ICollection<ProductoPresentacion> Presentaciones { get; set; } = new List<ProductoPresentacion>();
 

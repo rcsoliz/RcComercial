@@ -32,6 +32,9 @@ public interface IApplicationDbContext
     DbSet<DevolucionDetalle> DevolucionDetalles { get; }
     DbSet<Notificacion> Notificaciones { get; }
     DbSet<EmpresaConfiguracion> EmpresaConfiguraciones { get; }
+    DbSet<Proveedor> Proveedores { get; }
+    DbSet<Compra> Compras { get; }
+    DbSet<CompraDetalle> CompraDetalles { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

@@ -22,6 +22,7 @@ public class SucursalConfig : IEntityTypeConfiguration<Sucursal>
         b.ToTable("sucursal");
         b.HasIndex(x => x.EmpresaId);
         b.Property(x => x.Nombre).HasMaxLength(100);
+        b.Property(x => x.ActividadEconomica).HasMaxLength(20);
     }
 }
 

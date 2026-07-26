@@ -33,6 +33,8 @@ public record ProductoDto(
     bool EsControlado,
     bool PermiteDecimales,
     bool Activo,
+    int? CodigoProductoSin,
+    int? CodigoUnidadSin,
     List<PresentacionDto> Presentaciones,
     FichaFarmaciaDto? FichaFarmacia);
 

@@ -57,6 +57,13 @@ Tareas:
    y devuelve sugerencia `{ esSugerencia: true, datos }` para alta rápida.
 4. CRUD producto (permiso `productos.crear_editar`): crear con presentaciones
    anidadas; si `empresa.rubro.usa_ficha_farmacia`, aceptar ficha farmacia.
+4b. MIGRACIÓN — campos para facturación (Facturacion API los exige por ítem):
+   - `producto.codigo_producto_sin` (int, nullable): código de la paramétrica
+     de productos/servicios del SIN.
+   - `producto.codigo_unidad_sin` (int, nullable): unidad de medida en código SIN.
+   - `sucursal.actividad_economica` (varchar, nullable): código CAEB registrado.
+   Nullable a propósito: la tienda que no factura no está obligada a llenarlos;
+   el flujo de emisión (Fase 9) valida que existan solo al facturar.
 5. Cambio de precio (permiso `productos.cambiar_precios`): registrar SIEMPRE
    en `precio_historial` en la misma transacción.
 6. Desactivar producto (permiso `productos.eliminar`): soft delete.
@@ -184,12 +191,54 @@ Criterios: [ ] el sugerido excluye productos con stock suficiente;
    cola de sincronización con reintentos; el backend revalida todo al recibir.
 3. Rango de numeración reservado por dispositivo (extender tabla secuencia).
 
-## FASE 9 — Facturación SIAT
+## FASE 9 — Facturación SIAT (integración con Facturacion API)
 
-Investigar y aplicar la normativa vigente de Impuestos Nacionales (facturación
-en línea / computarizada): registro CUIS/CUFD, generación de CUF, firma,
-XML, paquetes de contingencia. Campos ya previstos en venta y devolucion.
-(Requiere credenciales de pruebas del SIAT — gestionarlas antes de esta fase.)
+> RcComercial NO implementa SIAT. Consume el servicio independiente
+> `facturador-by-rc` (repo aparte, producto vendible por sí mismo) vía REST.
+> RcComercial nunca conoce CUFD/CUIS/XML/SOAP: emite → 202 → webhook.
+> Para desarrollo se usa el SiatFakeAdapter del facturador (sin credenciales).
+
+Tareas (lado RcComercial):
+1. `IFacturacionApiClient` (HttpClient tipado + Polly): emitir, consultar,
+   anular, obtener PDF. Config: base URL + X-Api-Key del tenant (cifrada
+   en `empresa_configuracion`).
+2. Al completar una venta de empresa con facturación activa
+   (`empresa_configuracion['siat.activo'] = true`):
+   - Validar que todos los productos tengan `codigo_producto_sin` y
+     `codigo_unidad_sin`; si falta alguno, la venta se guarda igual y la
+     factura queda en error visible (no bloquear la venta).
+   - `POST /api/v1/facturas` con `referenciaExterna = venta.Id` (UUID v7:
+     idempotencia gratis, la venta offline re-sincronizada jamás factura doble).
+   - `venta.estado_siat = 'PENDIENTE'`.
+3. Endpoint receptor de webhooks `POST /api/webhooks/facturacion`:
+   - Verificar firma HMAC-SHA256 (timestamp + cuerpo) con el secreto del tenant;
+     rechazar timestamps viejos (> 5 min).
+   - Actualizar venta: EMITIDA (guardar cuf) o RECHAZADA (guardar motivo).
+   - Idempotente: el mismo webhook recibido dos veces no rompe nada.
+4. Polling de respaldo (job cada 10 min) para facturas PENDIENTE > 15 min.
+5. Anulación de venta facturada → `POST /facturas/{id}/anulacion` con código
+   de motivo SIN; la venta no queda ANULADA localmente hasta confirmar webhook.
+6. WhatsApp: adjuntar el PDF (`GET /facturas/{id}/pdf`) en la notificación
+   FACTURA_CLIENTE en lugar del recibo interno.
+7. Pantalla de configuración (permiso `admin.configuracion`): API key del
+   facturador, actividad económica, y asistente para mapear productos a
+   códigos SIN (masivo, por categoría).
+
+Criterios de aceptación:
+- [ ] Venta con siat.activo emite y el webhook la marca EMITIDA con CUF.
+- [ ] Webhook con firma inválida → 401 y no toca la venta.
+- [ ] Reenviar la misma venta al facturador no duplica factura (idempotencia).
+- [ ] Producto sin codigo_producto_sin: la venta se completa, la factura
+      queda en error visible en el panel.
+- [ ] Todo el flujo corre contra el SiatFakeAdapter, sin credenciales reales.
+
+Trabajo restante en el repo facturador-by-rc (paralelo, con su propio CLAUDE.md):
+- Clientes SOAP desde los WSDL públicos del SIN + pruebas contra WireMock.Net.
+- Completar SiatComputarizadaAdapter (hoy NotImplementedException).
+- Limpiar TODOs obsoletos (CufCalculator/XmlFacturaBuilder ya existen y
+  están testeados, pero los comentarios del adaptador dicen "pendiente").
+- Cuando lleguen las credenciales del ambiente piloto: smoke tests reales
+  y homologación. Nada de esto bloquea las fases 1–8 de RcComercial.
 
 ---
 

@@ -27,6 +27,8 @@ public class ActualizarProductoCommandHandler(IApplicationDbContext db)
         producto.ManejaLote = request.ManejaLote;
         producto.EsControlado = request.EsControlado;
         producto.PermiteDecimales = request.PermiteDecimales;
+        producto.CodigoProductoSin = request.CodigoProductoSin;
+        producto.CodigoUnidadSin = request.CodigoUnidadSin;
 
         db.ProductoPresentaciones.RemoveRange(producto.Presentaciones);
         producto.Presentaciones.Clear();

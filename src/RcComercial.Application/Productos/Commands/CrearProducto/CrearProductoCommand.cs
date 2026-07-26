@@ -33,5 +33,7 @@ public record CrearProductoCommand(
     bool ManejaLote,
     bool EsControlado,
     bool PermiteDecimales,
+    int? CodigoProductoSin,
+    int? CodigoUnidadSin,
     List<CrearProductoPresentacion> Presentaciones,
     CrearProductoFichaFarmacia? FichaFarmacia) : IRequest<ProductoDto>;

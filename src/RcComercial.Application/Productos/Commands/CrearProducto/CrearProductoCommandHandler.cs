@@ -24,6 +24,8 @@ public class CrearProductoCommandHandler(IApplicationDbContext db, ICurrentUserS
             ManejaLote = request.ManejaLote,
             EsControlado = request.EsControlado,
             PermiteDecimales = request.PermiteDecimales,
+            CodigoProductoSin = request.CodigoProductoSin,
+            CodigoUnidadSin = request.CodigoUnidadSin,
         };
 
         foreach (var p in request.Presentaciones)

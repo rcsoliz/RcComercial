@@ -18,6 +18,7 @@ public class CompraConfig : IEntityTypeConfiguration<Compra>
     public void Configure(EntityTypeBuilder<Compra> b)
     {
         b.ToTable("compra");
+        b.HasIndex(x => new { x.SucursalId, x.Numero }).IsUnique();
         b.HasIndex(x => new { x.ProveedorId, x.Fecha });
         b.HasMany(x => x.Detalles).WithOne().HasForeignKey(x => x.CompraId);
         b.Property(x => x.Numero).HasMaxLength(20);

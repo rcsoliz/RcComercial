@@ -44,6 +44,7 @@ public static class TiposNotificacion
     public const string ResumenDiario = "RESUMEN_DIARIO";
     public const string StockMinimo = "STOCK_MINIMO";
     public const string Vencimientos = "VENCIMIENTOS";
+    public const string PedidoProveedor = "PEDIDO_PROVEEDOR";
 }
 
 public static class EstadosNotificacion
