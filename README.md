@@ -19,6 +19,8 @@ database/
   00_esquema_base.sql         Esquema completo de referencia
   01_rubro_y_seguridad.sql    Rubro como catálogo + RBAC + auditoría
   02_revision_dba.sql         UUID v7, particionado, índices, seeds
+tests/
+  RcComercial.Tests           xUnit + Testcontainers (Postgres real), sin mocks de BD
 ```
 
 ## Primeros pasos
@@ -40,6 +42,18 @@ dotnet ef database update -p src/RcComercial.Infrastructure -s src/RcComercial.A
 dotnet run --project src/RcComercial.Api
 # Swagger: https://localhost:5001/swagger  |  Health: /health
 ```
+
+## Tests
+
+```bash
+dotnet test tests/RcComercial.Tests
+```
+
+Requiere Docker corriendo (Testcontainers levanta un Postgres real por corrida;
+no hay mocks de base de datos). Cubre CrearVenta (FEFO, concurrencia,
+idempotencia, controlados, stock, pagos), AnularVenta, aislamiento
+multi-tenant, permisos (costos ocultos, policy de autorización) y auth
+(lockout, rotación/reuso de refresh token).
 
 ## Reglas de arquitectura (no negociables)
 1. `EmpresaId` sale SIEMPRE del JWT, jamás del request. El query filter
