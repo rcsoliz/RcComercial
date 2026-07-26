@@ -29,21 +29,27 @@ public class AnularVentaCommandHandler(IApplicationDbContext db, ICurrentUserSer
 
         if (venta.Estado == EstadosVenta.Anulada) return VentaMapper.ToDto(venta); // idempotente
 
+        // AjustarStockAsync es SQL crudo que se ejecuta de inmediato: sin esta
+        // transacción explícita, la reversión de stock podría quedar
+        // confirmada aunque el resto de la anulación falle después.
+        return await db.EjecutarEnTransaccionAsync(async ct => await AnularAsync(venta, request.Motivo, ct), ct);
+    }
+
+    private async Task<VentaDto> AnularAsync(Venta venta, string motivo, CancellationToken ct)
+    {
         foreach (var detalle in venta.Detalles)
         {
             var stock = await db.Stocks.FirstOrDefaultAsync(
                 s => s.SucursalId == venta.SucursalId && s.ProductoId == detalle.ProductoId
                     && s.LoteId == detalle.LoteId, ct);
             if (stock is null)
-            {
-                stock = new Stock
+                db.Stocks.Add(new Stock
                 {
                     SucursalId = venta.SucursalId, ProductoId = detalle.ProductoId, LoteId = detalle.LoteId,
-                };
-                db.Stocks.Add(stock);
-            }
-            stock.Cantidad += detalle.CantidadBase;
-            stock.ActualizadoEn = DateTimeOffset.UtcNow;
+                    Cantidad = detalle.CantidadBase,
+                });
+            else
+                await db.AjustarStockAsync(stock.Id, detalle.CantidadBase, permiteNegativo: true, ct);
 
             db.MovimientosInventario.Add(new MovimientoInventario
             {
@@ -60,7 +66,7 @@ public class AnularVentaCommandHandler(IApplicationDbContext db, ICurrentUserSer
         }
 
         venta.Estado = EstadosVenta.Anulada;
-        venta.MotivoAnulacion = request.Motivo;
+        venta.MotivoAnulacion = motivo;
         venta.AnuladaPor = currentUser.UsuarioId;
 
         var telefono = await db.Empresas
@@ -74,7 +80,7 @@ public class AnularVentaCommandHandler(IApplicationDbContext db, ICurrentUserSer
                 EmpresaId = venta.EmpresaId,
                 Tipo = TiposNotificacion.Anulacion,
                 Destinatario = telefono,
-                Contenido = NotificacionTemplates.Anulacion(venta.Numero, request.Motivo),
+                Contenido = NotificacionTemplates.Anulacion(venta.Numero, motivo),
                 ReferenciaId = venta.Id,
             });
         }

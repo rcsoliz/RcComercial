@@ -21,6 +21,14 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
             .FirstOrDefaultAsync(v => v.Id == request.Id, ct);
         if (existente is not null) return VentaMapper.ToDto(existente);
 
+        // AjustarStockAsync/SiguienteNumeroAsync son SQL crudo que se ejecuta
+        // de inmediato: sin esta transacción explícita, un ajuste de stock
+        // podría quedar confirmado aunque el resto de la venta falle después.
+        return await db.EjecutarEnTransaccionAsync(async ct => await CrearAsync(request, ct), ct);
+    }
+
+    private async Task<VentaDto> CrearAsync(CrearVentaCommand request, CancellationToken ct)
+    {
         var empresaId = currentUser.EmpresaId!.Value;
         var usuarioId = currentUser.UsuarioId!.Value;
 
@@ -66,17 +74,11 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
             Guid? loteId = null;
             if (producto.ManejaLote)
             {
-                var stockLote = await BuscarStockLoteFefoAsync(db, sesion.SucursalId, producto.Id, cantidadBase, ct);
-                if (stockLote is null && !permiteStockNegativo)
-                    throw new ValidationException($"No hay stock/lote registrado para '{producto.Nombre}'.");
-                if (stockLote is not null)
-                {
-                    if (stockLote.Cantidad < cantidadBase && !permiteStockNegativo)
-                        throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
-                    loteId = stockLote.LoteId;
-                    stockLote.Cantidad -= cantidadBase;
-                    stockLote.ActualizadoEn = DateTimeOffset.UtcNow;
-                }
+                var reserva = await ReservarStockLoteFefoAsync(
+                    db, sesion.SucursalId, producto.Id, cantidadBase, permiteStockNegativo, ct);
+                if (reserva is null)
+                    throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
+                loteId = reserva.Value.LoteId;
             }
             else
             {
@@ -86,15 +88,17 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
                 {
                     if (!permiteStockNegativo)
                         throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
-                    stock = new Stock { SucursalId = sesion.SucursalId, ProductoId = producto.Id };
-                    db.Stocks.Add(stock);
+                    db.Stocks.Add(new Stock
+                    {
+                        SucursalId = sesion.SucursalId, ProductoId = producto.Id, Cantidad = -cantidadBase,
+                    });
                 }
-                else if (stock.Cantidad < cantidadBase && !permiteStockNegativo)
+                else
                 {
-                    throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
+                    var resultado = await db.AjustarStockAsync(stock.Id, -cantidadBase, permiteStockNegativo, ct);
+                    if (resultado is null)
+                        throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
                 }
-                stock.Cantidad -= cantidadBase;
-                stock.ActualizadoEn = DateTimeOffset.UtcNow;
             }
 
             venta.Detalles.Add(new VentaDetalle
@@ -182,18 +186,40 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
         return valor is not null && bool.TryParse(valor, out var b) && b;
     }
 
-    /// <summary>FEFO: lote más próximo a vencer cuyo stock alcance para toda la cantidad; sin partir la línea.</summary>
-    private static async Task<Stock?> BuscarStockLoteFefoAsync(
-        IApplicationDbContext db, Guid sucursalId, Guid productoId, decimal cantidadNecesaria, CancellationToken ct)
+    /// <summary>
+    /// FEFO concurrency-safe: intenta el ajuste atómico en cada lote, en orden
+    /// de vencimiento, hasta que uno alcance para toda la cantidad (sin partir
+    /// la línea). Como el descuento es una única UPDATE...RETURNING condicional
+    /// por candidato (ver AjustarStockAsync), dos ventas simultáneas del mismo
+    /// lote nunca se pisan: si otra venta ya consumió el lote entre que lo
+    /// leímos y lo intentamos, simplemente pasamos al siguiente candidato.
+    /// </summary>
+    private static async Task<(Guid StockId, Guid? LoteId)?> ReservarStockLoteFefoAsync(
+        IApplicationDbContext db, Guid sucursalId, Guid productoId, decimal cantidadNecesaria,
+        bool permiteNegativo, CancellationToken ct)
     {
         var candidatos = await (
             from s in db.Stocks
             join l in db.Lotes on s.LoteId equals l.Id
             where s.SucursalId == sucursalId && s.ProductoId == productoId
             orderby l.FechaVencimiento
-            select s
+            select new { s.Id, s.LoteId }
         ).ToListAsync(ct);
 
-        return candidatos.FirstOrDefault(s => s.Cantidad >= cantidadNecesaria) ?? candidatos.FirstOrDefault();
+        foreach (var candidato in candidatos)
+        {
+            var resultado = await db.AjustarStockAsync(candidato.Id, -cantidadNecesaria, permiteNegativo: false, ct);
+            if (resultado is not null) return (candidato.Id, candidato.LoteId);
+        }
+
+        if (permiteNegativo && candidatos.Count > 0)
+        {
+            // Ningún lote alcanzaba solo: se deja negativo el que vence primero.
+            var primero = candidatos[0];
+            await db.AjustarStockAsync(primero.Id, -cantidadNecesaria, permiteNegativo: true, ct);
+            return (primero.Id, primero.LoteId);
+        }
+
+        return null;
     }
 }

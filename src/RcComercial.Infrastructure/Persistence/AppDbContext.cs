@@ -71,6 +71,31 @@ public class AppDbContext(
         return resultado[0];
     }
 
+    public async Task<decimal?> AjustarStockAsync(
+        Guid stockId, decimal delta, bool permiteNegativo, CancellationToken ct = default)
+    {
+        var resultado = await Database.SqlQuery<decimal>($"""
+            UPDATE stock
+            SET cantidad = cantidad + {delta}, actualizado_en = now()
+            WHERE id = {stockId} AND ({permiteNegativo} OR cantidad + {delta} >= 0)
+            RETURNING cantidad
+            """).ToListAsync(ct);
+        return resultado.Count > 0 ? resultado[0] : null;
+    }
+
+    public async Task<T> EjecutarEnTransaccionAsync<T>(
+        Func<CancellationToken, Task<T>> operacion, CancellationToken ct = default)
+    {
+        var estrategia = Database.CreateExecutionStrategy();
+        return await estrategia.ExecuteAsync(async () =>
+        {
+            await using var transaccion = await Database.BeginTransactionAsync(ct);
+            var resultado = await operacion(ct);
+            await transaccion.CommitAsync(ct);
+            return resultado;
+        });
+    }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // Precisión por defecto para montos; se sobreescribe donde toca (14,3 / 14,4)

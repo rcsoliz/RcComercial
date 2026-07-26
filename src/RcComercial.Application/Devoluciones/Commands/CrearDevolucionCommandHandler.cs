@@ -10,7 +10,13 @@ namespace RcComercial.Application.Devoluciones.Commands;
 public class CrearDevolucionCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser)
     : IRequestHandler<CrearDevolucionCommand, DevolucionDto>
 {
-    public async Task<DevolucionDto> Handle(CrearDevolucionCommand request, CancellationToken ct)
+    public async Task<DevolucionDto> Handle(CrearDevolucionCommand request, CancellationToken ct) =>
+        // AjustarStockAsync/SiguienteNumeroAsync son SQL crudo que se ejecuta
+        // de inmediato: sin esta transacción explícita, el reingreso de stock
+        // podría quedar confirmado aunque el resto de la devolución falle después.
+        await db.EjecutarEnTransaccionAsync(async ct => await CrearAsync(request, ct), ct);
+
+    private async Task<DevolucionDto> CrearAsync(CrearDevolucionCommand request, CancellationToken ct)
     {
         var empresaId = currentUser.EmpresaId!.Value;
         var usuarioId = currentUser.UsuarioId!.Value;
@@ -60,15 +66,13 @@ public class CrearDevolucionCommandHandler(IApplicationDbContext db, ICurrentUse
                     s => s.SucursalId == venta.SucursalId && s.ProductoId == ventaDetalle.ProductoId
                         && s.LoteId == ventaDetalle.LoteId, ct);
                 if (stock is null)
-                {
-                    stock = new Stock
+                    db.Stocks.Add(new Stock
                     {
-                        SucursalId = venta.SucursalId, ProductoId = ventaDetalle.ProductoId, LoteId = ventaDetalle.LoteId,
-                    };
-                    db.Stocks.Add(stock);
-                }
-                stock.Cantidad += d.CantidadBase;
-                stock.ActualizadoEn = DateTimeOffset.UtcNow;
+                        SucursalId = venta.SucursalId, ProductoId = ventaDetalle.ProductoId,
+                        LoteId = ventaDetalle.LoteId, Cantidad = d.CantidadBase,
+                    });
+                else
+                    await db.AjustarStockAsync(stock.Id, d.CantidadBase, permiteNegativo: true, ct);
 
                 db.MovimientosInventario.Add(new MovimientoInventario
                 {

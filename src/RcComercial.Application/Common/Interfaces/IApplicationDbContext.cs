@@ -46,4 +46,25 @@ public interface IApplicationDbContext
     /// sin SELECT-then-UPDATE: dos ventas concurrentes nunca reciben el mismo número.
     /// </summary>
     Task<long> SiguienteNumeroAsync(Guid empresaId, Guid sucursalId, string tipoDocumento, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ajuste atómico de stock.cantidad (UPDATE ... RETURNING condicional, sin
+    /// lectura previa): evita el "lost update" de dos ventas/compras
+    /// concurrentes sobre el mismo producto/lote. Si <paramref name="permiteNegativo"/>
+    /// es false y el ajuste dejaría el stock negativo, no aplica nada y
+    /// devuelve null (el caller lo trata como stock insuficiente).
+    /// </summary>
+    Task<decimal?> AjustarStockAsync(
+        Guid stockId, decimal delta, bool permiteNegativo, CancellationToken ct = default);
+
+    /// <summary>
+    /// Envuelve <paramref name="operacion"/> en una transacción explícita de BD.
+    /// Necesario porque AjustarStockAsync/SiguienteNumeroAsync son SQL crudo que
+    /// se ejecuta de inmediato (no participan del batch diferido de
+    /// SaveChangesAsync): sin esto, un ajuste de stock podría quedar confirmado
+    /// aunque el resto de la operación (venta/compra/kardex) falle después,
+    /// violando "stock y kardex en la misma transacción, siempre".
+    /// </summary>
+    Task<T> EjecutarEnTransaccionAsync<T>(
+        Func<CancellationToken, Task<T>> operacion, CancellationToken ct = default);
 }

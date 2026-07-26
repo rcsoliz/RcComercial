@@ -1,6 +1,6 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using RcComercial.Api.Productos;
+using RcComercial.Application.Common;
 using RcComercial.Application.Common.Interfaces;
 using RcComercial.Application.Productos.Commands.ActualizarProducto;
 using RcComercial.Application.Productos.Commands.CambiarPrecio;
@@ -10,7 +10,6 @@ using RcComercial.Application.Productos.Commands.ImportarProductos;
 using RcComercial.Application.Productos.Queries.BuscarProductos;
 using RcComercial.Application.Productos.Queries.ObtenerProductoPorCodigoBarras;
 using RcComercial.Domain.Common;
-using RcComercial.Infrastructure.Persistence;
 
 namespace RcComercial.Api.Endpoints;
 
@@ -56,35 +55,23 @@ public static class ProductosEndpoints
         }).RequireAuthorization(Permisos.ProductosEliminar);
 
         group.MapPost("/importar", async (
-            HttpRequest http, IMediator mediator, AppDbContext db, ICurrentUserService currentUser) =>
+            HttpRequest http, IMediator mediator, IApplicationDbContext db, ICurrentUserService currentUser) =>
         {
             if (!http.HasFormContentType) return Results.BadRequest("Se esperaba multipart/form-data.");
             var form = await http.ReadFormAsync();
             var archivo = form.Files["archivo"];
             if (archivo is null || archivo.Length == 0) return Results.BadRequest("Falta el archivo 'archivo'.");
 
-            Guid sucursalId;
-            if (Guid.TryParse(http.Query["sucursalId"], out var sucursalIdQuery))
-            {
-                sucursalId = sucursalIdQuery;
-            }
-            else if (currentUser.SucursalId is { } sucursalUsuario)
-            {
-                sucursalId = sucursalUsuario;
-            }
-            else
-            {
-                var sucursales = await db.Sucursales.Where(s => s.Activo).Select(s => s.Id).ToListAsync();
-                if (sucursales.Count != 1)
-                    return Results.BadRequest(
-                        "Especifique 'sucursalId': la empresa tiene más de una sucursal activa.");
-                sucursalId = sucursales[0];
-            }
+            Guid? sucursalIdSolicitada = Guid.TryParse(http.Query["sucursalId"], out var parsed) ? parsed : null;
+            var sucursalId = await SucursalResolver.ResolverAsync(db, currentUser, sucursalIdSolicitada, default);
+            if (sucursalId is null)
+                return Results.BadRequest(
+                    "No se pudo determinar la sucursal: verifique 'sucursalId' o que exista una única sucursal activa.");
 
             await using var stream = archivo.OpenReadStream();
             var parseo = await CsvProductoParser.ParsearAsync(stream);
             var resultado = await mediator.Send(
-                new ImportarProductosCommand(sucursalId, parseo.Filas, parseo.Errores));
+                new ImportarProductosCommand(sucursalId.Value, parseo.Filas, parseo.Errores));
             return Results.Ok(resultado);
         }).RequireAuthorization(Permisos.ProductosCrearEditar);
     }

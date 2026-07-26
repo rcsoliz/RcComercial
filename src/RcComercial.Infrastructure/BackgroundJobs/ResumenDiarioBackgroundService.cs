@@ -1,12 +1,10 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RcComercial.Application.Common;
 using RcComercial.Application.Notificaciones;
-using RcComercial.Application.Panel.Queries.ObtenerPanelAlertas;
-using RcComercial.Application.Panel.Queries.ObtenerPanelHoy;
+using RcComercial.Application.Panel;
 using RcComercial.Domain.Common;
 using RcComercial.Domain.Entities;
 using RcComercial.Infrastructure.Persistence;
@@ -61,7 +59,6 @@ public class ResumenDiarioBackgroundService(
     {
         using var scope = scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var empresas = await db.Empresas.IgnoreQueryFilters()
             .Where(e => e.Activo && e.TelefonoWhatsapp != null)
@@ -69,8 +66,11 @@ public class ResumenDiarioBackgroundService(
 
         foreach (var empresa in empresas)
         {
-            var resumen = await mediator.Send(
-                new ObtenerPanelHoyQuery(EmpresaId: empresa.Id, IncluirCostos: true), ct);
+            // Llamada directa a los calculators (no vía IMediator/HTTP): son el
+            // único lugar donde empresaId se pasa explícito en vez de salir del
+            // JWT, y solo este servicio interno puede invocarlos así.
+            var resumen = await PanelHoyCalculator.CalcularAsync(
+                db, empresa.Id, sucursalId: null, incluirCostos: true, ct);
             db.Notificaciones.Add(new Notificacion
             {
                 EmpresaId = empresa.Id,
@@ -79,7 +79,7 @@ public class ResumenDiarioBackgroundService(
                 Contenido = NotificacionTemplates.ResumenDiario(resumen),
             });
 
-            var alertas = await mediator.Send(new ObtenerPanelAlertasQuery(EmpresaId: empresa.Id), ct);
+            var alertas = await PanelAlertasCalculator.CalcularAsync(db, empresa.Id, sucursalId: null, ct);
 
             if (alertas.ProductosBajoMinimo.Count > 0)
             {

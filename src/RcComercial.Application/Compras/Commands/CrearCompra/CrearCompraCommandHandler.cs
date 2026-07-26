@@ -12,7 +12,13 @@ namespace RcComercial.Application.Compras.Commands.CrearCompra;
 public class CrearCompraCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser)
     : IRequestHandler<CrearCompraCommand, CompraDto>
 {
-    public async Task<CompraDto> Handle(CrearCompraCommand request, CancellationToken ct)
+    public async Task<CompraDto> Handle(CrearCompraCommand request, CancellationToken ct) =>
+        // AjustarStockAsync/SiguienteNumeroAsync son SQL crudo que se ejecuta
+        // de inmediato: sin esta transacción explícita, un ajuste de stock
+        // podría quedar confirmado aunque el resto de la compra falle después.
+        await db.EjecutarEnTransaccionAsync(async ct => await CrearAsync(request, ct), ct);
+
+    private async Task<CompraDto> CrearAsync(CrearCompraCommand request, CancellationToken ct)
     {
         var empresaId = currentUser.EmpresaId!.Value;
         var usuarioId = currentUser.UsuarioId!.Value;
@@ -74,30 +80,10 @@ public class CrearCompraCommandHandler(IApplicationDbContext db, ICurrentUserSer
                 loteId = lote.Id;
             }
 
-            var stock = await db.Stocks.FirstOrDefaultAsync(
-                s => s.SucursalId == sucursalId && s.ProductoId == producto.Id && s.LoteId == loteId, ct);
-            if (stock is null)
-            {
-                stock = new Stock { SucursalId = sucursalId, ProductoId = producto.Id, LoteId = loteId };
-                db.Stocks.Add(stock);
-            }
-            stock.Cantidad += cantidadBase;
-            stock.ActualizadoEn = DateTimeOffset.UtcNow;
-
-            db.MovimientosInventario.Add(new MovimientoInventario
-            {
-                EmpresaId = empresaId,
-                SucursalId = sucursalId,
-                ProductoId = producto.Id,
-                LoteId = loteId,
-                Tipo = TiposMovimiento.Compra,
-                Cantidad = cantidadBase,
-                CostoUnitario = d.CostoUnitario,
-                ReferenciaTipo = "COMPRA",
-                ReferenciaId = compra.Id,
-                UsuarioId = usuarioId,
-            });
-
+            // Capturar el stock/costo previo ANTES de aplicar el ajuste atómico
+            // de esta línea: AjustarStockAsync corre de inmediato (misma
+            // transacción), así que si se leyera después, este mismo ajuste ya
+            // sería visible y se contaría dos veces en el promedio ponderado.
             if (!acumuladoPorProducto.TryGetValue(producto.Id, out var acumulado))
             {
                 var stockTotalPrevio = await db.Stocks
@@ -113,6 +99,30 @@ public class CrearCompraCommandHandler(IApplicationDbContext db, ICurrentUserSer
 
             acumuladoPorProducto[producto.Id] = (nuevoStockTotal, nuevoCosto);
             producto.CostoPromedio = nuevoCosto;
+
+            var stock = await db.Stocks.FirstOrDefaultAsync(
+                s => s.SucursalId == sucursalId && s.ProductoId == producto.Id && s.LoteId == loteId, ct);
+            if (stock is null)
+                db.Stocks.Add(new Stock
+                {
+                    SucursalId = sucursalId, ProductoId = producto.Id, LoteId = loteId, Cantidad = cantidadBase,
+                });
+            else
+                await db.AjustarStockAsync(stock.Id, cantidadBase, permiteNegativo: true, ct);
+
+            db.MovimientosInventario.Add(new MovimientoInventario
+            {
+                EmpresaId = empresaId,
+                SucursalId = sucursalId,
+                ProductoId = producto.Id,
+                LoteId = loteId,
+                Tipo = TiposMovimiento.Compra,
+                Cantidad = cantidadBase,
+                CostoUnitario = d.CostoUnitario,
+                ReferenciaTipo = "COMPRA",
+                ReferenciaId = compra.Id,
+                UsuarioId = usuarioId,
+            });
 
             compra.Detalles.Add(new CompraDetalle
             {
