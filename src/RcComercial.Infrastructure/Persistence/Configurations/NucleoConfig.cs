@@ -43,6 +43,13 @@ public class RubroConfig : IEntityTypeConfiguration<Rubro>
         b.ToTable("rubro");
         b.Property(x => x.Id).ValueGeneratedNever();
         b.HasIndex(x => x.Codigo).IsUnique();
+
+        b.HasData(
+            new Rubro { Id = 1, Codigo = "ALMACEN", Nombre = "Almacén / Tienda de barrio", Activo = true },
+            new Rubro { Id = 2, Codigo = "FARMACIA", Nombre = "Farmacia", UsaLotesPorDefecto = true, UsaControlados = true, UsaFichaFarmacia = true, Activo = true },
+            new Rubro { Id = 3, Codigo = "FERRETERIA", Nombre = "Ferretería", UsaDecimalesPorDefecto = true, Activo = true },
+            new Rubro { Id = 4, Codigo = "LICORERIA", Nombre = "Licorería", Activo = true },
+            new Rubro { Id = 5, Codigo = "MINIMARKET", Nombre = "Minimarket", Activo = true });
     }
 }
 

@@ -44,6 +44,14 @@ public static class ClasificacionesFarmacia
     public const string Estupefaciente = "ESTUPEFACIENTE";
 }
 
+/// <summary>Roles de sistema precargados (empresa_id NULL, es_sistema=true, no editables).</summary>
+public static class RolesSistema
+{
+    public static readonly Guid Dueno = Guid.Parse("a0000000-0000-0000-0000-000000000001");
+    public static readonly Guid Encargado = Guid.Parse("a0000000-0000-0000-0000-000000000002");
+    public static readonly Guid Vendedor = Guid.Parse("a0000000-0000-0000-0000-000000000003");
+}
+
 public static class Permisos
 {
     public const string VentasCrear = "ventas.crear";

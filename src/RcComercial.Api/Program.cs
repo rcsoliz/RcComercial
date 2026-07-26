@@ -1,15 +1,118 @@
+using System.Security.Claims;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using RcComercial.Api;
+using RcComercial.Api.Authorization;
+using RcComercial.Api.Endpoints;
 using RcComercial.Api.Services;
 using RcComercial.Application.Common.Interfaces;
 using RcComercial.Infrastructure;
+using RcComercial.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddMemoryCache();
+
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? throw new InvalidOperationException("Falta configurar Jwt:Secret.");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtSecret)),
+        };
+        options.Events = new JwtBearerEvents
+        {
+            // permisos_version del claim vs BD (cache 5 min): si el dueño
+            // cambió los permisos del rol, el JWT viejo deja de servir sin
+            // esperar a que expire.
+            OnTokenValidated = async context =>
+            {
+                var usuarioIdClaim = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                var permisosVersionClaim = context.Principal?.FindFirstValue("permisos_version");
+                if (!Guid.TryParse(usuarioIdClaim, out var usuarioId) ||
+                    !int.TryParse(permisosVersionClaim, out var permisosVersionDelToken))
+                {
+                    context.Fail("Token inválido.");
+                    return;
+                }
+
+                var cache = context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+                var permisosVersionActual = await cache.GetOrCreateAsync(
+                    $"usuario_permisos_version:{usuarioId}",
+                    async entry =>
+                    {
+                        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+                        var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+                        return await db.Usuarios.IgnoreQueryFilters()
+                            .Where(u => u.Id == usuarioId && u.Activo)
+                            .Select(u => (int?)u.PermisosVersion)
+                            .FirstOrDefaultAsync();
+                    });
+
+                if (permisosVersionActual is null || permisosVersionActual != permisosVersionDelToken)
+                    context.Fail("Los permisos del usuario cambiaron; vuelva a iniciar sesión.");
+            },
+        };
+    });
+
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermisoPolicyProvider>();
+builder.Services.AddAuthorization();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "sin-ip",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+        }));
+});
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" },
+            },
+            []
+        },
+    });
+});
 
 var app = builder.Build();
 
@@ -17,8 +120,15 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    await DevSeed.SeedAsync(app.Services);
 }
 
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapGet("/health", () => Results.Ok(new { estado = "ok", fecha = DateTimeOffset.UtcNow }));
+app.MapAuthEndpoints();
+app.MapSucursalesEndpoints();
 
 app.Run();
