@@ -128,7 +128,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { estado = "ok", fecha = DateTimeOffset.UtcNow }));
-app.MapAuthEndpoints();
-app.MapSucursalesEndpoints();
+
+var api = app.MapGroup("/api").AddEndpointFilter<AuditoriaPermisosSensiblesFilter>();
+api.MapAuthEndpoints();
+api.MapSucursalesEndpoints();
 
 app.Run();

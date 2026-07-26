@@ -14,7 +14,7 @@ public static class SucursalesEndpoints
 {
     public static void MapSucursalesEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/sucursales", async (AppDbContext db) =>
+        app.MapGet("/sucursales", async (AppDbContext db) =>
         {
             var sucursales = await db.Sucursales
                 .Where(s => s.Activo)
