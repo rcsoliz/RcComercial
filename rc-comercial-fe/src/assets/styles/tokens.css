@@ -26,6 +26,9 @@
   --radio-s: 7px;
   --radio-chip: 999px;
   --sombra: 0 1px 2px rgba(43, 48, 45, .06), 0 3px 10px rgba(43, 48, 45, .05);
+  /* Scrim de modales (Reka UI Dialog): neutro, no es superficie ni texto,
+     así que no rompe la regla "nunca #FFF/#000" de tarjetas/tipografía. */
+  --overlay: rgba(43, 48, 45, .45);
 
   --f-display: "Bricolage Grotesque", sans-serif;
   --f-ui: "Instrument Sans", sans-serif;
@@ -52,4 +55,5 @@
   --aviso: #BFA066;
   --aviso-tenue: #383021;
   --sombra: 0 1px 2px rgba(0, 0, 0, .25), 0 4px 14px rgba(0, 0, 0, .22);
+  --overlay: rgba(0, 0, 0, .6);
 }

@@ -8,6 +8,7 @@ using RcComercial.Application.Productos.Commands.CrearProducto;
 using RcComercial.Application.Productos.Commands.DesactivarProducto;
 using RcComercial.Application.Productos.Commands.ImportarProductos;
 using RcComercial.Application.Productos.Queries.BuscarProductos;
+using RcComercial.Application.Productos.Queries.ObtenerProducto;
 using RcComercial.Application.Productos.Queries.ObtenerProductoPorCodigoBarras;
 using RcComercial.Domain.Common;
 
@@ -28,6 +29,12 @@ public static class ProductosEndpoints
         group.MapGet("/por-codigo/{codigoBarras}", async (string codigoBarras, IMediator mediator) =>
         {
             var resultado = await mediator.Send(new ObtenerProductoPorCodigoBarrasQuery(codigoBarras));
+            return resultado is null ? Results.NotFound() : Results.Ok(resultado);
+        }).RequireAuthorization();
+
+        group.MapGet("/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var resultado = await mediator.Send(new ObtenerProductoQuery(id));
             return resultado is null ? Results.NotFound() : Results.Ok(resultado);
         }).RequireAuthorization();
 

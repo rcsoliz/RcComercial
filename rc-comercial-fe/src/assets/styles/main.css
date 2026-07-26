@@ -21,6 +21,7 @@
   --color-peligro-tenue: var(--peligro-tenue);
   --color-aviso: var(--aviso);
   --color-aviso-tenue: var(--aviso-tenue);
+  --color-overlay: var(--overlay);
 
   --font-display: var(--f-display);
   --font-ui: var(--f-ui);

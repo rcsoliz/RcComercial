@@ -15,7 +15,7 @@ const routes = [
     children: [
       { path: '', redirect: '/panel' },
       { path: 'panel', name: 'panel', component: () => import('@/views/PlaceholderView.vue'), meta: { titulo: 'Panel del dueño' } },
-      { path: 'pos', name: 'pos', component: () => import('@/views/PlaceholderView.vue'), meta: { titulo: 'Punto de venta' } },
+      { path: 'pos', name: 'pos', component: () => import('@/views/VentaView.vue'), meta: { titulo: 'Punto de venta' } },
       { path: 'productos', name: 'productos', component: () => import('@/views/PlaceholderView.vue'), meta: { titulo: 'Productos' } },
       { path: 'compras', name: 'compras', component: () => import('@/views/PlaceholderView.vue'), meta: { titulo: 'Compras' } },
       { path: 'ajustes', name: 'ajustes', component: () => import('@/views/PlaceholderView.vue'), meta: { titulo: 'Ajustes' } },
