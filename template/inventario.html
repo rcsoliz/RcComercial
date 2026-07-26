@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Inventario · SysCenterS</title>
+<!-- PROD: auto-hospedar fuentes e íconos (requisito PWA offline del DESIGN.md) -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&display=swap" rel="stylesheet"/>
+<style>
+/* ══ Tokens · Serenidad Profesional (desde DESIGN.md maestro) ══ */
+:root{
+  --papel:#EDECE6; --superficie:#F6F5F0; --superficie-2:#E4E3DC; --linea:#D4D3CA;
+  --tinta:#2B302D; --tinta-2:#5F6763; --tinta-3:#8B928D;
+  --marca:#25514B; --marca-2:#3E6963; --marca-tenue:#DCE5E1; --sobre-marca:#F2F5F3;
+  --ocre:#785921;
+  --exito:#3F6B4F; --exito-tenue:#DEE9DE;
+  --aviso:#8A6B33; --aviso-tenue:#EDE4D0;
+  --peligro:#A05A4C; --peligro-tenue:#EADCD7;
+  --radio:10px; --radio-s:7px;
+  --sombra-ambiental:0 6px 20px rgba(43,48,45,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:15px;line-height:1.6;
+  background:var(--papel);color:var(--tinta);
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle}
+.icono-lleno{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+.titular{font-family:'Bricolage Grotesque',sans-serif;font-weight:600}
+.label-caps{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1}
+.mono{font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:500} /* SOLO códigos: SKU, ID */
+.monto{font-variant-numeric:tabular-nums} /* montos en Instrument tabular */
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--marca);outline-offset:2px}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ══ Sidebar ══ */
+.barra-lateral{
+  position:fixed;left:0;top:0;height:100vh;width:256px;z-index:40;
+  background:var(--papel);border-right:1px solid var(--linea);
+  display:flex;flex-direction:column;
+}
+.barra-lateral .logo{padding:24px}
+.barra-lateral .logo h1{font-family:'Bricolage Grotesque';font-size:17px;font-weight:700;color:var(--marca)}
+.barra-lateral .logo p{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-3);margin-top:4px}
+.barra-lateral nav{flex:1;padding:0 16px;display:flex;flex-direction:column;gap:4px}
+.item-nav{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radio-s);
+  color:var(--tinta-2);transition:background .15s}
+.item-nav:hover{background:var(--superficie-2)}
+.item-nav.activo{background:var(--marca-tenue);color:var(--marca);font-weight:700}
+.pie-lateral{padding:16px;border-top:1px solid var(--linea)}
+
+/* ══ Cabecera ══ */
+.principal{margin-left:256px;min-height:100vh;display:flex;flex-direction:column}
+.barra-superior{
+  position:sticky;top:0;z-index:30;height:64px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:0 24px;background:var(--superficie);border-bottom:1px solid var(--linea);
+}
+.buscador{position:relative;width:100%;max-width:420px}
+.buscador .material-symbols-outlined{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tinta-3);pointer-events:none}
+.buscador input{
+  width:100%;padding:9px 16px 9px 42px;font:inherit;font-size:13.6px;color:var(--tinta);
+  background:var(--superficie-2);border:1.5px solid transparent;border-radius:var(--radio-s);
+  transition:background .15s,border-color .15s;
+}
+.buscador input::placeholder{color:var(--tinta-3)}
+.buscador input:focus{outline:none;background:var(--superficie);border-color:var(--marca)}
+.grupo-derecha{display:flex;align-items:center;gap:8px}
+.boton-primario{
+  display:flex;align-items:center;gap:8px;padding:10px 20px;
+  background:var(--marca);color:var(--sobre-marca);border-radius:var(--radio-s);
+  font-family:'Bricolage Grotesque';font-weight:700;font-size:14px;
+  transition:background .15s,transform .08s;
+}
+.boton-primario:hover{background:var(--marca-2)}
+.boton-primario:active{transform:scale(.97)}
+.boton-icono{padding:8px;border-radius:50%;color:var(--tinta-2);display:flex;transition:background .15s}
+.boton-icono:hover{background:var(--superficie-2)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--marca-tenue);color:var(--marca);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-left:8px}
+
+/* ══ Contenido ══ */
+.contenido{flex:1;display:flex;gap:24px;padding:24px;align-items:flex-start}
+.zona-tabla{flex:1;min-width:0}
+
+.migas{display:flex;align-items:center;gap:4px;color:var(--tinta-3);margin-bottom:4px}
+.migas .label-caps{font-size:10px}
+.migas .actual{color:var(--marca)}
+.cabecera-pagina{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.cabecera-pagina h2{font-family:'Bricolage Grotesque';font-size:32px;font-weight:700;line-height:1.2;letter-spacing:-.02em}
+.boton-secundario{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:13.6px;
+  background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio-s);
+  color:var(--tinta-2);transition:background .15s;
+}
+.boton-secundario:hover{background:var(--superficie-2)}
+
+/* Tarjetas resumen */
+.tarjetas-resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:40px}
+.tarjeta{background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio);padding:24px}
+.tarjeta .label-caps{color:var(--tinta-3);display:block;margin-bottom:10px}
+.tarjeta .cifra{font-family:'Bricolage Grotesque';font-size:32px;font-weight:700;line-height:1.2;letter-spacing:-.02em}
+.tarjeta .sufijo{font-size:13.6px;color:var(--tinta-3);margin-left:6px}
+.tarjeta.destacada{background:var(--marca);border-color:var(--marca);color:var(--sobre-marca);position:relative;overflow:hidden}
+.tarjeta.destacada .label-caps{color:var(--marca-tenue)}
+.tarjeta.destacada .icono-fondo{position:absolute;right:-16px;bottom:-16px;opacity:.15;font-size:100px}
+
+/* Tabla */
+.contenedor-tabla{background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio);overflow:hidden}
+.desliza{overflow-x:auto}
+table{width:100%;border-collapse:collapse;text-align:left}
+thead tr{background:var(--superficie-2);border-bottom:1px solid var(--linea)}
+th{padding:14px 24px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta-3);white-space:nowrap}
+th.derecha,td.derecha{text-align:right}
+tbody tr{border-bottom:1px solid var(--linea);transition:background .15s}
+tbody tr:hover{background:var(--marca-tenue)}
+td{padding:16px 24px;vertical-align:middle}
+.celda-producto{display:flex;align-items:center;gap:16px}
+.miniatura{width:40px;height:40px;flex-shrink:0;border-radius:var(--radio-s);
+  background:var(--superficie-2);border:1px solid var(--linea);
+  display:flex;align-items:center;justify-content:center;color:var(--tinta-3)}
+.nombre-producto{font-family:'Bricolage Grotesque';font-weight:600;font-size:15px;line-height:1.35}
+.sku{color:var(--tinta-3);text-transform:uppercase;margin-top:2px}
+.categoria{font-size:13.6px}
+.laboratorio{font-size:11px;color:var(--tinta-3)}
+.precio{font-weight:700}
+
+/* Barras de stock (componente adoptado): --marca normal, --aviso bajo, --peligro solo en 0 */
+.stock-celda{display:flex;align-items:center;gap:12px;min-width:180px}
+.barra-stock{width:96px;height:6px;flex-shrink:0;border-radius:9999px;background:var(--superficie-2);overflow:hidden}
+.barra-stock .relleno{height:100%;border-radius:inherit;background:var(--marca)}
+.barra-stock .relleno.bajo{background:var(--aviso)}
+.stock-numero{font-weight:700;font-size:13.6px}
+.stock-etiqueta{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--aviso);white-space:nowrap}
+
+/* Chips de estado: píldora + tinte tenue */
+.chip{display:inline-block;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.chip.activo{background:var(--exito-tenue);color:var(--exito)}
+.chip.inactivo{background:var(--superficie-2);color:var(--tinta-3)}
+
+.pie-tabla{display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:20px 24px;border-top:1px solid var(--linea);flex-wrap:wrap}
+.pie-tabla p{font-size:13.6px;color:var(--tinta-3)}
+.paginacion{display:flex;gap:8px}
+.paginacion button{
+  min-width:36px;padding:6px 10px;border:1px solid var(--linea);border-radius:var(--radio-s);
+  color:var(--tinta-2);font-size:13.6px;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.paginacion button:hover{background:var(--superficie-2)}
+.paginacion button.actual{background:var(--marca);border-color:var(--marca);color:var(--sobre-marca);font-weight:700}
+.paginacion .material-symbols-outlined{font-size:18px}
+
+/* ══ Panel derecho: registro de inventario (tarjeta NORMAL — el dentado es solo del ticket del POS) ══ */
+.panel-registro{
+  width:300px;flex-shrink:0;position:sticky;top:88px;
+  background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio);
+  padding:20px;box-shadow:var(--sombra-ambiental);
+  display:flex;flex-direction:column;gap:16px;
+}
+.panel-registro .cabecera{display:flex;justify-content:space-between;align-items:flex-start;
+  padding-bottom:16px;border-bottom:1px solid var(--linea)}
+.panel-registro h3{font-family:'Bricolage Grotesque';font-weight:600;font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+.fila-registro{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+.fila-registro .concepto{color:var(--tinta-3)}
+.fila-registro .valor{font-weight:600}
+.accion-rapida{padding-top:16px;border-top:1px solid var(--linea)}
+.boton-panel{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px;background:var(--superficie-2);border:1px solid var(--linea);
+  border-radius:var(--radio-s);font-weight:700;font-size:13.6px;transition:background .15s;
+}
+.boton-panel:hover{background:var(--marca-tenue);color:var(--marca)}
+.consejo{background:var(--marca-tenue);border-radius:var(--radio-s);padding:14px;margin-top:auto}
+.consejo strong{display:block;font-size:11px;color:var(--marca);margin-bottom:4px}
+.consejo p{font-size:11px;color:var(--tinta-2);line-height:1.5}
+
+/* ══ Móvil ══ */
+.barra-inferior{display:none}
+@media (max-width:1279px){ .panel-registro{display:none} }
+@media (max-width:899px){
+  .barra-lateral{display:none}
+  .principal{margin-left:0}
+  .contenido{padding:16px}
+  .tarjetas-resumen{grid-template-columns:repeat(2,1fr);gap:16px}
+  body{padding-bottom:80px}
+  .barra-inferior{
+    position:fixed;bottom:0;left:0;width:100%;height:80px;z-index:50;
+    display:flex;justify-content:space-around;align-items:center;padding:8px 16px;
+    background:var(--superficie);border-top:1px solid var(--linea);border-radius:10px 10px 0 0;
+  }
+  .item-tab{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--tinta-2);padding:6px 14px;border-radius:var(--radio)}
+  .item-tab .label-caps{font-size:9px}
+  .item-tab.activo{background:var(--marca-tenue);color:var(--marca)}
+}
+@media (max-width:599px){
+  .cabecera-pagina h2{font-size:24px}
+  .tarjetas-resumen{grid-template-columns:1fr 1fr;gap:12px}
+  .tarjeta{padding:16px}
+  .tarjeta .cifra{font-size:24px}
+  .barra-superior{gap:12px}
+  .boton-primario .texto-boton{display:none} /* solo el ícono "+" en angosto */
+  .boton-primario{padding:10px 12px}
+  .pie-tabla{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ Sidebar ══ -->
+<aside class="barra-lateral">
+  <div class="logo">
+    <h1>SysCenterS</h1>
+    <p>Pharma POS v1.0</p>
+  </div>
+  <nav aria-label="Navegación principal">
+    <a class="item-nav" href="venta.html"><span class="material-symbols-outlined">point_of_sale</span> Punto de venta</a>
+    <a class="item-nav" href="dashboard.html"><span class="material-symbols-outlined">dashboard</span> Inicio</a>
+    <a class="item-nav activo" href="#" aria-current="page"><span class="material-symbols-outlined icono-lleno">inventory_2</span> Inventario</a>
+    <a class="item-nav" href="#"><span class="material-symbols-outlined">group</span> Clientes</a>
+    <a class="item-nav" href="#"><span class="material-symbols-outlined">manage_accounts</span> Usuarios</a>
+  </nav>
+  <div class="pie-lateral">
+    <button class="item-nav" style="width:100%"><span class="material-symbols-outlined">logout</span> Cerrar sesión</button>
+  </div>
+</aside>
+
+<main class="principal">
+  <!-- ══ Cabecera ══ -->
+  <header class="barra-superior">
+    <div class="buscador">
+      <span class="material-symbols-outlined">search</span>
+      <input id="busqueda" type="text" placeholder="Buscar producto, SKU o categoría…" autocomplete="off"/>
+    </div>
+    <div class="grupo-derecha">
+      <button class="boton-primario"><span class="material-symbols-outlined" style="font-size:20px">add</span><span class="texto-boton">Nuevo producto</span></button>
+      <button class="boton-icono" aria-label="Notificaciones"><span class="material-symbols-outlined">notifications</span></button>
+      <button class="boton-icono" aria-label="Configuración"><span class="material-symbols-outlined">settings</span></button>
+      <div class="avatar" aria-label="Roberto S.">RS</div>
+    </div>
+  </header>
+
+  <div class="contenido">
+    <section class="zona-tabla" aria-label="Lista de productos">
+      <!-- Migas + título -->
+      <div class="migas">
+        <span class="label-caps">Inventario</span>
+        <span class="material-symbols-outlined" style="font-size:12px">chevron_right</span>
+        <span class="label-caps actual">Lista de productos</span>
+      </div>
+      <div class="cabecera-pagina">
+        <h2>Gestión de inventario</h2>
+        <div style="display:flex;gap:8px">
+          <button class="boton-secundario"><span class="material-symbols-outlined" style="font-size:18px">filter_list</span> Filtros</button>
+          <button class="boton-secundario"><span class="material-symbols-outlined" style="font-size:18px">file_download</span> Exportar</button>
+        </div>
+      </div>
+
+      <!-- Tarjetas resumen -->
+      <div class="tarjetas-resumen">
+        <div class="tarjeta">
+          <span class="label-caps">Total SKU</span>
+          <span class="cifra monto">1.402</span><span class="sufijo" style="color:var(--exito)">+12 %</span>
+        </div>
+        <div class="tarjeta">
+          <span class="label-caps">Stock bajo</span>
+          <span class="cifra monto" style="color:var(--peligro)">18</span><span class="sufijo">alertas</span>
+        </div>
+        <div class="tarjeta">
+          <span class="label-caps">Valoración</span>
+          <span class="cifra monto" style="color:var(--ocre)">Bs 82.400</span>
+        </div>
+        <div class="tarjeta destacada">
+          <span class="label-caps">Ventas activas</span>
+          <span class="cifra monto">412</span>
+          <span class="material-symbols-outlined icono-fondo" aria-hidden="true">trending_up</span>
+        </div>
+      </div>
+
+      <!-- Tabla de productos -->
+      <div class="contenedor-tabla">
+        <div class="desliza">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Categoría / Lab.</th>
+                <th class="derecha">Precio</th>
+                <th>Nivel de stock</th>
+                <th>Estado</th>
+                <th class="derecha"><span class="visually-hidden">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-tabla">
+              <tr>
+                <td>
+                  <div class="celda-producto">
+                    <div class="miniatura"><span class="material-symbols-outlined">medication</span></div>
+                    <div>
+                      <p class="nombre-producto">Amoxicilina 500mg</p>
+                      <p class="sku mono">SKU-29384-AMX</p>
+                    </div>
+                  </div>
+                </td>
+                <td><p class="categoria">Antibióticos</p><p class="laboratorio">Genfar S.A.</p></td>
+                <td class="derecha"><span class="precio monto">Bs 12,50</span></td>
+                <td>
+                  <div class="stock-celda">
+                    <div class="barra-stock"><div class="relleno" style="width:85%"></div></div>
+                    <span class="stock-numero monto">142</span>
+                  </div>
+                </td>
+                <td><span class="chip activo">Activo</span></td>
+                <td class="derecha"><button class="boton-icono" aria-label="Más opciones para Amoxicilina 500mg"><span class="material-symbols-outlined">more_vert</span></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="celda-producto">
+                    <div class="miniatura"><span class="material-symbols-outlined">pill</span></div>
+                    <div>
+                      <p class="nombre-producto">Ibuprofeno 400mg</p>
+                      <p class="sku mono">SKU-11202-IBU</p>
+                    </div>
+                  </div>
+                </td>
+                <td><p class="categoria">Analgésicos</p><p class="laboratorio">Laboratorios Roche</p></td>
+                <td class="derecha"><span class="precio monto">Bs 8,75</span></td>
+                <td>
+                  <div class="stock-celda">
+                    <div class="barra-stock"><div class="relleno bajo" style="width:8%"></div></div>
+                    <span>
+                      <span class="stock-numero monto" style="color:var(--aviso)">4</span>
+                      <span class="stock-etiqueta">Stock bajo</span>
+                    </span>
+                  </div>
+                </td>
+                <td><span class="chip activo">Activo</span></td>
+                <td class="derecha"><button class="boton-icono" aria-label="Más opciones para Ibuprofeno 400mg"><span class="material-symbols-outlined">more_vert</span></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="celda-producto">
+                    <div class="miniatura"><span class="material-symbols-outlined">vaccines</span></div>
+                    <div>
+                      <p class="nombre-producto">Vaporub 50g</p>
+                      <p class="sku mono">SKU-77211-VIC</p>
+                    </div>
+                  </div>
+                </td>
+                <td><p class="categoria">Respiratorios</p><p class="laboratorio">Vicks Pharma</p></td>
+                <td class="derecha"><span class="precio monto">Bs 18,90</span></td>
+                <td>
+                  <div class="stock-celda">
+                    <div class="barra-stock"><div class="relleno" style="width:45%"></div></div>
+                    <span class="stock-numero monto">56</span>
+                  </div>
+                </td>
+                <td><span class="chip inactivo">Inactivo</span></td>
+                <td class="derecha"><button class="boton-icono" aria-label="Más opciones para Vaporub 50g"><span class="material-symbols-outlined">more_vert</span></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="celda-producto">
+                    <div class="miniatura"><span class="material-symbols-outlined">water_drop</span></div>
+                    <div>
+                      <p class="nombre-producto">Colirio Natural 15ml</p>
+                      <p class="sku mono">SKU-88210-COL</p>
+                    </div>
+                  </div>
+                </td>
+                <td><p class="categoria">Oftalmológicos</p><p class="laboratorio">BioPharma Lab</p></td>
+                <td class="derecha"><span class="precio monto">Bs 22,00</span></td>
+                <td>
+                  <div class="stock-celda">
+                    <div class="barra-stock"><div class="relleno" style="width:65%"></div></div>
+                    <span class="stock-numero monto">89</span>
+                  </div>
+                </td>
+                <td><span class="chip activo">Activo</span></td>
+                <td class="derecha"><button class="boton-icono" aria-label="Más opciones para Colirio Natural 15ml"><span class="material-symbols-outlined">more_vert</span></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pie-tabla">
+          <p>Mostrando <strong style="color:var(--tinta)" class="monto">1–4</strong> de <span class="monto">1.402</span> productos</p>
+          <div class="paginacion">
+            <button aria-label="Página anterior"><span class="material-symbols-outlined">chevron_left</span></button>
+            <button class="actual" aria-current="page">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button aria-label="Página siguiente"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ Panel: registro de inventario (tarjeta normal, sin dentado) ══ -->
+    <aside class="panel-registro" aria-label="Registro de inventario">
+      <div class="cabecera">
+        <div>
+          <h3>Registro de inventario</h3>
+          <p class="mono" style="color:var(--tinta-3);font-size:10px;margin-top:4px">ID: #SYS-882193-24</p>
+        </div>
+        <span class="material-symbols-outlined" style="color:var(--marca)">history</span>
+      </div>
+      <div class="fila-registro">
+        <span class="concepto">Entradas de hoy</span>
+        <span class="valor monto" style="color:var(--exito)">+1.200 uds</span>
+      </div>
+      <div class="fila-registro">
+        <span class="concepto">Ajustes realizados</span>
+        <span class="valor monto" style="color:var(--tinta-2)">−14 uds</span>
+      </div>
+      <div class="fila-registro">
+        <span class="concepto">Por vencer (30 días)</span>
+        <span class="valor monto" style="color:var(--aviso)">24 uds</span>
+      </div>
+      <div class="accion-rapida">
+        <p class="label-caps" style="color:var(--tinta-3);margin-bottom:10px">Acción rápida</p>
+        <button class="boton-panel"><span class="material-symbols-outlined" style="font-size:18px">upload_file</span> Importar CSV</button>
+      </div>
+      <div class="consejo">
+        <strong>Consejo de eficiencia</strong>
+        <p>Configura "puntos de reposición" para generar órdenes de compra automáticas cuando el stock entre en zona baja.</p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<!-- ══ Barra de pestañas (móvil) ══ -->
+<nav class="barra-inferior" aria-label="Navegación móvil">
+  <a class="item-tab" href="dashboard.html"><span class="material-symbols-outlined">dashboard</span><span class="label-caps">Inicio</span></a>
+  <a class="item-tab" href="venta.html"><span class="material-symbols-outlined">shopping_cart</span><span class="label-caps">Venta</span></a>
+  <a class="item-tab activo" href="#" aria-current="page"><span class="material-symbols-outlined icono-lleno">inventory</span><span class="label-caps">Stock</span></a>
+  <a class="item-tab" href="#"><span class="material-symbols-outlined">person</span><span class="label-caps">Perfil</span></a>
+</nav>
+
+<script>
+// Filtro en vivo sobre la tabla
+document.getElementById('busqueda').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('#cuerpo-tabla tr').forEach(fila => {
+    fila.style.display = fila.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>

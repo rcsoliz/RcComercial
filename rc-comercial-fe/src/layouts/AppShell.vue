@@ -1,0 +1,73 @@
+<script setup>
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+import { LogOut } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/auth'
+import TemaToggle from '@/components/ui/TemaToggle.vue'
+import { navegacion } from './navegacion'
+
+const auth = useAuthStore()
+const router = useRouter()
+const route = useRoute()
+
+function cerrarSesion() {
+  auth.cerrarSesion()
+  router.push('/login')
+}
+</script>
+
+<template>
+  <div class="min-h-dvh bg-papel">
+    <aside class="fixed left-0 top-0 hidden h-dvh w-64 flex-col border-r border-linea bg-papel md:flex">
+      <div class="p-6">
+        <h1 class="font-display text-[17px] font-bold text-marca">SysCenterS</h1>
+      </div>
+
+      <nav class="flex flex-1 flex-col gap-1 px-4" aria-label="Navegación principal">
+        <RouterLink
+          v-for="item in navegacion"
+          :key="item.to"
+          :to="item.to"
+          class="flex items-center gap-3 rounded-s px-4 py-3 text-tinta-2 transition-colors hover:bg-superficie-2"
+          :class="{ 'bg-marca-tenue font-bold text-marca': route.path.startsWith(item.to) }"
+        >
+          <component :is="item.icon" class="h-5 w-5" />
+          {{ item.label }}
+        </RouterLink>
+      </nav>
+
+      <div class="flex items-center gap-2 border-t border-linea p-4">
+        <button
+          class="flex flex-1 items-center gap-3 rounded-s px-4 py-3 text-tinta-2 hover:bg-superficie-2"
+          @click="cerrarSesion"
+        >
+          <LogOut class="h-5 w-5" />
+          Cerrar sesión
+        </button>
+        <TemaToggle />
+      </div>
+    </aside>
+
+    <TemaToggle class="fixed right-2 top-2 z-40 bg-papel md:hidden" />
+
+    <main class="min-h-dvh pb-28 md:ml-64 md:pb-0">
+      <RouterView />
+    </main>
+
+    <nav
+      class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t border-linea bg-superficie py-1 md:hidden"
+      style="border-radius: 10px 10px 0 0"
+      aria-label="Navegación móvil"
+    >
+      <RouterLink
+        v-for="item in navegacion"
+        :key="item.to"
+        :to="item.to"
+        class="flex min-h-11 min-w-11 flex-col items-center justify-center gap-1 rounded px-3 py-2 text-tinta-2"
+        :class="{ 'bg-marca-tenue text-marca': route.path.startsWith(item.to) }"
+      >
+        <component :is="item.icon" class="h-5 w-5" />
+        <span class="text-[9px] font-bold uppercase tracking-wide">{{ item.label }}</span>
+      </RouterLink>
+    </nav>
+  </div>
+</template>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SysCenterS — Sistema de diseño (mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SYSCENTERS — TOKENS DE DISEÑO
+   Paleta "bajo consumo visual": sin blanco ni negro puros,
+   croma bajo, un solo color de marca (petróleo apagado).
+   ============================================================ */
+:root {
+  /* Tema Día */
+  --papel:        #EDECE6;  /* fondo de la app: gris cálido apagado */
+  --superficie:   #F6F5F0;  /* tarjetas y paneles */
+  --superficie-2: #E4E3DC;  /* zonas hundidas, inputs */
+  --linea:        #D4D3CA;
+  --tinta:        #2B302D;  /* texto principal: gris verdoso, no negro */
+  --tinta-2:      #5F6763;  /* texto secundario */
+  --tinta-3:      #8B928D;  /* pistas, placeholders */
+
+  --marca:        #3E6963;  /* petróleo apagado: acciones, foco, selección */
+  --marca-hover:  #345A55;
+  --marca-tenue:  #DCE5E1;  /* fondos de selección/estado */
+  --sobre-marca:  #F2F5F3;
+
+  --ocre:         #9C7A3F;  /* montos destacados, atención suave */
+  --exito:        #4E7A5D;
+  --exito-tenue:  #DEE8E0;
+  --peligro:      #A05A4C;
+  --peligro-tenue:#ECDFDB;
+  --aviso:        #A5833F;
+  --aviso-tenue:  #ECE4D2;
+
+  --radio: 10px;
+  --radio-s: 7px;
+  --sombra: 0 1px 2px rgba(43,48,45,.06), 0 3px 10px rgba(43,48,45,.05);
+
+  --f-display: "Bricolage Grotesque", sans-serif;
+  --f-ui: "Instrument Sans", sans-serif;
+  --f-mono: "Spline Sans Mono", monospace;
+}
+[data-tema="noche"] {
+  --papel:        #1D2220;
+  --superficie:   #262C29;
+  --superficie-2: #1A1F1D;
+  --linea:        #363D3A;
+  --tinta:        #D9DBD5;
+  --tinta-2:      #9AA29D;
+  --tinta-3:      #6C736F;
+  --marca:        #6E9A92;
+  --marca-hover:  #7FABA3;
+  --marca-tenue:  #2E3B38;
+  --sobre-marca:  #16201E;
+  --ocre:         #C2A26A;
+  --exito:        #7BA98B;
+  --exito-tenue:  #2A3630;
+  --peligro:      #C08574;
+  --peligro-tenue:#3A2C28;
+  --aviso:        #BFA066;
+  --aviso-tenue:  #383021;
+  --sombra: 0 1px 2px rgba(0,0,0,.25), 0 4px 14px rgba(0,0,0,.22);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-size: 15px; }
+body {
+  font-family: var(--f-ui);
+  background: var(--papel);
+  color: var(--tinta);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;  /* montos siempre alineados */
+  min-height: 100vh;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+/* ---------- Barra del mockup (solo para esta demo) ---------- */
+.demo-bar {
+  display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
+  padding:.6rem 1rem; border-bottom:1px solid var(--linea);
+  background: var(--superficie); position: sticky; top:0; z-index:50;
+}
+.demo-bar strong { font-family: var(--f-display); font-weight:700; letter-spacing:-.01em; }
+.demo-bar .nota { color: var(--tinta-3); font-size:.8rem; margin-right:auto; }
+.tabs { display:flex; gap:.35rem; background: var(--superficie-2); padding:.25rem; border-radius: 999px; }
+.tabs button { padding:.4rem .95rem; border-radius:999px; font-weight:600; font-size:.85rem; color: var(--tinta-2); }
+.tabs button.activo { background: var(--marca); color: var(--sobre-marca); }
+.toggle-tema { border:1px solid var(--linea); border-radius:999px; padding:.4rem .9rem; font-size:.85rem; font-weight:600; background: var(--superficie); }
+
+.vista { display:none; }
+.vista.activa { display:block; }
+
+/* ============================================================
+   VISTA 1 — POS (pantalla de venta)
+   ============================================================ */
+.pos {
+  display:grid; grid-template-columns: 1fr 400px; gap: 1rem;
+  padding: 1rem; max-width: 1280px; margin: 0 auto;
+  min-height: calc(100vh - 56px);
+}
+.pos-topbar {
+  grid-column: 1 / -1; display:flex; align-items:center; gap:1rem;
+  padding: .35rem .25rem;
+}
+.logo {
+  font-family: var(--f-display); font-weight:700; font-size:1.15rem;
+  letter-spacing:-.02em; display:flex; align-items:center; gap:.55rem;
+}
+.logo .simbolo {
+  width:26px; height:26px; border-radius:8px; background: var(--marca);
+  color: var(--sobre-marca); display:grid; place-items:center;
+  font-size:.85rem; font-weight:700;
+}
+.chip-sesion {
+  display:flex; align-items:center; gap:.5rem; font-size:.83rem; color:var(--tinta-2);
+  background: var(--superficie); border:1px solid var(--linea);
+  padding:.35rem .75rem; border-radius:999px;
+}
+.punto { width:8px; height:8px; border-radius:99px; background: var(--exito); }
+.pos-topbar .derecha { margin-left:auto; display:flex; gap:.75rem; align-items:center; font-size:.85rem; color:var(--tinta-2); }
+
+/* Columna izquierda: búsqueda + productos */
+.panel-busqueda { display:flex; flex-direction:column; gap:.9rem; }
+.buscador {
+  display:flex; align-items:center; gap:.65rem;
+  background: var(--superficie); border:1.5px solid var(--linea);
+  border-radius: var(--radio); padding:.8rem 1rem;
+  box-shadow: var(--sombra);
+}
+.buscador:focus-within { border-color: var(--marca); }
+.buscador input {
+  border:none; outline:none; background:transparent; color:var(--tinta);
+  font: inherit; font-size:1.05rem; width:100%;
+}
+.buscador input::placeholder { color: var(--tinta-3); }
+.buscador kbd {
+  font-family: var(--f-mono); font-size:.7rem; color:var(--tinta-3);
+  border:1px solid var(--linea); border-radius:5px; padding:.15rem .4rem; white-space:nowrap;
+}
+.grid-productos {
+  display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:.65rem;
+}
+.prod {
+  background: var(--superficie); border:1px solid var(--linea);
+  border-radius: var(--radio); padding:.75rem; text-align:left;
+  display:flex; flex-direction:column; gap:.3rem; box-shadow: var(--sombra);
+  transition: border-color .12s ease, transform .12s ease;
+}
+.prod:hover { border-color: var(--marca); transform: translateY(-1px); }
+.prod .etq {
+  font-size:.68rem; font-weight:600; letter-spacing:.04em;
+  color: var(--tinta-3); text-transform:uppercase;
+}
+.prod .nombre { font-weight:600; line-height:1.25; font-size:.9rem; }
+.prod .precio { margin-top:auto; font-weight:700; color: var(--tinta); }
+.prod .stock { font-size:.75rem; color: var(--tinta-3); }
+.prod .stock.bajo { color: var(--aviso); font-weight:600; }
+.prod.vence .etq { color: var(--aviso); }
+
+/* Columna derecha: EL TICKET (elemento firma) */
+.ticket-panel { display:flex; flex-direction:column; }
+.ticket {
+  background: var(--superficie); border-radius: var(--radio) var(--radio) 0 0;
+  box-shadow: var(--sombra); display:flex; flex-direction:column; flex:1;
+  border:1px solid var(--linea); border-bottom:none;
+}
+.ticket-cab {
+  padding: .9rem 1.1rem; border-bottom:1px dashed var(--linea);
+  display:flex; justify-content:space-between; align-items:baseline;
+}
+.ticket-cab h2 { font-family: var(--f-display); font-size:1rem; font-weight:600; }
+.ticket-cab .nro { font-family: var(--f-mono); font-size:.78rem; color:var(--tinta-3); }
+.ticket-items { flex:1; overflow:auto; padding:.4rem 0; }
+.item {
+  display:grid; grid-template-columns: 1fr auto; gap:.15rem .75rem;
+  padding:.55rem 1.1rem;
+}
+.item:hover { background: var(--marca-tenue); }
+.item .n { font-weight:600; font-size:.9rem; }
+.item .d { font-size:.78rem; color:var(--tinta-2); }
+.item .lote { font-family: var(--f-mono); font-size:.7rem; color:var(--tinta-3); }
+.item .m { font-weight:600; text-align:right; }
+.item .cant { display:flex; align-items:center; gap:.45rem; justify-content:flex-end; }
+.item .cant button {
+  width:22px; height:22px; border-radius:6px; background:var(--superficie-2);
+  color:var(--tinta-2); font-weight:700; line-height:1;
+}
+.ticket-tot {
+  border-top:1px dashed var(--linea); padding: .8rem 1.1rem; display:grid; gap:.3rem;
+}
+.fila-t { display:flex; justify-content:space-between; font-size:.88rem; color:var(--tinta-2); }
+.fila-t.total { font-size:1.35rem; font-weight:700; color:var(--tinta); align-items:baseline; }
+.fila-t.total .bs { font-family: var(--f-display); }
+/* Borde dentado del ticket */
+.ticket-borde {
+  height:12px; background: var(--superficie);
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+          mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+  filter: drop-shadow(0 2px 2px rgba(43,48,45,.08));
+}
+.acciones-cobro { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top: .9rem; }
+.btn {
+  border-radius: var(--radio-s); padding:.9rem 1rem; font-weight:700; font-size:.95rem;
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  transition: background .12s ease;
+}
+.btn-marca { background: var(--marca); color: var(--sobre-marca); grid-column:1/-1; font-size:1.05rem; }
+.btn-marca:hover { background: var(--marca-hover); }
+.btn-suave { background: var(--superficie-2); color: var(--tinta-2); border:1px solid var(--linea); }
+.btn-suave:hover { color: var(--tinta); }
+
+/* ============================================================
+   VISTA 2 — PANEL DEL DUEÑO (móvil)
+   ============================================================ */
+.escenario {
+  display:flex; justify-content:center; align-items:flex-start; gap:3rem;
+  padding: 2.5rem 1rem; flex-wrap:wrap;
+}
+.telefono {
+  width: 384px; border-radius: 34px; padding: 10px;
+  background: var(--tinta); box-shadow: 0 18px 50px rgba(0,0,0,.28);
+}
+.pantalla {
+  border-radius: 26px; overflow:hidden; background: var(--papel);
+  height: 780px; display:flex; flex-direction:column;
+}
+.p-cab { padding: 1.1rem 1.2rem .4rem; display:flex; align-items:center; gap:.6rem; }
+.p-cab .saludo { font-size:.8rem; color: var(--tinta-2); }
+.p-cab h1 { font-family: var(--f-display); font-size:1.25rem; font-weight:700; letter-spacing:-.02em; }
+.p-cab .avatar {
+  margin-left:auto; width:34px; height:34px; border-radius:99px;
+  background: var(--marca-tenue); color:var(--marca); font-weight:700;
+  display:grid; place-items:center; font-size:.85rem;
+}
+.p-cuerpo { flex:1; overflow:auto; padding: .6rem 1rem 1.2rem; display:grid; gap:.8rem; align-content:start; }
+
+.tarjeta-hoy {
+  background: var(--marca); color: var(--sobre-marca);
+  border-radius: 16px; padding: 1.1rem 1.2rem; box-shadow: var(--sombra);
+}
+.tarjeta-hoy .fecha { font-size:.75rem; opacity:.8; letter-spacing:.03em; text-transform:uppercase; font-weight:600; }
+.tarjeta-hoy .monto { font-family: var(--f-display); font-size:2.1rem; font-weight:700; letter-spacing:-.02em; margin:.15rem 0 .5rem; }
+.tarjeta-hoy .sub { display:flex; gap:1.2rem; font-size:.82rem; opacity:.92; }
+.tarjeta-hoy .sub b { font-weight:700; }
+.spark { display:flex; align-items:flex-end; gap:4px; height:42px; margin-top:.8rem; }
+.spark i { flex:1; background: rgba(242,245,243,.35); border-radius:3px 3px 0 0; }
+.spark i.hoy { background: var(--ocre); }
+
+.tarjeta {
+  background: var(--superficie); border:1px solid var(--linea);
+  border-radius: 14px; padding: .95rem 1.05rem; box-shadow: var(--sombra);
+}
+.tarjeta h3 {
+  font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color: var(--tinta-3); margin-bottom:.6rem;
+}
+.fila-dato { display:flex; justify-content:space-between; padding:.35rem 0; font-size:.9rem; }
+.fila-dato .v { font-weight:700; }
+.dos-col { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+
+.alerta { display:flex; gap:.6rem; align-items:flex-start; padding:.5rem 0; font-size:.86rem; }
+.alerta .icono {
+  width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+  font-size:.8rem; flex-shrink:0; font-weight:700;
+}
+.alerta.aviso .icono { background: var(--aviso-tenue); color: var(--aviso); }
+.alerta.peligro .icono { background: var(--peligro-tenue); color: var(--peligro); }
+.alerta .t { font-weight:600; }
+.alerta .s { color: var(--tinta-2); font-size:.8rem; }
+
+.leyenda { max-width: 330px; font-size:.88rem; color:var(--tinta-2); line-height:1.65; padding-top:1.2rem; }
+.leyenda h2 { font-family:var(--f-display); color:var(--tinta); font-size:1.3rem; letter-spacing:-.02em; margin-bottom:.6rem; }
+.leyenda .muestras { display:flex; gap:.45rem; margin:.9rem 0; }
+.leyenda .muestras i { width:34px; height:34px; border-radius:9px; border:1px solid var(--linea); }
+
+@media (max-width: 900px) {
+  .pos { grid-template-columns: 1fr; }
+  .telefono { width:100%; max-width:384px; }
+}
+</style>
+</head>
+<body data-tema="dia">
+
+<div class="demo-bar">
+  <strong>SysCenterS</strong>
+  <span class="nota">mockup del sistema de diseño — nada es funcional, solo se evalúa la dirección visual</span>
+  <div class="tabs">
+    <button class="activo" data-vista="pos">POS · Venta</button>
+    <button data-vista="panel">Panel del dueño</button>
+  </div>
+  <button class="toggle-tema" id="toggleTema">☾ Tema noche</button>
+</div>
+
+<!-- ============ VISTA POS ============ -->
+<section class="vista activa" id="vista-pos">
+  <div class="pos">
+    <div class="pos-topbar">
+      <div class="logo"><span class="simbolo">S</span> SysCenterS</div>
+      <div class="chip-sesion"><span class="punto"></span> Caja 1 · abierta 08:02 · Bs 300,00 inicial</div>
+      <div class="derecha">
+        <span>Farmacia San Gabriel — Suc. Central</span>
+        <span style="font-weight:600">María Q.</span>
+      </div>
+    </div>
+
+    <div class="panel-busqueda">
+      <div class="buscador">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--tinta-3)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input placeholder="Buscar producto o escanear código…  ej: para 500" />
+        <kbd>F2</kbd>
+      </div>
+
+      <div class="grid-productos">
+        <button class="prod">
+          <span class="etq">Analgésicos</span>
+          <span class="nombre">Paracetamol 500 mg · Bagó</span>
+          <span class="stock">Blíster ×10 · 84 en stock</span>
+          <span class="precio">Bs 8,00</span>
+        </button>
+        <button class="prod">
+          <span class="etq">Analgésicos</span>
+          <span class="nombre">Ibuprofeno 400 mg · Inti</span>
+          <span class="stock">Blíster ×10 · 120 en stock</span>
+          <span class="precio">Bs 12,00</span>
+        </button>
+        <button class="prod vence">
+          <span class="etq">⚠ Vence 09/2026</span>
+          <span class="nombre">Amoxicilina 500 mg susp.</span>
+          <span class="stock">Frasco · 6 en stock</span>
+          <span class="precio">Bs 28,50</span>
+        </button>
+        <button class="prod">
+          <span class="etq">Antiácidos</span>
+          <span class="nombre">Sal de Andrews sobre</span>
+          <span class="stock">Unidad · 240 en stock</span>
+          <span class="precio">Bs 3,50</span>
+        </button>
+        <button class="prod">
+          <span class="etq">Vitaminas</span>
+          <span class="nombre">Vitamina C 1 g efervescente</span>
+          <span class="stock bajo">Tubo ×10 · quedan 4</span>
+          <span class="precio">Bs 24,00</span>
+        </button>
+        <button class="prod">
+          <span class="etq">Cuidado personal</span>
+          <span class="nombre">Alcohol en gel 250 ml</span>
+          <span class="stock">Unidad · 51 en stock</span>
+          <span class="precio">Bs 15,00</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ticket-panel">
+      <div class="ticket">
+        <div class="ticket-cab">
+          <h2>Venta en curso</h2>
+          <span class="nro">Nº 00004215</span>
+        </div>
+        <div class="ticket-items">
+          <div class="item">
+            <span class="n">Paracetamol 500 mg</span>
+            <span class="m">Bs 16,00</span>
+            <span class="d">Blíster ×10 · Bs 8,00 c/u <span class="lote">L-2409A · vence 03/2027</span></span>
+            <span class="cant"><button>−</button> 2 <button>+</button></span>
+          </div>
+          <div class="item">
+            <span class="n">Alcohol en gel 250 ml</span>
+            <span class="m">Bs 15,00</span>
+            <span class="d">Unidad · Bs 15,00 c/u</span>
+            <span class="cant"><button>−</button> 1 <button>+</button></span>
+          </div>
+          <div class="item">
+            <span class="n">Sal de Andrews</span>
+            <span class="m">Bs 10,50</span>
+            <span class="d">Unidad · Bs 3,50 c/u</span>
+            <span class="cant"><button>−</button> 3 <button>+</button></span>
+          </div>
+        </div>
+        <div class="ticket-tot">
+          <div class="fila-t"><span>Subtotal</span><span>Bs 41,50</span></div>
+          <div class="fila-t"><span>Descuento</span><span>— Bs 0,00</span></div>
+          <div class="fila-t total"><span class="bs">Total</span><span>Bs 41,50</span></div>
+        </div>
+      </div>
+      <div class="ticket-borde"></div>
+
+      <div class="acciones-cobro">
+        <button class="btn btn-marca">Cobrar · Bs 41,50 &nbsp;<kbd style="font-family:var(--f-mono);font-size:.7rem;opacity:.75">F12</kbd></button>
+        <button class="btn btn-suave">Efectivo</button>
+        <button class="btn btn-suave">QR</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VISTA PANEL DUEÑO ============ -->
+<section class="vista" id="vista-panel">
+  <div class="escenario">
+    <div class="telefono"><div class="pantalla">
+      <div class="p-cab">
+        <div>
+          <div class="saludo">Domingo 26 · Farmacia San Gabriel</div>
+          <h1>Hola, Roberto</h1>
+        </div>
+        <div class="avatar">RS</div>
+      </div>
+      <div class="p-cuerpo">
+
+        <div class="tarjeta-hoy">
+          <div class="fecha">Vendido hoy</div>
+          <div class="monto">Bs 2.847,50</div>
+          <div class="sub"><span><b>63</b> ventas</span><span>ticket <b>Bs 45,20</b></span><span><b>2</b> anuladas</span></div>
+          <div class="spark">
+            <i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i>
+            <i style="height:62%"></i><i style="height:50%"></i><i style="height:78%"></i>
+            <i class="hoy" style="height:88%"></i>
+          </div>
+        </div>
+
+        <div class="dos-col">
+          <div class="tarjeta">
+            <h3>Cajas</h3>
+            <div class="fila-dato"><span>Caja 1 · María</span><span class="v" style="color:var(--exito)">abierta</span></div>
+            <div class="fila-dato"><span>Caja 2 · Jorge</span><span class="v">cerrada ✓</span></div>
+          </div>
+          <div class="tarjeta">
+            <h3>Pagos de hoy</h3>
+            <div class="fila-dato"><span>QR</span><span class="v">Bs 1.630</span></div>
+            <div class="fila-dato"><span>Efectivo</span><span class="v">Bs 1.217</span></div>
+          </div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Necesitan tu atención</h3>
+          <div class="alerta peligro">
+            <span class="icono">!</span>
+            <div><div class="t">Diferencia de caja — Bs 35,00</div><div class="s">Cierre de Jorge, ayer 20:15</div></div>
+          </div>
+          <div class="alerta aviso">
+            <span class="icono">⏱</span>
+            <div><div class="t">4 productos vencen en 30 días</div><div class="s">Amoxicilina susp., Loratadina…</div></div>
+          </div>
+          <div class="alerta aviso">
+            <span class="icono">▤</span>
+            <div><div class="t">7 productos bajo stock mínimo</div><div class="s">Sugerido de compra listo para Droguería INTI</div></div>
+          </div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Más vendidos hoy</h3>
+          <div class="fila-dato"><span>1 · Paracetamol 500 mg</span><span class="v">42 u.</span></div>
+          <div class="fila-dato"><span>2 · Alcohol en gel 250 ml</span><span class="v">18 u.</span></div>
+          <div class="fila-dato"><span>3 · Sal de Andrews</span><span class="v">15 u.</span></div>
+        </div>
+
+      </div>
+    </div></div>
+
+    <div class="leyenda">
+      <h2>Por qué se ve así</h2>
+      <p>Superficies en gris cálido sin blanco puro y tinta gris-verdosa sin negro puro: menos contraste agresivo, menos fatiga en jornadas de 8 horas. Un solo color de marca (petróleo apagado) reservado para acciones y foco; los estados usan versiones desaturadas que informan sin alarmar.</p>
+      <div class="muestras">
+        <i style="background:var(--papel)"></i>
+        <i style="background:var(--superficie)"></i>
+        <i style="background:var(--marca)"></i>
+        <i style="background:var(--ocre)"></i>
+        <i style="background:var(--exito)"></i>
+        <i style="background:var(--peligro)"></i>
+      </div>
+      <p>Números tabulares en todos los montos, tamaños generosos para targets táctiles, y el ticket con borde dentado como firma visual del producto. Prueba el <b>tema noche</b> con el botón de arriba: pensado para farmacias de turno.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('activo'));
+  b.classList.add('activo');
+  document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+  document.getElementById('vista-' + b.dataset.vista).classList.add('activa');
+}));
+const t = document.getElementById('toggleTema');
+t.addEventListener('click', () => {
+  const noche = document.body.dataset.tema !== 'noche';
+  document.body.dataset.tema = noche ? 'noche' : 'dia';
+  t.textContent = noche ? '☀ Tema día' : '☾ Tema noche';
+});
+</script>
+</body>
+</html>

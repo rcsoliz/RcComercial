@@ -1,0 +1,55 @@
+/* SysCenterS — tokens de diseño (DESIGN.md §2, §3, §4). Fuente única de verdad.
+   Nunca copiar hex sueltos en componentes: todo sale de estas variables. */
+
+:root {
+  /* Tema Día (default) */
+  --papel: #EDECE6;
+  --superficie: #F6F5F0;
+  --superficie-2: #E4E3DC;
+  --linea: #D4D3CA;
+  --tinta: #2B302D;
+  --tinta-2: #5F6763;
+  --tinta-3: #8B928D;
+  --marca: #3E6963;
+  --marca-hover: #345A55;
+  --marca-tenue: #DCE5E1;
+  --sobre-marca: #F2F5F3;
+  --ocre: #9C7A3F;
+  --exito: #4E7A5D;
+  --exito-tenue: #DEE8E0;
+  --peligro: #A05A4C;
+  --peligro-tenue: #ECDFDB;
+  --aviso: #A5833F;
+  --aviso-tenue: #ECE4D2;
+
+  --radio: 10px;
+  --radio-s: 7px;
+  --radio-chip: 999px;
+  --sombra: 0 1px 2px rgba(43, 48, 45, .06), 0 3px 10px rgba(43, 48, 45, .05);
+
+  --f-display: "Bricolage Grotesque", sans-serif;
+  --f-ui: "Instrument Sans", sans-serif;
+  --f-mono: "Spline Sans Mono", monospace;
+}
+
+[data-tema="noche"] {
+  --papel: #1D2220;
+  --superficie: #262C29;
+  --superficie-2: #1A1F1D;
+  --linea: #363D3A;
+  --tinta: #D9DBD5;
+  --tinta-2: #9AA29D;
+  --tinta-3: #6C736F;
+  --marca: #6E9A92;
+  --marca-hover: #7FABA3;
+  --marca-tenue: #2E3B38;
+  --sobre-marca: #16201E;
+  --ocre: #C2A26A;
+  --exito: #7BA98B;
+  --exito-tenue: #2A3630;
+  --peligro: #C08574;
+  --peligro-tenue: #3A2C28;
+  --aviso: #BFA066;
+  --aviso-tenue: #383021;
+  --sombra: 0 1px 2px rgba(0, 0, 0, .25), 0 4px 14px rgba(0, 0, 0, .22);
+}

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es-BO">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <meta name="theme-color" content="#3E6963" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SysCenterS</title>
+    <script>
+      // Aplica el tema persistido antes del primer paint (evita flash del tema equivocado).
+      try {
+        var t = localStorage.getItem('syscenters-tema')
+        if (t === 'noche' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-tema', 'noche')
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

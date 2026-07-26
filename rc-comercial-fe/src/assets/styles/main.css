@@ -1,0 +1,71 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./fonts.css";
+
+@theme inline {
+  --color-papel: var(--papel);
+  --color-superficie: var(--superficie);
+  --color-superficie-2: var(--superficie-2);
+  --color-linea: var(--linea);
+  --color-tinta: var(--tinta);
+  --color-tinta-2: var(--tinta-2);
+  --color-tinta-3: var(--tinta-3);
+  --color-marca: var(--marca);
+  --color-marca-hover: var(--marca-hover);
+  --color-marca-tenue: var(--marca-tenue);
+  --color-sobre-marca: var(--sobre-marca);
+  --color-ocre: var(--ocre);
+  --color-exito: var(--exito);
+  --color-exito-tenue: var(--exito-tenue);
+  --color-peligro: var(--peligro);
+  --color-peligro-tenue: var(--peligro-tenue);
+  --color-aviso: var(--aviso);
+  --color-aviso-tenue: var(--aviso-tenue);
+
+  --font-display: var(--f-display);
+  --font-ui: var(--f-ui);
+  --font-mono: var(--f-mono);
+
+  --radius-DEFAULT: var(--radio);
+  --radius-s: var(--radio-s);
+  --radius-chip: var(--radio-chip);
+
+  --shadow-DEFAULT: var(--sombra);
+
+  /* Punto único de colapso sidebar→tab bar / POS 2 columnas (DESIGN.md §6) */
+  --breakpoint-md: 900px;
+}
+
+@layer base {
+  html {
+    font-size: 15px;
+  }
+
+  body {
+    font-family: var(--f-ui);
+    background: var(--papel);
+    color: var(--tinta);
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+    min-height: 100dvh;
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--marca);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
