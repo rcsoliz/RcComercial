@@ -42,6 +42,15 @@ public static class TiposNotificacion
     public const string Anulacion = "ANULACION";
     public const string DiferenciaCaja = "DIFERENCIA_CAJA";
     public const string ResumenDiario = "RESUMEN_DIARIO";
+    public const string StockMinimo = "STOCK_MINIMO";
+    public const string Vencimientos = "VENCIMIENTOS";
+}
+
+public static class EstadosNotificacion
+{
+    public const string Pendiente = "PENDIENTE";
+    public const string Enviada = "ENVIADA";
+    public const string Fallida = "FALLIDA";
 }
 
 public static class ClasificacionesFarmacia

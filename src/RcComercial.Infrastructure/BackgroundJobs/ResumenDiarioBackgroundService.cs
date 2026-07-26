@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RcComercial.Application.Common;
-using RcComercial.Application.Panel.Dtos;
+using RcComercial.Application.Notificaciones;
+using RcComercial.Application.Panel.Queries.ObtenerPanelAlertas;
 using RcComercial.Application.Panel.Queries.ObtenerPanelHoy;
 using RcComercial.Domain.Common;
 using RcComercial.Domain.Entities;
@@ -15,7 +16,8 @@ namespace RcComercial.Infrastructure.BackgroundJobs;
 /// <summary>
 /// A las 21:00 hora La Paz, compone el resumen del día de cada empresa
 /// activa con WhatsApp configurado y lo encola en `notificacion`
-/// (tipo RESUMEN_DIARIO). El envío real es Fase 5; aquí solo se encola.
+/// (RESUMEN_DIARIO, y STOCK_MINIMO/VENCIMIENTOS si hay alertas). El envío
+/// real lo hace NotificacionDispatcherBackgroundService; aquí solo se encola.
 /// </summary>
 public class ResumenDiarioBackgroundService(
     IServiceScopeFactory scopeFactory, ILogger<ResumenDiarioBackgroundService> logger) : BackgroundService
@@ -69,22 +71,39 @@ public class ResumenDiarioBackgroundService(
         {
             var resumen = await mediator.Send(
                 new ObtenerPanelHoyQuery(EmpresaId: empresa.Id, IncluirCostos: true), ct);
-
             db.Notificaciones.Add(new Notificacion
             {
                 EmpresaId = empresa.Id,
                 Tipo = TiposNotificacion.ResumenDiario,
                 Destinatario = empresa.TelefonoWhatsapp!,
-                Contenido = ComponerMensaje(resumen),
+                Contenido = NotificacionTemplates.ResumenDiario(resumen),
             });
+
+            var alertas = await mediator.Send(new ObtenerPanelAlertasQuery(EmpresaId: empresa.Id), ct);
+
+            if (alertas.ProductosBajoMinimo.Count > 0)
+            {
+                db.Notificaciones.Add(new Notificacion
+                {
+                    EmpresaId = empresa.Id,
+                    Tipo = TiposNotificacion.StockMinimo,
+                    Destinatario = empresa.TelefonoWhatsapp!,
+                    Contenido = NotificacionTemplates.StockMinimo(alertas.ProductosBajoMinimo),
+                });
+            }
+
+            if (alertas.LotesPorVencer30.Count > 0)
+            {
+                db.Notificaciones.Add(new Notificacion
+                {
+                    EmpresaId = empresa.Id,
+                    Tipo = TiposNotificacion.Vencimientos,
+                    Destinatario = empresa.TelefonoWhatsapp!,
+                    Contenido = NotificacionTemplates.Vencimientos(alertas.LotesPorVencer30),
+                });
+            }
         }
 
         await db.SaveChangesAsync(ct);
     }
-
-    private static string ComponerMensaje(PanelHoyDto r) =>
-        $"Resumen del día: {r.NumeroVentas} ventas por Bs {r.TotalVendido:F2} " +
-        $"(ticket promedio Bs {r.TicketPromedio:F2}). " +
-        $"Anulaciones: {r.NumeroAnulaciones} (Bs {r.MontoAnulaciones:F2}). " +
-        $"Descuentos: Bs {r.MontoDescuentos:F2}.";
 }

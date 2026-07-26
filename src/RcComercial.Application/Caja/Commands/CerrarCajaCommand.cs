@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RcComercial.Application.Common.Interfaces;
+using RcComercial.Application.Notificaciones;
 using RcComercial.Domain.Common;
 using RcComercial.Domain.Entities;
 
@@ -54,8 +55,7 @@ public class CerrarCajaCommandHandler(IApplicationDbContext db, ICurrentUserServ
                     EmpresaId = currentUser.EmpresaId!.Value,
                     Tipo = TiposNotificacion.DiferenciaCaja,
                     Destinatario = telefono,
-                    Contenido = $"Diferencia de caja: declarado {request.MontoDeclarado:F2}, " +
-                        $"calculado {montoCalculado:F2}.",
+                    Contenido = NotificacionTemplates.DiferenciaCaja(request.MontoDeclarado, montoCalculado),
                     ReferenciaId = sesion.Id,
                 });
             }

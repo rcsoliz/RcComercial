@@ -7,6 +7,7 @@ using RcComercial.Infrastructure.Auth;
 using RcComercial.Infrastructure.BackgroundJobs;
 using RcComercial.Infrastructure.Persistence;
 using RcComercial.Infrastructure.Persistence.Interceptors;
+using RcComercial.Infrastructure.Whatsapp;
 
 namespace RcComercial.Infrastructure;
 
@@ -31,7 +32,19 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
 
+        services.Configure<WhatsappCloudApiSettings>(configuration.GetSection("Whatsapp:CloudApi"));
+        services.Configure<NotificacionDispatcherSettings>(configuration.GetSection("Whatsapp"));
+        if (string.Equals(configuration["Whatsapp:Proveedor"], "CloudApi", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHttpClient<IWhatsappSender, WhatsappCloudApiSender>();
+        }
+        else
+        {
+            services.AddScoped<IWhatsappSender, WaLinkSender>();
+        }
+
         services.AddHostedService<ResumenDiarioBackgroundService>();
+        services.AddHostedService<NotificacionDispatcherBackgroundService>();
 
         return services;
     }

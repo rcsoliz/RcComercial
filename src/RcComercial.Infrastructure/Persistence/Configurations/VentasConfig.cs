@@ -111,7 +111,9 @@ public class NotificacionConfig : IEntityTypeConfiguration<Notificacion>
     {
         b.ToTable("notificacion");
         b.HasIndex(x => new { x.Estado, x.CreadoEn });
+        b.HasIndex(x => new { x.Estado, x.ProximoIntentoEn });
         b.Property(x => x.Contenido).HasMaxLength(4000);
         b.Property(x => x.Tipo).HasMaxLength(30);
+        b.Property(x => x.EnlaceGenerado).HasMaxLength(4000);
     }
 }

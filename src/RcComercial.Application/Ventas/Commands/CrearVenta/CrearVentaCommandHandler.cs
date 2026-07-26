@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RcComercial.Application.Common.Interfaces;
+using RcComercial.Application.Notificaciones;
 using RcComercial.Application.Ventas.Dtos;
 using RcComercial.Domain.Common;
 using RcComercial.Domain.Entities;
@@ -160,7 +161,7 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
                     EmpresaId = empresaId,
                     Tipo = TiposNotificacion.FacturaCliente,
                     Destinatario = telefono,
-                    Contenido = $"Gracias por su compra. Total: {venta.Total:F2} Bs. N° {venta.Numero}.",
+                    Contenido = NotificacionTemplates.ReciboVenta(venta.Numero, venta.Total),
                     ReferenciaId = venta.Id,
                 });
             }

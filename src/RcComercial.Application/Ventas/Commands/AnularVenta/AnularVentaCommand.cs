@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RcComercial.Application.Common.Interfaces;
+using RcComercial.Application.Notificaciones;
 using RcComercial.Application.Ventas.Dtos;
 using RcComercial.Domain.Common;
 using RcComercial.Domain.Entities;
@@ -73,7 +74,7 @@ public class AnularVentaCommandHandler(IApplicationDbContext db, ICurrentUserSer
                 EmpresaId = venta.EmpresaId,
                 Tipo = TiposNotificacion.Anulacion,
                 Destinatario = telefono,
-                Contenido = $"Venta N° {venta.Numero} anulada. Motivo: {request.Motivo}",
+                Contenido = NotificacionTemplates.Anulacion(venta.Numero, request.Motivo),
                 ReferenciaId = venta.Id,
             });
         }
