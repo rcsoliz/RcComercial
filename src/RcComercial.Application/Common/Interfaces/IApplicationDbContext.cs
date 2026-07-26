@@ -19,9 +19,27 @@ public interface IApplicationDbContext
     DbSet<PrecioHistorial> PreciosHistorial { get; }
     DbSet<Stock> Stocks { get; }
     DbSet<MovimientoInventario> MovimientosInventario { get; }
+    DbSet<Lote> Lotes { get; }
+    DbSet<Sucursal> Sucursales { get; }
+    DbSet<Cliente> Clientes { get; }
+    DbSet<SesionCaja> SesionesCaja { get; }
+    DbSet<Venta> Ventas { get; }
+    DbSet<VentaDetalle> VentaDetalles { get; }
+    DbSet<Pago> Pagos { get; }
+    DbSet<Receta> Recetas { get; }
+    DbSet<Devolucion> Devoluciones { get; }
+    DbSet<DevolucionDetalle> DevolucionDetalles { get; }
+    DbSet<Notificacion> Notificaciones { get; }
+    DbSet<EmpresaConfiguracion> EmpresaConfiguraciones { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 
     /// <summary>Deja de trackear una entidad (usado para descartar cambios de una fila fallida en imports por lote).</summary>
     void Detach(object entity);
+
+    /// <summary>
+    /// Incremento atómico de secuencia.numero (INSERT ... ON CONFLICT DO UPDATE RETURNING),
+    /// sin SELECT-then-UPDATE: dos ventas concurrentes nunca reciben el mismo número.
+    /// </summary>
+    Task<long> SiguienteNumeroAsync(Guid empresaId, Guid sucursalId, string tipoDocumento, CancellationToken ct = default);
 }

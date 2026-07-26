@@ -58,6 +58,19 @@ public class AppDbContext(
 
     public void Detach(object entity) => Entry(entity).State = EntityState.Detached;
 
+    public async Task<long> SiguienteNumeroAsync(
+        Guid empresaId, Guid sucursalId, string tipoDocumento, CancellationToken ct = default)
+    {
+        var resultado = await Database.SqlQuery<long>($"""
+            INSERT INTO secuencia (empresa_id, sucursal_id, tipo_documento, prefijo, siguiente)
+            VALUES ({empresaId}, {sucursalId}, {tipoDocumento}, '', 2)
+            ON CONFLICT (empresa_id, sucursal_id, tipo_documento)
+            DO UPDATE SET siguiente = secuencia.siguiente + 1
+            RETURNING siguiente - 1
+            """).ToListAsync(ct);
+        return resultado[0];
+    }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // Precisión por defecto para montos; se sobreescribe donde toca (14,3 / 14,4)
