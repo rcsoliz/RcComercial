@@ -18,10 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RcComercial.Domain\RcComercial.Domain.csproj" />
-    <ProjectReference Include="..\..\src\RcComercial.Application\RcComercial.Application.csproj" />
-    <ProjectReference Include="..\..\src\RcComercial.Infrastructure\RcComercial.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\src\RcComercial.Api\RcComercial.Api.csproj" />
+    <ProjectReference Include="..\RcComercial.Domain\RcComercial.Domain.csproj" />
+    <ProjectReference Include="..\RcComercial.Application\RcComercial.Application.csproj" />
+    <ProjectReference Include="..\RcComercial.Infrastructure\RcComercial.Infrastructure.csproj" />
+    <ProjectReference Include="..\RcComercial.Api\RcComercial.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

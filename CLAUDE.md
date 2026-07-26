@@ -38,7 +38,7 @@ Frontend futuro: Vue 3 PWA offline-first. Facturación SIAT (Bolivia).
 - Migración: `dotnet ef migrations add <Nombre> -p src/RcComercial.Infrastructure -s src/RcComercial.Api`
 - La tabla auditoria está ExcludeFromMigrations: se crea con SQL
   (database/02_revision_dba.sql) porque es particionada.
-- Tests: `dotnet test tests/RcComercial.Tests` (requiere Docker; Testcontainers
+- Tests: `dotnet test src/RcComercial.Tests` (requiere Docker; Testcontainers
   levanta un Postgres real por corrida, sin mocks de BD).
 
 ## Preferencias del desarrollador

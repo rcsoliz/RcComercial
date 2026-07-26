@@ -15,12 +15,11 @@ src/
   RcComercial.Application     Casos de uso e interfaces (ICurrentUserService)
   RcComercial.Infrastructure  AppDbContext, configuraciones EF, interceptores
   RcComercial.Api             Minimal API + Swagger
+  RcComercial.Tests           xUnit + Testcontainers (Postgres real), sin mocks de BD
 database/
   00_esquema_base.sql         Esquema completo de referencia
   01_rubro_y_seguridad.sql    Rubro como catálogo + RBAC + auditoría
   02_revision_dba.sql         UUID v7, particionado, índices, seeds
-tests/
-  RcComercial.Tests           xUnit + Testcontainers (Postgres real), sin mocks de BD
 ```
 
 ## Primeros pasos
@@ -46,7 +45,7 @@ dotnet run --project src/RcComercial.Api
 ## Tests
 
 ```bash
-dotnet test tests/RcComercial.Tests
+dotnet test src/RcComercial.Tests
 ```
 
 Requiere Docker corriendo (Testcontainers levanta un Postgres real por corrida;

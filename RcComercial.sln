@@ -11,9 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RcComercial.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RcComercial.Api", "src\RcComercial.Api\RcComercial.Api.csproj", "{A1000000-0000-4000-8000-000000000004}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RcComercial.Tests", "tests\RcComercial.Tests\RcComercial.Tests.csproj", "{C7BEEC4F-DDDA-4FDE-97F2-90467838DAE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RcComercial.Tests", "src\RcComercial.Tests\RcComercial.Tests.csproj", "{C7BEEC4F-DDDA-4FDE-97F2-90467838DAE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,8 +86,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{C7BEEC4F-DDDA-4FDE-97F2-90467838DAE2} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
