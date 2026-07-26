@@ -14,6 +14,7 @@ public class ProductoConfig : IEntityTypeConfiguration<Producto>
         b.HasIndex(x => new { x.EmpresaId, x.Activo, x.Nombre });
         b.Property(x => x.CostoPromedio).HasPrecision(14, 4);
         b.Property(x => x.StockMinimo).HasPrecision(14, 3);
+        b.HasIndex(x => x.Nombre).HasMethod("gin").HasOperators("gin_trgm_ops");
         b.HasOne(x => x.FichaFarmacia).WithOne()
             .HasForeignKey<ProductoFarmacia>(x => x.ProductoId);
         b.HasMany(x => x.Presentaciones).WithOne()
@@ -85,5 +86,17 @@ public class UnidadMedidaConfig : IEntityTypeConfiguration<UnidadMedida>
     {
         b.ToTable("unidad_medida");
         b.Property(x => x.Id).ValueGeneratedNever();
+
+        b.HasData(
+            new UnidadMedida { Id = 1, Nombre = "Unidad", Abreviatura = "UND" },
+            new UnidadMedida { Id = 2, Nombre = "Kilogramo", Abreviatura = "KG" },
+            new UnidadMedida { Id = 3, Nombre = "Gramo", Abreviatura = "GR" },
+            new UnidadMedida { Id = 4, Nombre = "Litro", Abreviatura = "LT" },
+            new UnidadMedida { Id = 5, Nombre = "Mililitro", Abreviatura = "ML" },
+            new UnidadMedida { Id = 6, Nombre = "Metro", Abreviatura = "M" },
+            new UnidadMedida { Id = 7, Nombre = "Centímetro", Abreviatura = "CM" },
+            new UnidadMedida { Id = 8, Nombre = "Caja", Abreviatura = "CJA" },
+            new UnidadMedida { Id = 9, Nombre = "Tableta", Abreviatura = "TAB" },
+            new UnidadMedida { Id = 10, Nombre = "Par", Abreviatura = "PAR" });
     }
 }

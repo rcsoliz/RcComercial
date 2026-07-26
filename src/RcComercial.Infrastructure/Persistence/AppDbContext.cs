@@ -8,7 +8,7 @@ namespace RcComercial.Infrastructure.Persistence;
 
 public class AppDbContext(
     DbContextOptions<AppDbContext> options,
-    ICurrentUserService currentUser) : DbContext(options)
+    ICurrentUserService currentUser) : DbContext(options), IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUser = currentUser;
 
@@ -56,6 +56,8 @@ public class AppDbContext(
     // Notificaciones
     public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
 
+    public void Detach(object entity) => Entry(entity).State = EntityState.Detached;
+
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // Precisión por defecto para montos; se sobreescribe donde toca (14,3 / 14,4)
@@ -65,6 +67,7 @@ public class AppDbContext(
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("pg_trgm");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         // ============================================================

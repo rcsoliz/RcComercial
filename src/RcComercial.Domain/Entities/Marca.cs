@@ -6,4 +6,5 @@ public class Marca : BaseEntity, ITenantEntity
 {
     public Guid EmpresaId { get; set; }
     public string Nombre { get; set; } = default!;
+    public bool Activo { get; set; } = true;
 }

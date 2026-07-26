@@ -23,6 +23,8 @@ public static class DependencyInjection
                    .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>());
         });
 
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<ITokenService, JwtTokenService>();

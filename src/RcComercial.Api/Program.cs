@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -11,6 +13,7 @@ using RcComercial.Api;
 using RcComercial.Api.Authorization;
 using RcComercial.Api.Endpoints;
 using RcComercial.Api.Services;
+using RcComercial.Application;
 using RcComercial.Application.Common.Interfaces;
 using RcComercial.Infrastructure;
 using RcComercial.Infrastructure.Persistence;
@@ -20,6 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 builder.Services.AddMemoryCache();
 
 var jwtSecret = builder.Configuration["Jwt:Secret"]
@@ -116,6 +120,26 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var error = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        if (error is ValidationException validationEx)
+        {
+            context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                errores = validationEx.Errors.Select(e => new { campo = e.PropertyName, mensaje = e.ErrorMessage }),
+            });
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await context.Response.WriteAsJsonAsync(new { error = "Ocurrió un error inesperado." });
+    });
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -132,5 +156,8 @@ app.MapGet("/health", () => Results.Ok(new { estado = "ok", fecha = DateTimeOffs
 var api = app.MapGroup("/api").AddEndpointFilter<AuditoriaPermisosSensiblesFilter>();
 api.MapAuthEndpoints();
 api.MapSucursalesEndpoints();
+api.MapProductosEndpoints();
+api.MapCategoriasEndpoints();
+api.MapMarcasEndpoints();
 
 app.Run();
