@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RcComercial.Application.Auth;
 using RcComercial.Application.Common.Interfaces;
 using RcComercial.Infrastructure.Auth;
+using RcComercial.Infrastructure.BackgroundJobs;
 using RcComercial.Infrastructure.Persistence;
 using RcComercial.Infrastructure.Persistence.Interceptors;
 
@@ -29,6 +30,8 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
+
+        services.AddHostedService<ResumenDiarioBackgroundService>();
 
         return services;
     }

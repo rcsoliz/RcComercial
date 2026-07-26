@@ -36,6 +36,14 @@ public static class TiposMovimiento
     public const string InventarioInicial = "INVENTARIO_INICIAL";
 }
 
+public static class TiposNotificacion
+{
+    public const string FacturaCliente = "FACTURA_CLIENTE";
+    public const string Anulacion = "ANULACION";
+    public const string DiferenciaCaja = "DIFERENCIA_CAJA";
+    public const string ResumenDiario = "RESUMEN_DIARIO";
+}
+
 public static class ClasificacionesFarmacia
 {
     public const string Libre = "LIBRE";

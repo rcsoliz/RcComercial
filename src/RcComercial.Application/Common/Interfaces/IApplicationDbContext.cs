@@ -11,6 +11,7 @@ namespace RcComercial.Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
     DbSet<Empresa> Empresas { get; }
+    DbSet<Usuario> Usuarios { get; }
     DbSet<Categoria> Categorias { get; }
     DbSet<Marca> Marcas { get; }
     DbSet<Producto> Productos { get; }

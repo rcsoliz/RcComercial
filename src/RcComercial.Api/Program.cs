@@ -162,5 +162,6 @@ api.MapMarcasEndpoints();
 api.MapVentasEndpoints();
 api.MapCajaEndpoints();
 api.MapDevolucionesEndpoints();
+api.MapPanelEndpoints();
 
 app.Run();

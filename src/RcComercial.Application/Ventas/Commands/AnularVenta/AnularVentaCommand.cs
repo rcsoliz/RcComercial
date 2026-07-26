@@ -71,7 +71,7 @@ public class AnularVentaCommandHandler(IApplicationDbContext db, ICurrentUserSer
             db.Notificaciones.Add(new Notificacion
             {
                 EmpresaId = venta.EmpresaId,
-                Tipo = "ANULACION",
+                Tipo = TiposNotificacion.Anulacion,
                 Destinatario = telefono,
                 Contenido = $"Venta N° {venta.Numero} anulada. Motivo: {request.Motivo}",
                 ReferenciaId = venta.Id,

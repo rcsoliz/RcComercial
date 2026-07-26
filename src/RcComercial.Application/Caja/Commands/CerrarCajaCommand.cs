@@ -52,7 +52,7 @@ public class CerrarCajaCommandHandler(IApplicationDbContext db, ICurrentUserServ
                 db.Notificaciones.Add(new Notificacion
                 {
                     EmpresaId = currentUser.EmpresaId!.Value,
-                    Tipo = "DIFERENCIA_CAJA",
+                    Tipo = TiposNotificacion.DiferenciaCaja,
                     Destinatario = telefono,
                     Contenido = $"Diferencia de caja: declarado {request.MontoDeclarado:F2}, " +
                         $"calculado {montoCalculado:F2}.",

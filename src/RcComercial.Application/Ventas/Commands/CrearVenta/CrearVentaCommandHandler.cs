@@ -158,7 +158,7 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
                 db.Notificaciones.Add(new Notificacion
                 {
                     EmpresaId = empresaId,
-                    Tipo = "FACTURA_CLIENTE",
+                    Tipo = TiposNotificacion.FacturaCliente,
                     Destinatario = telefono,
                     Contenido = $"Gracias por su compra. Total: {venta.Total:F2} Bs. N° {venta.Numero}.",
                     ReferenciaId = venta.Id,
