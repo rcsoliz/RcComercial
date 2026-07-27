@@ -24,5 +24,9 @@ public static class CajaEndpoints
         group.MapGet("/abierta", async (IMediator mediator) =>
             Results.Ok(await mediator.Send(new ObtenerSesionAbiertaQuery())))
             .RequireAuthorization();
+
+        group.MapGet("/historial", async (int? pagina, IMediator mediator) =>
+            Results.Ok(await mediator.Send(new ListarSesionesCajaQuery(pagina ?? 1))))
+            .RequireAuthorization(Permisos.CajaAbrirCerrar);
     }
 }

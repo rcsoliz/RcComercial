@@ -1,6 +1,7 @@
 using MediatR;
 using RcComercial.Application.Compras.Commands.CrearCompra;
 using RcComercial.Application.Compras.Commands.EnviarPedidoProveedor;
+using RcComercial.Application.Compras.Queries.ListarCompras;
 using RcComercial.Application.Compras.Queries.ObtenerSugeridoCompra;
 using RcComercial.Domain.Common;
 
@@ -11,6 +12,10 @@ public static class ComprasEndpoints
     public static void MapComprasEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/compras");
+
+        group.MapGet("/", async (int? pagina, IMediator mediator) =>
+            Results.Ok(await mediator.Send(new ListarComprasQuery(pagina ?? 1))))
+            .RequireAuthorization(Permisos.ComprasCrear);
 
         group.MapGet("/sugerido", async (Guid proveedorId, Guid? sucursalId, IMediator mediator) =>
             Results.Ok(await mediator.Send(new ObtenerSugeridoCompraQuery(proveedorId, sucursalId))))

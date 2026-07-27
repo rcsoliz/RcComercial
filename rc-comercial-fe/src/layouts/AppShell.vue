@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { LogOut } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
@@ -8,6 +9,10 @@ import { navegacion } from './navegacion'
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+
+const navegacionVisible = computed(() =>
+  navegacion.filter((item) => !item.permiso || auth.tienePermiso(item.permiso)),
+)
 
 function cerrarSesion() {
   auth.cerrarSesion()
@@ -24,7 +29,7 @@ function cerrarSesion() {
 
       <nav class="flex flex-1 flex-col gap-1 px-4" aria-label="Navegación principal">
         <RouterLink
-          v-for="item in navegacion"
+          v-for="item in navegacionVisible"
           :key="item.to"
           :to="item.to"
           class="flex items-center gap-3 rounded-s px-4 py-3 text-tinta-2 transition-colors hover:bg-superficie-2"
@@ -59,7 +64,7 @@ function cerrarSesion() {
       aria-label="Navegación móvil"
     >
       <RouterLink
-        v-for="item in navegacion"
+        v-for="item in navegacionVisible"
         :key="item.to"
         :to="item.to"
         class="flex min-h-11 min-w-11 flex-col items-center justify-center gap-1 rounded px-3 py-2 text-tinta-2"

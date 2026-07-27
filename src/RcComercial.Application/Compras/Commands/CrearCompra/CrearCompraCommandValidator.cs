@@ -19,5 +19,20 @@ public class CrearCompraCommandValidator : AbstractValidator<CrearCompraCommand>
         RuleFor(x => x.ProveedorId)
             .MustAsync((proveedorId, ct) => db.Proveedores.AnyAsync(p => p.Id == proveedorId && p.Activo, ct))
             .WithMessage("El proveedor no existe.");
+
+        RuleFor(x => x)
+            .MustAsync(async (cmd, ct) =>
+            {
+                var productoIds = cmd.Detalles.Select(d => d.ProductoId).Distinct().ToList();
+                var idsConLote = await db.Productos
+                    .Where(p => productoIds.Contains(p.Id) && p.ManejaLote)
+                    .Select(p => p.Id)
+                    .ToListAsync(ct);
+
+                return cmd.Detalles
+                    .Where(d => idsConLote.Contains(d.ProductoId))
+                    .All(d => !string.IsNullOrWhiteSpace(d.NumeroLote) && d.FechaVencimiento is not null);
+            })
+            .WithMessage("Los productos que manejan lote requieren número de lote y fecha de vencimiento.");
     }
 }

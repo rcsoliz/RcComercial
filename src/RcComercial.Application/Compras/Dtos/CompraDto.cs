@@ -20,3 +20,7 @@ public record CompraDto(
     decimal Subtotal,
     decimal Total,
     List<CompraDetalleDto> Detalles);
+
+public record CompraListItemDto(
+    Guid Id, string Numero, DateTimeOffset Fecha, Guid ProveedorId, string ProveedorNombre,
+    string? NroFacturaProv, string Estado, decimal Total);
