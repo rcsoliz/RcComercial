@@ -77,6 +77,17 @@ public static class PanelHoyCalculator
             return new TopProductoDto(x.ProductoId, info?.Nombre ?? "?", x.Cantidad, x.Monto, costoTotal, utilidad);
         }).ToList();
 
+        var montosPorMetodoPagoRaw = await (
+            from p in db.Pagos
+            join v in completadas on p.VentaId equals v.Id
+            group p by p.Metodo into g
+            select new { Metodo = g.Key, Monto = g.Sum(x => x.Monto) })
+            .ToListAsync(ct);
+        var montosPorMetodoPago = montosPorMetodoPagoRaw
+            .Select(x => new MontoPorMetodoPagoDto(x.Metodo, x.Monto))
+            .OrderByDescending(x => x.Monto)
+            .ToList();
+
         var sucursalIds = await ResolverSucursalIdsAsync(db, empresaId, sucursalId, ct);
         var cajasAbiertasRaw = await db.SesionesCaja
             .Where(s => sucursalIds.Contains(s.SucursalId) && s.Estado == "ABIERTA")
@@ -89,7 +100,8 @@ public static class PanelHoyCalculator
 
         return new PanelHoyDto(
             totalVendido, numeroVentas, ticketPromedio, ventasPorUsuario,
-            numeroAnulaciones, montoAnulaciones, montoDescuentos, topProductos, cajasAbiertas);
+            numeroAnulaciones, montoAnulaciones, montoDescuentos, topProductos, cajasAbiertas,
+            montosPorMetodoPago);
     }
 
     internal static Task<Dictionary<Guid, string>> ObtenerNombresAsync(

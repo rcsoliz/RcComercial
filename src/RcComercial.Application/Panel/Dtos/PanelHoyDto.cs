@@ -8,6 +8,8 @@ public record TopProductoDto(
 
 public record SesionCajaAbiertaDto(Guid Id, Guid UsuarioId, string UsuarioNombre, DateTimeOffset Apertura, decimal MontoInicial);
 
+public record MontoPorMetodoPagoDto(string Metodo, decimal Monto);
+
 public record PanelHoyDto(
     decimal TotalVendido,
     int NumeroVentas,
@@ -17,4 +19,5 @@ public record PanelHoyDto(
     decimal MontoAnulaciones,
     decimal MontoDescuentos,
     List<TopProductoDto> TopProductos,
-    List<SesionCajaAbiertaDto> CajasAbiertas);
+    List<SesionCajaAbiertaDto> CajasAbiertas,
+    List<MontoPorMetodoPagoDto> MontosPorMetodoPago);
