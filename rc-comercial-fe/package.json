@@ -15,6 +15,7 @@
     "apexcharts": "^6.5.0",
     "axios": "^1.18.1",
     "dayjs": "^1.11.21",
+    "idb": "^8.0.3",
     "lucide-vue-next": "^1.0.0",
     "pinia": "^4.0.2",
     "reka-ui": "^2.10.1",

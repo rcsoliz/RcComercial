@@ -167,5 +167,6 @@ api.MapDevolucionesEndpoints();
 api.MapPanelEndpoints();
 api.MapComprasEndpoints();
 api.MapProveedoresEndpoints();
+api.MapSyncEndpoints();
 
 app.Run();

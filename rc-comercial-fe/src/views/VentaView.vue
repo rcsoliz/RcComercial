@@ -4,16 +4,20 @@ import { watchDebounced } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { Minus, Plus, Search } from 'lucide-vue-next'
 import { useVentaStore } from '@/stores/venta'
+import { useConexion } from '@/composables/useConexion'
 import { obtenerSesionAbierta, abrirCaja } from '@/api/caja'
 import { buscarProductos, obtenerProductoPorId, obtenerProductoPorCodigoBarras } from '@/api/productos'
+import { buscarEnCatalogoLocal, obtenerProductoLocalPorId, obtenerProductoLocalPorCodigoBarras } from '@/db/catalogoDb'
 import ModalPresentacion from '@/components/pos/ModalPresentacion.vue'
 import ModalReceta from '@/components/pos/ModalReceta.vue'
 import ModalCobro from '@/components/pos/ModalCobro.vue'
 import ModalCancelar from '@/components/pos/ModalCancelar.vue'
 
 const venta = useVentaStore()
+const { enLinea } = useConexion()
 
 // ── Sesión de caja: se verifica al entrar; sin sesión abierta no se puede vender ──
+const CLAVE_SESION_CAJA_CACHE = 'syscenters-caja-abierta-cache'
 const cargandoCaja = ref(true)
 const sesionCaja = ref(null)
 const montoInicial = ref('')
@@ -24,6 +28,15 @@ async function cargarSesionCaja() {
   cargandoCaja.value = true
   try {
     sesionCaja.value = await obtenerSesionAbierta()
+    if (sesionCaja.value) localStorage.setItem(CLAVE_SESION_CAJA_CACHE, JSON.stringify(sesionCaja.value))
+    else localStorage.removeItem(CLAVE_SESION_CAJA_CACHE)
+  } catch {
+    // Sin red no se puede confirmar el estado real de la caja: si el
+    // cajero ya la había abierto en línea, seguimos con esa última sesión
+    // conocida en vez de bloquear el POS entero por no tener conexión.
+    const cache = localStorage.getItem(CLAVE_SESION_CAJA_CACHE)
+    sesionCaja.value = cache ? JSON.parse(cache) : null
+    if (sesionCaja.value) toast.info('Sin conexión: se usa la última sesión de caja conocida.')
   } finally {
     cargandoCaja.value = false
   }
@@ -35,6 +48,7 @@ async function abrirCajaAhora() {
   abriendoCaja.value = true
   try {
     sesionCaja.value = await abrirCaja(monto, null)
+    localStorage.setItem(CLAVE_SESION_CAJA_CACHE, JSON.stringify(sesionCaja.value))
   } catch (error) {
     const mensajes = error.response?.data?.errores?.map((e) => e.mensaje)
     errorCaja.value = mensajes?.join(' ') || 'No se pudo abrir la caja.'
@@ -52,7 +66,20 @@ const inputBusqueda = ref(null)
 async function ejecutarBusqueda() {
   buscando.value = true
   try {
-    resultados.value = await buscarProductos(textoBusqueda.value)
+    // IndexedDB primero: instantáneo y funciona sin red.
+    resultados.value = await buscarEnCatalogoLocal(textoBusqueda.value)
+
+    // El backend es solo complemento: si hay conexión y trae resultados
+    // (mejor rankeados / más al día), los usamos; si falla o no hay red,
+    // nos quedamos tranquilos con lo que ya mostramos desde IndexedDB.
+    if (enLinea.value) {
+      try {
+        const remotos = await buscarProductos(textoBusqueda.value)
+        if (remotos.length > 0 || resultados.value.length === 0) resultados.value = remotos
+      } catch {
+        /* seguimos con los resultados locales */
+      }
+    }
   } finally {
     buscando.value = false
   }
@@ -63,13 +90,29 @@ watchDebounced(textoBusqueda, ejecutarBusqueda, { debounce: 300 })
 async function intentarCodigoBarras() {
   const texto = textoBusqueda.value.trim()
   if (!texto) return
-  const resultado = await obtenerProductoPorCodigoBarras(texto)
-  if (!resultado) return
-  if (resultado.esSugerencia) {
-    toast.info(`"${resultado.sugerencia.nombre}" no está en tu catálogo todavía. Regístralo en Productos.`)
-    return
+
+  if (enLinea.value) {
+    try {
+      const resultado = await obtenerProductoPorCodigoBarras(texto)
+      if (resultado?.esSugerencia) {
+        toast.info(`"${resultado.sugerencia.nombre}" no está en tu catálogo todavía. Regístralo en Productos.`)
+        return
+      }
+      if (resultado) {
+        agregarProductoDesde(resultado.producto)
+        textoBusqueda.value = ''
+        await nextTick()
+        inputBusqueda.value?.focus()
+        return
+      }
+    } catch {
+      /* sin red real pese a "en línea": probamos el catálogo local */
+    }
   }
-  agregarProductoDesde(resultado.producto)
+
+  const local = await obtenerProductoLocalPorCodigoBarras(texto)
+  if (!local) return
+  agregarProductoDesde(local)
   textoBusqueda.value = ''
   await nextTick()
   inputBusqueda.value?.focus()
@@ -80,8 +123,19 @@ const mostrarPresentacion = ref(false)
 const productoSeleccionado = ref(null)
 
 async function alTocarProducto(item) {
-  const producto = await obtenerProductoPorId(item.id)
-  agregarProductoDesde(producto)
+  // Ya viene completo del catálogo local (IndexedDB): no hace falta red.
+  if (item.presentaciones) {
+    agregarProductoDesde(item)
+    return
+  }
+  try {
+    const producto = await obtenerProductoPorId(item.id)
+    agregarProductoDesde(producto)
+  } catch {
+    const local = await obtenerProductoLocalPorId(item.id)
+    if (local) agregarProductoDesde(local)
+    else toast.error('No se pudo cargar el producto. Intenta de nuevo.')
+  }
 }
 
 function agregarProductoDesde(producto) {

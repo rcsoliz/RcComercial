@@ -15,6 +15,10 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_ORIGIN || 'http://localhost:5000',
           changeOrigin: true,
         },
+        '/health': {
+          target: env.VITE_API_ORIGIN || 'http://localhost:5000',
+          changeOrigin: true,
+        },
       },
     },
     plugins: [

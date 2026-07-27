@@ -4,6 +4,7 @@ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { LogOut } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import TemaToggle from '@/components/ui/TemaToggle.vue'
+import IndicadorConexion from '@/components/ui/IndicadorConexion.vue'
 import { navegacion } from './navegacion'
 
 const auth = useAuthStore()
@@ -23,8 +24,9 @@ function cerrarSesion() {
 <template>
   <div class="min-h-dvh bg-papel">
     <aside class="fixed left-0 top-0 hidden h-dvh w-64 flex-col border-r border-linea bg-papel md:flex">
-      <div class="p-6">
+      <div class="flex flex-col gap-3 p-6">
         <h1 class="font-display text-[17px] font-bold text-marca">SysCenterS</h1>
+        <IndicadorConexion />
       </div>
 
       <nav class="flex flex-1 flex-col gap-1 px-4" aria-label="Navegación principal">
@@ -53,6 +55,7 @@ function cerrarSesion() {
     </aside>
 
     <TemaToggle class="fixed right-2 top-2 z-40 bg-papel md:hidden" />
+    <IndicadorConexion compacto class="fixed left-2 top-2 z-40 md:hidden" />
 
     <main class="min-h-dvh pb-28 md:ml-64 md:pb-0">
       <RouterView />
