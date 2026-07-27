@@ -39,7 +39,8 @@ public record ProductoDto(
     FichaFarmaciaDto? FichaFarmacia);
 
 public record ProductoListItemDto(
-    Guid Id, string? Codigo, string? CodigoBarras, string Nombre, decimal PrecioBase, bool Activo);
+    Guid Id, string? Codigo, string? CodigoBarras, string Nombre, decimal PrecioBase, bool Activo,
+    string? CategoriaNombre, string? MarcaNombre, decimal StockTotal, decimal StockMinimo);
 
 public record ProductoMaestroDto(
     Guid Id, string CodigoBarras, string Nombre, string? Marca, string? Contenido, short? RubroId);

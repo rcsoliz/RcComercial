@@ -1,7 +1,7 @@
 import http from './http'
 
-export function buscarProductos(texto) {
-  return http.get('/productos', { params: { buscar: texto || undefined } }).then((r) => r.data)
+export function buscarProductos(texto, pagina = 1) {
+  return http.get('/productos', { params: { buscar: texto || undefined, pagina } }).then((r) => r.data)
 }
 
 export function obtenerProductoPorId(id) {
@@ -16,4 +16,20 @@ export async function obtenerProductoPorCodigoBarras(codigoBarras) {
     if (error.response?.status === 404) return null
     throw error
   }
+}
+
+export function crearProducto(comando) {
+  return http.post('/productos', comando).then((r) => r.data)
+}
+
+export function actualizarProducto(id, comando) {
+  return http.put(`/productos/${id}`, comando).then((r) => r.data)
+}
+
+export function cambiarPrecio(id, nuevoPrecio, presentacionId = null) {
+  return http.put(`/productos/${id}/precio`, { presentacionId, nuevoPrecio })
+}
+
+export function desactivarProducto(id) {
+  return http.delete(`/productos/${id}`)
 }

@@ -14,6 +14,7 @@ public interface IApplicationDbContext
     DbSet<Usuario> Usuarios { get; }
     DbSet<Categoria> Categorias { get; }
     DbSet<Marca> Marcas { get; }
+    DbSet<UnidadMedida> UnidadesMedida { get; }
     DbSet<Producto> Productos { get; }
     DbSet<ProductoPresentacion> ProductoPresentaciones { get; }
     DbSet<ProductoMaestro> ProductosMaestro { get; }

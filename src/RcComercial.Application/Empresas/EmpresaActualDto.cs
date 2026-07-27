@@ -1,0 +1,11 @@
+namespace RcComercial.Application.Empresas;
+
+public record EmpresaActualDto(
+    Guid Id,
+    string Nombre,
+    short RubroId,
+    string RubroNombre,
+    bool UsaLotesPorDefecto,
+    bool UsaControlados,
+    bool UsaFichaFarmacia,
+    bool UsaDecimalesPorDefecto);

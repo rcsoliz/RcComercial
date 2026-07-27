@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import http from '@/api/http'
+import { decodificarPayloadJwt } from '@/utils/jwt'
 
 const CLAVE = 'syscenters-sesion'
 
@@ -28,9 +29,20 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     autenticado: (state) => !!state.accessToken,
+
+    permisos: (state) => {
+      const payload = state.accessToken ? decodificarPayloadJwt(state.accessToken) : null
+      const permiso = payload?.permiso
+      if (!permiso) return []
+      return Array.isArray(permiso) ? permiso : [permiso]
+    },
   },
 
   actions: {
+    tienePermiso(codigo) {
+      return this.permisos.includes(codigo)
+    },
+
     _persistir() {
       guardar(this.accessToken ? { accessToken: this.accessToken, refreshToken: this.refreshToken } : null)
     },

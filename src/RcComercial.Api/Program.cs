@@ -156,6 +156,8 @@ app.MapGet("/health", () => Results.Ok(new { estado = "ok", fecha = DateTimeOffs
 var api = app.MapGroup("/api").AddEndpointFilter<AuditoriaPermisosSensiblesFilter>();
 api.MapAuthEndpoints();
 api.MapSucursalesEndpoints();
+api.MapEmpresasEndpoints();
+api.MapUnidadesMedidaEndpoints();
 api.MapProductosEndpoints();
 api.MapCategoriasEndpoints();
 api.MapMarcasEndpoints();

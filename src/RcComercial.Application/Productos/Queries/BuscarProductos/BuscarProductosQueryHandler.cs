@@ -34,10 +34,40 @@ public class BuscarProductosQueryHandler(IApplicationDbContext db)
                 .OrderByDescending(p => EF.Functions.TrigramsSimilarity(p.Nombre, texto));
         }
 
-        return await query
+        var productos = await query
             .Skip((pagina - 1) * TamanoPagina)
             .Take(TamanoPagina)
-            .Select(p => new ProductoListItemDto(p.Id, p.Codigo, p.CodigoBarras, p.Nombre, p.PrecioBase, p.Activo))
+            .Select(p => new
+            {
+                p.Id, p.Codigo, p.CodigoBarras, p.Nombre, p.PrecioBase, p.Activo,
+                p.CategoriaId, p.MarcaId, p.StockMinimo,
+            })
             .ToListAsync(ct);
+
+        var productoIds = productos.Select(p => p.Id).ToList();
+        var categoriaIds = productos.Where(p => p.CategoriaId is not null).Select(p => p.CategoriaId!.Value).ToList();
+        var marcaIds = productos.Where(p => p.MarcaId is not null).Select(p => p.MarcaId!.Value).ToList();
+
+        var stockPorProducto = await db.Stocks
+            .Where(s => productoIds.Contains(s.ProductoId))
+            .GroupBy(s => s.ProductoId)
+            .Select(g => new { ProductoId = g.Key, Total = g.Sum(s => s.Cantidad) })
+            .ToDictionaryAsync(x => x.ProductoId, x => x.Total, ct);
+
+        var categorias = await db.Categorias
+            .Where(c => categoriaIds.Contains(c.Id))
+            .ToDictionaryAsync(c => c.Id, c => c.Nombre, ct);
+
+        var marcas = await db.Marcas
+            .Where(m => marcaIds.Contains(m.Id))
+            .ToDictionaryAsync(m => m.Id, m => m.Nombre, ct);
+
+        return productos
+            .Select(p => new ProductoListItemDto(
+                p.Id, p.Codigo, p.CodigoBarras, p.Nombre, p.PrecioBase, p.Activo,
+                p.CategoriaId is { } catId ? categorias.GetValueOrDefault(catId) : null,
+                p.MarcaId is { } marId ? marcas.GetValueOrDefault(marId) : null,
+                stockPorProducto.GetValueOrDefault(p.Id), p.StockMinimo))
+            .ToList();
     }
 }
