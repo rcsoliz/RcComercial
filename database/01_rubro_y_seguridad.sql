@@ -72,6 +72,12 @@ INSERT INTO permiso (id, codigo, modulo, nombre, es_sensible) VALUES
  (50, 'productos.crear_editar',  'Productos',     'Crear y editar productos',               FALSE),
  (51, 'productos.eliminar',      'Productos',     'Desactivar productos',                   TRUE),
  (52, 'productos.cambiar_precios','Productos',    'Modificar precios',                      TRUE),
+ -- Clientes
+ (80, 'clientes.crear_editar',   'Clientes',      'Crear y editar clientes',                FALSE),
+ (81, 'clientes.eliminar',       'Clientes',      'Desactivar clientes',                    TRUE),
+ -- Proveedores
+ (90, 'proveedores.crear_editar','Proveedores',   'Crear y editar proveedores',             FALSE),
+ (91, 'proveedores.eliminar',    'Proveedores',   'Desactivar proveedores',                 TRUE),
  -- Reportes
  (60, 'reportes.ver',            'Reportes',      'Ver reportes y panel del negocio',       FALSE),
  -- Administración (lo que mencionas: NO todos pueden tocar usuarios/config)
@@ -108,10 +114,11 @@ INSERT INTO rol_permiso SELECT 'a0000000-0000-0000-0000-000000000001', id FROM p
 -- Encargado: opera todo, pero NO administra usuarios/roles/configuración
 INSERT INTO rol_permiso SELECT 'a0000000-0000-0000-0000-000000000002', id
   FROM permiso WHERE codigo NOT LIKE 'admin.%';
--- Vendedor: solo vender y consultar
+-- Vendedor: solo vender y consultar (clientes.crear_editar: alta rápida de
+-- cliente al cobrar, sin poder desactivar clientes ni tocar proveedores)
 INSERT INTO rol_permiso SELECT 'a0000000-0000-0000-0000-000000000003', id
   FROM permiso WHERE codigo IN
-  ('ventas.crear','ventas.ver_historial','caja.abrir_cerrar','inventario.ver');
+  ('ventas.crear','ventas.ver_historial','caja.abrir_cerrar','inventario.ver','clientes.crear_editar');
 
 -- Migrar usuario: de rol texto a rol_id
 ALTER TABLE usuario ADD COLUMN rol_id UUID REFERENCES rol(id);

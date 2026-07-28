@@ -5,7 +5,7 @@ using RcComercial.Application.Compras.Dtos;
 
 namespace RcComercial.Application.Compras.Queries.ListarCompras;
 
-public record ListarComprasQuery(int Pagina = 1) : IRequest<List<CompraListItemDto>>;
+public record ListarComprasQuery(int Pagina = 1, Guid? ProveedorId = null) : IRequest<List<CompraListItemDto>>;
 
 public class ListarComprasQueryHandler(IApplicationDbContext db)
     : IRequestHandler<ListarComprasQuery, List<CompraListItemDto>>
@@ -16,7 +16,10 @@ public class ListarComprasQueryHandler(IApplicationDbContext db)
     {
         var pagina = Math.Max(1, request.Pagina);
 
-        var compras = await db.Compras
+        IQueryable<Domain.Entities.Compra> query = db.Compras;
+        if (request.ProveedorId is { } proveedorId) query = query.Where(c => c.ProveedorId == proveedorId);
+
+        var compras = await query
             .OrderByDescending(c => c.Fecha)
             .Skip((pagina - 1) * TamanoPagina)
             .Take(TamanoPagina)

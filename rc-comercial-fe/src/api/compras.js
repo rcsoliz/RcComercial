@@ -1,7 +1,7 @@
 import http from './http'
 
-export function listarCompras(pagina = 1) {
-  return http.get('/compras', { params: { pagina } }).then((r) => r.data)
+export function listarCompras(pagina = 1, proveedorId = null) {
+  return http.get('/compras', { params: { pagina, proveedorId } }).then((r) => r.data)
 }
 
 export function crearCompra(comando) {

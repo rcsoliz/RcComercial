@@ -166,6 +166,7 @@ api.MapProductosEndpoints();
 api.MapCategoriasEndpoints();
 api.MapMarcasEndpoints();
 api.MapVentasEndpoints();
+api.MapClientesEndpoints();
 api.MapCajaEndpoints();
 api.MapDevolucionesEndpoints();
 api.MapPanelEndpoints();

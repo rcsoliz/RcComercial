@@ -13,8 +13,8 @@ public static class ComprasEndpoints
     {
         var group = app.MapGroup("/compras");
 
-        group.MapGet("/", async (int? pagina, IMediator mediator) =>
-            Results.Ok(await mediator.Send(new ListarComprasQuery(pagina ?? 1))))
+        group.MapGet("/", async (int? pagina, Guid? proveedorId, IMediator mediator) =>
+            Results.Ok(await mediator.Send(new ListarComprasQuery(pagina ?? 1, proveedorId))))
             .RequireAuthorization(Permisos.ComprasCrear);
 
         group.MapGet("/sugerido", async (Guid proveedorId, Guid? sucursalId, IMediator mediator) =>

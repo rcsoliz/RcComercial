@@ -242,6 +242,52 @@ Trabajo restante en el repo facturador-by-rc (paralelo, con su propio CLAUDE.md)
 
 ---
 
+FASE 9, sesión 1 — integración con Facturacion API (facturador-by-rc).
+Lee PLAN.md Fase 9 completa y CLAUDE.md. RcComercial NUNCA conoce
+CUFD/CUIS/XML: emite → 202 → webhook. Desarrollo contra el facturador
+corriendo local con SiatFakeAdapter (docker-compose del otro repo).
+
+1. IFacturacionApiClient (HttpClient tipado + Polly: retry con backoff
+   y circuit breaker): emitir factura, consultar estado, solicitar
+   anulación, obtener PDF. Config por empresa en empresa_configuracion:
+   siat.activo (bool), siat.api_key (cifrada con Data Protection),
+   siat.webhook_secret (cifrado).
+2. Al completar una venta de empresa con siat.activo=true:
+   - Si algún producto no tiene codigo_producto_sin o codigo_unidad_sin:
+     la venta se guarda igual, estado_siat='RECHAZADA' con motivo claro
+     visible en panel — la venta JAMÁS se bloquea por facturación.
+   - Si están completos: POST al facturador con referenciaExterna =
+     venta.Id, estado_siat='PENDIENTE'. La llamada va DESPUÉS del commit
+     de la venta (nunca dentro de la transacción) y en un job Hangfire/
+     BackgroundService con reintentos — la venta responde rápido al POS.
+3. Tests (Testcontainers + mock del facturador con WireMock.Net):
+   venta con siat.activo emite; sin códigos SIN queda rechazada sin
+   bloquear; caída del facturador → reintenta sin perder facturas.
+
+FASE 9, sesión 2 — receptor de webhooks y UI. Requiere 9.1 aprobada.
+
+1. POST /api/webhooks/facturacion (SIN [Authorize] — autentica por
+   firma): verificar HMAC-SHA256 de timestamp+cuerpo con el secreto del
+   tenant, rechazar timestamps > 5 min (replay), responder 401 sin
+   detalle si falla. Actualizar venta: EMITIDA (guardar cuf) o RECHAZADA
+   (motivo). Idempotente: el mismo webhook dos veces no cambia nada.
+2. Polling de respaldo: job cada 10 min consulta al facturador las
+   ventas PENDIENTE > 15 min.
+3. Anulación: anular una venta facturada exige código de motivo SIN y
+   dispara la anulación en el facturador; la venta queda ANULADA local
+   solo al confirmar el webhook de la nota.
+4. WhatsApp: si la venta tiene factura EMITIDA, la notificación
+   FACTURA_CLIENTE adjunta el PDF del facturador en vez del recibo.
+5. Frontend: badge de estado SIAT en el ticket y en el historial
+   (SIN_FACTURA gris, PENDIENTE --aviso, EMITIDA --exito, RECHAZADA
+   --peligro con motivo); pantalla de configuración (admin.configuracion)
+   para API key, actividad económica y el asistente de mapeo masivo de
+   códigos SIN por categoría.
+6. Tests: firma inválida → 401 sin tocar la venta; webhook duplicado
+   idempotente; el criterio final del PLAN: todo el flujo corre contra
+   el SiatFakeAdapter sin credenciales reales.
+7. Al terminar: reporte de cierre de la Fase 9 y del PLAN completo.
+
 ## Recordatorios permanentes
 - Una fase por sesión. Compilar y probar criterios ANTES de commit.
 - Parches mínimos; no tocar infraestructura compartida sin avisar.

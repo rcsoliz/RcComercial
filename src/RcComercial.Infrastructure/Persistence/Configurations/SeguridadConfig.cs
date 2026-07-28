@@ -45,6 +45,10 @@ public class PermisoConfig : IEntityTypeConfiguration<Permiso>
             new Permiso { Id = 50, Codigo = Permisos.ProductosCrearEditar, Modulo = "Productos", Nombre = "Crear y editar productos" },
             new Permiso { Id = 51, Codigo = Permisos.ProductosEliminar, Modulo = "Productos", Nombre = "Desactivar productos", EsSensible = true },
             new Permiso { Id = 52, Codigo = Permisos.ProductosCambiarPrecios, Modulo = "Productos", Nombre = "Modificar precios", EsSensible = true },
+            new Permiso { Id = 80, Codigo = Permisos.ClientesCrearEditar, Modulo = "Clientes", Nombre = "Crear y editar clientes" },
+            new Permiso { Id = 81, Codigo = Permisos.ClientesEliminar, Modulo = "Clientes", Nombre = "Desactivar clientes", EsSensible = true },
+            new Permiso { Id = 90, Codigo = Permisos.ProveedoresCrearEditar, Modulo = "Proveedores", Nombre = "Crear y editar proveedores" },
+            new Permiso { Id = 91, Codigo = Permisos.ProveedoresEliminar, Modulo = "Proveedores", Nombre = "Desactivar proveedores", EsSensible = true },
             new Permiso { Id = 60, Codigo = Permisos.ReportesVer, Modulo = "Reportes", Nombre = "Ver reportes y panel del negocio" },
             new Permiso { Id = 70, Codigo = Permisos.AdminUsuarios, Modulo = "Administración", Nombre = "Crear, editar y desactivar usuarios", EsSensible = true },
             new Permiso { Id = 71, Codigo = Permisos.AdminRoles, Modulo = "Administración", Nombre = "Configurar roles y permisos", EsSensible = true },
@@ -55,9 +59,11 @@ public class PermisoConfig : IEntityTypeConfiguration<Permiso>
 
 public class RolPermisoConfig : IEntityTypeConfiguration<RolPermiso>
 {
-    private static readonly short[] TodosLosPermisos = [10, 11, 12, 13, 20, 21, 30, 31, 32, 40, 41, 50, 51, 52, 60, 70, 71, 72, 73];
-    private static readonly short[] PermisosEncargado = [10, 11, 12, 13, 20, 21, 30, 31, 32, 40, 41, 50, 51, 52, 60];
-    private static readonly short[] PermisosVendedor = [10, 13, 20, 30];
+    private static readonly short[] TodosLosPermisos = [10, 11, 12, 13, 20, 21, 30, 31, 32, 40, 41, 50, 51, 52, 60, 70, 71, 72, 73, 80, 81, 90, 91];
+    private static readonly short[] PermisosEncargado = [10, 11, 12, 13, 20, 21, 30, 31, 32, 40, 41, 50, 51, 52, 60, 80, 81, 90, 91];
+    // Vendedor solo puede crear/editar clientes (alta rápida en el cobro del
+    // POS); desactivar clientes y todo lo de proveedores queda para roles de más confianza.
+    private static readonly short[] PermisosVendedor = [10, 13, 20, 30, 80];
 
     public void Configure(EntityTypeBuilder<RolPermiso> b)
     {

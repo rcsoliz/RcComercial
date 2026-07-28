@@ -14,6 +14,7 @@ const route = useRoute()
 const navegacionVisible = computed(() =>
   navegacion.filter((item) => !item.permiso || auth.tienePermiso(item.permiso)),
 )
+const navegacionMovil = computed(() => navegacionVisible.value.filter((item) => !item.soloEscritorio))
 
 function cerrarSesion() {
   auth.cerrarSesion()
@@ -67,7 +68,7 @@ function cerrarSesion() {
       aria-label="Navegación móvil"
     >
       <RouterLink
-        v-for="item in navegacionVisible"
+        v-for="item in navegacionMovil"
         :key="item.to"
         :to="item.to"
         class="flex min-h-11 min-w-11 flex-col items-center justify-center gap-1 rounded px-3 py-2 text-tinta-2"

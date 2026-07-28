@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import ModalBase from '@/components/ui/ModalBase.vue'
+import SelectorCliente from '@/components/pos/SelectorCliente.vue'
 import { useVentaStore } from '@/stores/venta'
 import { crearVenta } from '@/api/ventas'
 import { encolarVentaPendiente, tomarSiguienteNumero } from '@/db/ventasDb'
@@ -17,6 +18,15 @@ const enviando = ref(false)
 const errorGeneral = ref('')
 const avisoStockInsuficiente = ref(null)
 let confirmarPeseAStockInsuficiente = false
+
+const clienteSeleccionado = ref(null) // { id, nombre } | null
+watch(clienteSeleccionado, (c) => venta.establecerCliente(c?.id ?? null))
+// venta.id cambia con cada iniciarNueva(): señal de "venta nueva" para
+// limpiar la selección visual (el modal no se desmonta entre cobros).
+watch(
+  () => venta.id,
+  () => (clienteSeleccionado.value = null),
+)
 
 function fmtBs(n) {
   const [ent, dec] = Number(n).toFixed(2).split('.')
@@ -177,6 +187,8 @@ async function venderPeseAStockInsuficiente() {
           </button>
         </div>
       </div>
+
+      <SelectorCliente v-model="clienteSeleccionado" />
 
       <ul v-if="venta.pagos.length" class="flex flex-col gap-2">
         <li

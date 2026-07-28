@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { watchDebounced } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import dayjs from 'dayjs'
@@ -7,6 +8,8 @@ import { Plus, Send, Trash2 } from 'lucide-vue-next'
 import { crearCompra, enviarPedidoProveedor, listarCompras, obtenerSugeridoCompra } from '@/api/compras'
 import { crearProveedor, listarProveedores } from '@/api/proveedores'
 import { buscarProductos, obtenerProductoPorId } from '@/api/productos'
+
+const route = useRoute()
 
 function fmtBs(n) {
   const [ent, dec] = Number(n || 0).toFixed(2).split('.')
@@ -248,8 +251,18 @@ function nuevaCompra() {
   if (proveedores.value.length === 0) cargarProveedores()
 }
 
-onMounted(() => {
+onMounted(async () => {
   cargarListado()
+
+  // Acceso directo desde el detalle de un proveedor ("ver su sugerido"):
+  // abre directo en la pestaña de nueva compra, con el proveedor y el
+  // sugerido ya calculados.
+  if (route.query.proveedorId) {
+    await cargarProveedores()
+    vista.value = 'nueva'
+    proveedorId.value = route.query.proveedorId
+    cargarSugerido()
+  }
 })
 </script>
 

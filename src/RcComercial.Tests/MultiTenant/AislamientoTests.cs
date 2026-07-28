@@ -1,6 +1,10 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using RcComercial.Application.Clientes.Commands;
+using RcComercial.Application.Clientes.Queries;
 using RcComercial.Application.Panel;
+using RcComercial.Application.Proveedores.Commands;
+using RcComercial.Application.Proveedores.Queries;
 using RcComercial.Application.Ventas.Commands.AnularVenta;
 using RcComercial.Application.Ventas.Commands.CrearVenta;
 using RcComercial.Domain.Common;
@@ -10,6 +14,44 @@ namespace RcComercial.Tests.MultiTenant;
 
 public class AislamientoTests(PostgresContainerFixture fixture) : PruebaBase(fixture)
 {
+    [Fact]
+    public async Task Clientes_DeUnaEmpresa_NuncaAparecenEnLaBusquedaDeOtra()
+    {
+        var empresaA = await CrearEmpresaDePruebaAsync();
+        var empresaB = await CrearEmpresaDePruebaAsync();
+
+        // Mismo nombre a propósito: si el filtro multi-tenant fallara, la
+        // búsqueda de A traería también al de B.
+        var clienteA = await EnviarComoAsync(empresaA, empresaA.Dueno, null,
+            new CrearClienteCommand("Cliente Compartido", null, TiposDocumentoCliente.Ci, null, null));
+        await EnviarComoAsync(empresaB, empresaB.Dueno, null,
+            new CrearClienteCommand("Cliente Compartido", null, TiposDocumentoCliente.Ci, null, null));
+
+        var resultadosDesdeA = await EnviarComoAsync(
+            empresaA, empresaA.Dueno, null, new BuscarClientesQuery("Cliente Compartido", "todos", 1));
+
+        resultadosDesdeA.Should().ContainSingle();
+        resultadosDesdeA.Single().Id.Should().Be(clienteA.Id);
+    }
+
+    [Fact]
+    public async Task Proveedores_DeUnaEmpresa_NuncaAparecenEnLaBusquedaDeOtra()
+    {
+        var empresaA = await CrearEmpresaDePruebaAsync();
+        var empresaB = await CrearEmpresaDePruebaAsync();
+
+        var proveedorA = await EnviarComoAsync(empresaA, empresaA.Dueno, null,
+            new CrearProveedorCommand("Proveedor Compartido", null, null, 0, 3));
+        await EnviarComoAsync(empresaB, empresaB.Dueno, null,
+            new CrearProveedorCommand("Proveedor Compartido", null, null, 0, 3));
+
+        var resultadosDesdeA = await EnviarComoAsync(
+            empresaA, empresaA.Dueno, null, new BuscarProveedoresQuery("Proveedor Compartido", "todos", 1));
+
+        resultadosDesdeA.Should().ContainSingle();
+        resultadosDesdeA.Single().Id.Should().Be(proveedorA.Id);
+    }
+
     [Fact]
     public async Task Productos_DeUnaEmpresa_NuncaAparecenParaOtra()
     {

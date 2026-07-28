@@ -24,6 +24,16 @@ public static class MetodosPago
     public const string Transferencia = "TRANSFERENCIA";
 }
 
+public static class TiposDocumentoCliente
+{
+    public const string Ci = "CI";
+    public const string Nit = "NIT";
+    public const string Cex = "CEX"; // carnet de extranjero
+    public const string Pas = "PAS"; // pasaporte
+
+    public static readonly string[] Todos = [Ci, Nit, Cex, Pas];
+}
+
 public static class TiposMovimiento
 {
     public const string Compra = "COMPRA";
@@ -86,6 +96,10 @@ public static class Permisos
     public const string ProductosCrearEditar = "productos.crear_editar";
     public const string ProductosEliminar = "productos.eliminar";
     public const string ProductosCambiarPrecios = "productos.cambiar_precios";
+    public const string ClientesCrearEditar = "clientes.crear_editar";
+    public const string ClientesEliminar = "clientes.eliminar";
+    public const string ProveedoresCrearEditar = "proveedores.crear_editar";
+    public const string ProveedoresEliminar = "proveedores.eliminar";
     public const string ReportesVer = "reportes.ver";
     public const string AdminUsuarios = "admin.usuarios";
     public const string AdminRoles = "admin.roles";

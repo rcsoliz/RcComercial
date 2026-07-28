@@ -1,8 +1,11 @@
 <script setup>
 import ModalBase from '@/components/ui/ModalBase.vue'
 
-defineProps({
+const props = defineProps({
   nombre: { type: String, required: true },
+  titulo: { type: String, default: 'Desactivar' },
+  /** Si no se pasa, usa el texto genérico de "no se borra, se puede reactivar". */
+  mensaje: { type: String, default: null },
 })
 
 const abierto = defineModel({ type: Boolean, default: false })
@@ -15,10 +18,9 @@ function confirmar() {
 </script>
 
 <template>
-  <ModalBase v-model="abierto" titulo="Desactivar producto" ancho="max-w-[380px]">
+  <ModalBase v-model="abierto" :titulo="titulo" ancho="max-w-[380px]">
     <p class="text-[13.6px] text-tinta-2">
-      "{{ nombre }}" dejará de aparecer en el punto de venta y en el catálogo. No se borra: puedes reactivarlo
-      después desde la base de datos si hace falta.
+      {{ mensaje ?? `"${nombre}" quedará inactivo. No se borra: se puede reactivar después desde la base de datos si hace falta.` }}
     </p>
     <div class="mt-5 grid grid-cols-2 gap-3">
       <button

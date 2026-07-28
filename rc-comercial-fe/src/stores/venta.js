@@ -96,6 +96,10 @@ export const useVentaStore = defineStore('venta', {
       this.receta = datos
     },
 
+    establecerCliente(clienteId) {
+      this.clienteId = clienteId
+    },
+
     agregarPago(pago) {
       this.pagos.push(pago)
     },

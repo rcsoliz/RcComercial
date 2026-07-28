@@ -1,18 +1,18 @@
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using RcComercial.Application.Common;
 using RcComercial.Application.Common.Interfaces;
-using RcComercial.Domain.Entities;
 
 namespace RcComercial.Application.Proveedores.Commands;
 
-public record CrearProveedorCommand(
-    string Nombre, string? Nit, string? TelefonoWhatsapp, int DiasCredito, int LeadTimeDias)
-    : IRequest<ProveedorDto>;
+public record EditarProveedorCommand(
+    Guid Id, string Nombre, string? Nit, string? TelefonoWhatsapp, int DiasCredito, int LeadTimeDias)
+    : IRequest<ProveedorDto?>;
 
-public class CrearProveedorCommandValidator : AbstractValidator<CrearProveedorCommand>
+public class EditarProveedorCommandValidator : AbstractValidator<EditarProveedorCommand>
 {
-    public CrearProveedorCommandValidator()
+    public EditarProveedorCommandValidator()
     {
         RuleFor(x => x.Nombre).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Nit).Must(ValidacionesFormato.NitValido)
@@ -24,22 +24,21 @@ public class CrearProveedorCommandValidator : AbstractValidator<CrearProveedorCo
     }
 }
 
-public class CrearProveedorCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser)
-    : IRequestHandler<CrearProveedorCommand, ProveedorDto>
+public class EditarProveedorCommandHandler(IApplicationDbContext db)
+    : IRequestHandler<EditarProveedorCommand, ProveedorDto?>
 {
-    public async Task<ProveedorDto> Handle(CrearProveedorCommand request, CancellationToken ct)
+    public async Task<ProveedorDto?> Handle(EditarProveedorCommand request, CancellationToken ct)
     {
-        var proveedor = new Proveedor
-        {
-            EmpresaId = currentUser.EmpresaId!.Value,
-            Nombre = request.Nombre,
-            Nit = request.Nit,
-            TelefonoWhatsapp = request.TelefonoWhatsapp,
-            DiasCredito = request.DiasCredito,
-            LeadTimeDias = request.LeadTimeDias,
-        };
-        db.Proveedores.Add(proveedor);
+        var proveedor = await db.Proveedores.FirstOrDefaultAsync(p => p.Id == request.Id, ct);
+        if (proveedor is null) return null;
+
+        proveedor.Nombre = request.Nombre;
+        proveedor.Nit = request.Nit;
+        proveedor.TelefonoWhatsapp = request.TelefonoWhatsapp;
+        proveedor.DiasCredito = request.DiasCredito;
+        proveedor.LeadTimeDias = request.LeadTimeDias;
         await db.SaveChangesAsync(ct);
+
         return new ProveedorDto(
             proveedor.Id, proveedor.Nombre, proveedor.Nit, proveedor.TelefonoWhatsapp,
             proveedor.DiasCredito, proveedor.LeadTimeDias, proveedor.Activo);

@@ -15,7 +15,7 @@ import { listarUnidadesMedida } from '@/api/unidadesMedida'
 import { obtenerEmpresaActual } from '@/api/empresa'
 import PresentacionesEditor from '@/components/productos/PresentacionesEditor.vue'
 import ModalCambiarPrecio from '@/components/productos/ModalCambiarPrecio.vue'
-import ModalDesactivar from '@/components/productos/ModalDesactivar.vue'
+import ModalDesactivar from '@/components/ui/ModalDesactivar.vue'
 
 const props = defineProps({
   id: { type: String, default: null },
@@ -54,6 +54,10 @@ const fichaFarmacia = ref({
 
 const mostrarCambiarPrecio = ref(false)
 const mostrarDesactivar = ref(false)
+const mensajeDesactivar = computed(
+  () =>
+    `"${productoOriginal.value?.nombre}" dejará de aparecer en el punto de venta y en el catálogo. No se borra: puedes reactivarlo después desde la base de datos si hace falta.`,
+)
 const editorPresentaciones = ref(null)
 
 const esquema = toTypedSchema(
@@ -501,7 +505,9 @@ function fmtBs(n) {
   <ModalDesactivar
     v-if="productoOriginal"
     v-model="mostrarDesactivar"
+    titulo="Desactivar producto"
     :nombre="productoOriginal.nombre"
+    :mensaje="mensajeDesactivar"
     @confirmar="confirmarDesactivar"
   />
 </template>

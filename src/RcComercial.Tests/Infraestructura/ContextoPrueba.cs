@@ -12,6 +12,8 @@ public static class PermisosPorRol
         Permisos.CajaAbrirCerrar, Permisos.CajaVerTodas, Permisos.InventarioVer, Permisos.InventarioAjustar,
         Permisos.InventarioVerCostos, Permisos.ComprasCrear, Permisos.ComprasAnular,
         Permisos.ProductosCrearEditar, Permisos.ProductosEliminar, Permisos.ProductosCambiarPrecios,
+        Permisos.ClientesCrearEditar, Permisos.ClientesEliminar,
+        Permisos.ProveedoresCrearEditar, Permisos.ProveedoresEliminar,
         Permisos.ReportesVer, Permisos.AdminUsuarios, Permisos.AdminRoles, Permisos.AdminConfiguracion,
         Permisos.AdminSucursales,
     ];
@@ -19,6 +21,7 @@ public static class PermisosPorRol
     public static readonly string[] Vendedor =
     [
         Permisos.VentasCrear, Permisos.VentasVerHistorial, Permisos.CajaAbrirCerrar, Permisos.InventarioVer,
+        Permisos.ClientesCrearEditar,
     ];
 
     public static string[] Para(Guid rolId) =>
