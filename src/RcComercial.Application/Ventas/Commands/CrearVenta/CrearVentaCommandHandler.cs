@@ -43,7 +43,10 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
             .Where(p => productoIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, ct);
 
-        var numero = await db.SiguienteNumeroAsync(empresaId, sesion.SucursalId, "VENTA", ct);
+        // Numero no-nulo = viene de un rango reservado por un dispositivo
+        // offline: se usa tal cual, sin pedir uno nuevo a la secuencia.
+        var numero = request.Numero
+            ?? (await db.SiguienteNumeroAsync(empresaId, sesion.SucursalId, "VENTA", ct)).ToString("00000000");
 
         var venta = new Venta
         {
@@ -52,8 +55,10 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
             SucursalId = sesion.SucursalId,
             SesionCajaId = sesion.Id,
             ClienteId = request.ClienteId,
-            Numero = numero.ToString("00000000"),
+            Numero = numero,
             UsuarioId = usuarioId,
+            CreadoOffline = request.Numero is not null,
+            SincronizadoEn = request.Numero is not null ? DateTimeOffset.UtcNow : null,
         };
 
         foreach (var d in request.Detalles)

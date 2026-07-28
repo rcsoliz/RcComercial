@@ -58,6 +58,8 @@ public class AppDbContext(
 
     public void Detach(object entity) => Entry(entity).State = EntityState.Detached;
 
+    public void LimpiarSeguimiento() => ChangeTracker.Clear();
+
     public async Task<long> SiguienteNumeroAsync(
         Guid empresaId, Guid sucursalId, string tipoDocumento, CancellationToken ct = default)
     {
@@ -67,6 +69,19 @@ public class AppDbContext(
             ON CONFLICT (empresa_id, sucursal_id, tipo_documento)
             DO UPDATE SET siguiente = secuencia.siguiente + 1
             RETURNING siguiente - 1
+            """).ToListAsync(ct);
+        return resultado[0];
+    }
+
+    public async Task<long> ReservarRangoNumeroAsync(
+        Guid empresaId, Guid sucursalId, string tipoDocumento, int tamano, CancellationToken ct = default)
+    {
+        var resultado = await Database.SqlQuery<long>($"""
+            INSERT INTO secuencia (empresa_id, sucursal_id, tipo_documento, prefijo, siguiente)
+            VALUES ({empresaId}, {sucursalId}, {tipoDocumento}, '', {tamano + 1})
+            ON CONFLICT (empresa_id, sucursal_id, tipo_documento)
+            DO UPDATE SET siguiente = secuencia.siguiente + {tamano}
+            RETURNING siguiente - {tamano}
             """).ToListAsync(ct);
         return resultado[0];
     }

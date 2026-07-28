@@ -21,13 +21,21 @@ public class ObtenerCatalogoSyncQueryHandler(IApplicationDbContext db)
             ? DateTimeOffset.UnixEpoch
             : productos.Max(p => p.ActualizadoEn ?? p.CreadoEn);
 
+        var productoIds = productos.Select(p => p.Id).ToList();
+        var stockPorProducto = await db.Stocks
+            .Where(s => productoIds.Contains(s.ProductoId))
+            .GroupBy(s => s.ProductoId)
+            .Select(g => new { ProductoId = g.Key, Total = g.Sum(s => s.Cantidad) })
+            .ToDictionaryAsync(x => x.ProductoId, x => x.Total, ct);
+
         var productosDto = productos
             .Select(p => new SyncProductoDto(
                 p.Id, p.Codigo, p.CodigoBarras, p.Nombre, p.PrecioBase,
                 p.ManejaLote, p.EsControlado, p.PermiteDecimales,
                 p.Presentaciones.Select(pr => new SyncPresentacionDto(
                     pr.Id, pr.Nombre, pr.Factor, pr.CodigoBarras,
-                    pr.Precio, pr.PrecioMayorista, pr.CantidadMinMayorista, pr.EsPredeterminada)).ToList()))
+                    pr.Precio, pr.PrecioMayorista, pr.CantidadMinMayorista, pr.EsPredeterminada)).ToList(),
+                stockPorProducto.GetValueOrDefault(p.Id)))
             .ToList();
 
         return new SyncCatalogoDto(version.ToString("O"), productosDto);

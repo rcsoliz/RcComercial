@@ -21,6 +21,12 @@ public record CrearVentaRecetaCommand(
 /// (devuelve la venta ya creada, no duplica). No lleva Total: el backend
 /// siempre lo calcula desde las líneas — el precio unitario sí lo manda el
 /// cliente/POS (fuente de verdad para poder vender offline).
+///
+/// Numero es SOLO para ventas creadas offline (POST /api/sync/ventas): el
+/// dispositivo ya trae un número de su rango reservado (ReservarRangoCommand)
+/// y el handler lo usa tal cual en vez de pedir uno nuevo a la secuencia.
+/// Null (el caso normal de POST /api/ventas) = numeración automática de
+/// siempre. Un Numero no-nulo también marca la venta como creado_offline.
 /// </summary>
 public record CrearVentaCommand(
     Guid Id,
@@ -28,4 +34,5 @@ public record CrearVentaCommand(
     decimal Descuento,
     List<CrearVentaDetalleCommand> Detalles,
     List<CrearVentaPagoCommand> Pagos,
-    CrearVentaRecetaCommand? Receta) : IRequest<VentaDto>;
+    CrearVentaRecetaCommand? Receta,
+    string? Numero = null) : IRequest<VentaDto>;

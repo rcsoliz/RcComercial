@@ -8,6 +8,7 @@ import { useConexion } from '@/composables/useConexion'
 import { obtenerSesionAbierta, abrirCaja } from '@/api/caja'
 import { buscarProductos, obtenerProductoPorId, obtenerProductoPorCodigoBarras } from '@/api/productos'
 import { buscarEnCatalogoLocal, obtenerProductoLocalPorId, obtenerProductoLocalPorCodigoBarras } from '@/db/catalogoDb'
+import { contarVentasRechazadas } from '@/db/ventasDb'
 import ModalPresentacion from '@/components/pos/ModalPresentacion.vue'
 import ModalReceta from '@/components/pos/ModalReceta.vue'
 import ModalCobro from '@/components/pos/ModalCobro.vue'
@@ -121,6 +122,7 @@ async function intentarCodigoBarras() {
 // ── Carrito ──
 const mostrarPresentacion = ref(false)
 const productoSeleccionado = ref(null)
+const ultimaVentaOffline = ref(null)
 
 async function alTocarProducto(item) {
   // Ya viene completo del catálogo local (IndexedDB): no hace falta red.
@@ -139,6 +141,7 @@ async function alTocarProducto(item) {
 }
 
 function agregarProductoDesde(producto) {
+  ultimaVentaOffline.value = null
   if (producto.presentaciones.length > 0) {
     productoSeleccionado.value = producto
     mostrarPresentacion.value = true
@@ -175,8 +178,14 @@ function alConfirmarReceta(datos) {
   mostrarCobro.value = true
 }
 
-function alCrearVenta(ventaCreada) {
-  toast.success(`Venta ${ventaCreada.numero} registrada · ${fmtBs(ventaCreada.total)}`)
+function alCrearVenta({ ventaCreada, offline }) {
+  if (offline) {
+    toast.warning(`Venta ${ventaCreada.numero} guardada sin conexión · ${fmtBs(ventaCreada.total)}`)
+    ultimaVentaOffline.value = { numero: ventaCreada.numero, total: ventaCreada.total }
+  } else {
+    toast.success(`Venta ${ventaCreada.numero} registrada · ${fmtBs(ventaCreada.total)}`)
+    ultimaVentaOffline.value = null
+  }
   venta.iniciarNueva()
   nextTick(() => inputBusqueda.value?.focus())
 }
@@ -192,12 +201,24 @@ function alPresionarTecla(e) {
   }
 }
 
+const rechazadasCount = ref(0)
+let temporizadorRechazadas = null
+
+async function actualizarRechazadasCount() {
+  rechazadasCount.value = await contarVentasRechazadas()
+}
+
 onMounted(() => {
   cargarSesionCaja()
   ejecutarBusqueda()
+  actualizarRechazadasCount()
+  temporizadorRechazadas = setInterval(actualizarRechazadasCount, 30_000)
   window.addEventListener('keydown', alPresionarTecla)
 })
-onUnmounted(() => window.removeEventListener('keydown', alPresionarTecla))
+onUnmounted(() => {
+  window.removeEventListener('keydown', alPresionarTecla)
+  clearInterval(temporizadorRechazadas)
+})
 </script>
 
 <template>
@@ -239,9 +260,18 @@ onUnmounted(() => window.removeEventListener('keydown', alPresionarTecla))
   <div v-else class="fixed inset-x-0 top-0 bottom-28 flex flex-col md:bottom-0 md:left-64 md:flex-row">
     <!-- Columna izquierda: búsqueda + grid -->
     <section class="flex min-h-0 flex-1 flex-col p-4 md:p-6" aria-label="Catálogo de productos">
-      <div class="mb-2 flex items-center gap-2">
-        <span class="h-2 w-2 animate-pulse rounded-full bg-exito" aria-hidden="true"></span>
-        <span class="text-[11px] font-bold uppercase tracking-wide text-exito">Caja activa</span>
+      <div class="mb-2 flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="h-2 w-2 animate-pulse rounded-full bg-exito" aria-hidden="true"></span>
+          <span class="text-[11px] font-bold uppercase tracking-wide text-exito">Caja activa</span>
+        </div>
+        <RouterLink
+          v-if="rechazadasCount > 0"
+          :to="{ name: 'ventas-revisar' }"
+          class="rounded-chip bg-peligro-tenue px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-peligro hover:underline"
+        >
+          {{ rechazadasCount }} por revisar
+        </RouterLink>
       </div>
 
       <div class="relative mb-4">
@@ -291,6 +321,11 @@ onUnmounted(() => window.removeEventListener('keydown', alPresionarTecla))
         <div class="flex min-h-0 flex-1 flex-col rounded-t bg-superficie">
           <div class="border-b border-dashed border-linea p-5 text-center">
             <h2 class="font-display text-[17px] font-semibold tracking-wide text-tinta">VENTA EN CURSO</h2>
+          </div>
+
+          <div v-if="ultimaVentaOffline" class="flex items-center justify-between gap-2 bg-aviso-tenue px-4 py-2.5">
+            <span class="font-mono text-[11px] text-aviso">VENTA {{ ultimaVentaOffline.numero }}</span>
+            <span class="text-[11px] font-bold uppercase tracking-wide text-aviso">Pendiente de sincronizar</span>
           </div>
 
           <div class="min-h-0 flex-1 overflow-y-auto px-4 py-2">

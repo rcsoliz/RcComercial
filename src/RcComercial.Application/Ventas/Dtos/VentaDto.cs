@@ -23,4 +23,5 @@ public record VentaDto(
     decimal Descuento,
     decimal Total,
     List<VentaDetalleDto> Detalles,
-    List<PagoDto> Pagos);
+    List<PagoDto> Pagos,
+    bool CreadoOffline);

@@ -10,5 +10,6 @@ internal static class VentaMapper
         v.Detalles.Select(d => new VentaDetalleDto(
             d.Id, d.ProductoId, d.PresentacionId, d.LoteId, d.Cantidad, d.CantidadBase,
             d.PrecioUnitario, d.Descuento, d.Total)).ToList(),
-        v.Pagos.Select(p => new PagoDto(p.Id, p.Metodo, p.Monto, p.ReferenciaQr)).ToList());
+        v.Pagos.Select(p => new PagoDto(p.Id, p.Metodo, p.Monto, p.ReferenciaQr)).ToList(),
+        v.CreadoOffline);
 }

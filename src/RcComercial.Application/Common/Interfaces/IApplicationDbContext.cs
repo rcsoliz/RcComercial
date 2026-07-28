@@ -43,10 +43,31 @@ public interface IApplicationDbContext
     void Detach(object entity);
 
     /// <summary>
+    /// Limpia TODO el change tracker (ChangeTracker.Clear()). Para lotes que
+    /// reusan un command handler ítem por ítem (p. ej. sync de ventas offline):
+    /// si un ítem falla a mitad de camino, sus entidades ya trackeadas
+    /// (detalles, pagos, stock nuevo...) no son alcanzables desde fuera del
+    /// handler reusado para Detach()-earlas una por una: sin este limpiado,
+    /// SaveChangesAsync del SIGUIENTE ítem exitoso las volvería a insertar.
+    /// </summary>
+    void LimpiarSeguimiento();
+
+    /// <summary>
     /// Incremento atómico de secuencia.numero (INSERT ... ON CONFLICT DO UPDATE RETURNING),
     /// sin SELECT-then-UPDATE: dos ventas concurrentes nunca reciben el mismo número.
     /// </summary>
     Task<long> SiguienteNumeroAsync(Guid empresaId, Guid sucursalId, string tipoDocumento, CancellationToken ct = default);
+
+    /// <summary>
+    /// Reserva un BLOQUE atómico de <paramref name="tamano"/> números de la
+    /// misma secuencia (mismo INSERT ... ON CONFLICT DO UPDATE RETURNING,
+    /// incrementando por el tamaño del bloque en vez de 1). Para numeración
+    /// offline por dispositivo: el bloque devuelto (inicio..inicio+tamano-1)
+    /// jamás se solapa con otro dispositivo ni con ventas online, porque
+    /// ambos consumen la MISMA secuencia compartida.
+    /// </summary>
+    Task<long> ReservarRangoNumeroAsync(
+        Guid empresaId, Guid sucursalId, string tipoDocumento, int tamano, CancellationToken ct = default);
 
     /// <summary>
     /// Ajuste atómico de stock.cantidad (UPDATE ... RETURNING condicional, sin

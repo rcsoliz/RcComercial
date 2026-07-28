@@ -1,9 +1,11 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { toast } from 'vue-sonner'
 import ModalBase from '@/components/ui/ModalBase.vue'
 import { useVentaStore } from '@/stores/venta'
 import { crearVenta } from '@/api/ventas'
+import { encolarVentaPendiente } from '@/db/ventasDb'
+import { descontarStockOptimista } from '@/db/catalogoDb'
+import { tomarSiguienteNumero } from '@/db/rangoNumeracion'
 
 const abierto = defineModel({ type: Boolean, default: false })
 const emit = defineEmits(['venta-creada'])
@@ -42,12 +44,50 @@ function agregarPago() {
   monto.value = faltante.value > 0 ? faltante.value.toFixed(2) : ''
 }
 
+/** Guarda la venta en la cola local (IndexedDB) y descuenta stock local de forma optimista. */
+async function guardarVentaOffline() {
+  let numero = tomarSiguienteNumero()
+  if (!numero) {
+    // Respaldo si el dispositivo nunca reservó rango estando en línea: se
+    // deriva del propio Id (único por diseño), cabe en VARCHAR(20).
+    numero = 'OFF' + venta.id.replace(/-/g, '').slice(0, 17).toUpperCase()
+  }
+
+  const comando = { ...venta.aComandoCrearVenta(), numero }
+  await encolarVentaPendiente({
+    id: venta.id,
+    numero,
+    creadoEn: new Date().toISOString(),
+    total: venta.total,
+    resumenItems: venta.items.map((i) => `${i.cantidad} × ${i.nombre}`).join(', '),
+    comando,
+  })
+
+  for (const item of venta.items) {
+    await descontarStockOptimista(item.productoId, item.cantidad * item.factor)
+  }
+
+  return numero
+}
+
 async function confirmarCobro() {
   errorGeneral.value = ''
   enviando.value = true
   try {
-    const ventaCreada = await crearVenta(venta.aComandoCrearVenta())
-    emit('venta-creada', ventaCreada)
+    try {
+      const ventaCreada = await crearVenta(venta.aComandoCrearVenta())
+      emit('venta-creada', { ventaCreada, offline: false })
+      abierto.value = false
+      return
+    } catch (error) {
+      // Sin response = falla de red/servidor inalcanzable: no es un rechazo
+      // real del backend, así que la venta se guarda offline en vez de
+      // perderse. Un 422/403/etc SÍ es una respuesta real: se relanza abajo.
+      if (error.response) throw error
+    }
+
+    const numero = await guardarVentaOffline()
+    emit('venta-creada', { ventaCreada: { numero, total: venta.total, id: venta.id }, offline: true })
     abierto.value = false
   } catch (error) {
     const status = error.response?.status
@@ -56,8 +96,6 @@ async function confirmarCobro() {
       errorGeneral.value = mensajes.join(' ') || 'La venta no pudo completarse.'
     } else if (status === 403) {
       errorGeneral.value = 'No tienes permiso para registrar ventas.'
-    } else if (!error.response) {
-      toast.error('No se pudo conectar con el servidor. Intenta de nuevo.')
     } else {
       errorGeneral.value = 'Ocurrió un error inesperado. Intenta de nuevo.'
     }

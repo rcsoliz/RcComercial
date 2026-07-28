@@ -10,6 +10,10 @@ public record SyncPresentacionDto(
 public record SyncProductoDto(
     Guid Id, string? Codigo, string? CodigoBarras, string Nombre,
     decimal PrecioBase, bool ManejaLote, bool EsControlado, bool PermiteDecimales,
-    List<SyncPresentacionDto> Presentaciones);
+    List<SyncPresentacionDto> Presentaciones,
+    // Stock total de la empresa (todas las sucursales) al momento de sincronizar:
+    // referencia para el descuento OPTIMISTA local; el backend revalida el
+    // stock real de todas formas al recibir la venta.
+    decimal StockTotal);
 
 public record SyncCatalogoDto(string Version, List<SyncProductoDto> Productos);

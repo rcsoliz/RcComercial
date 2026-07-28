@@ -128,10 +128,14 @@ app.UseExceptionHandler(errorApp =>
         if (error is ValidationException validationEx)
         {
             context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
-            await context.Response.WriteAsJsonAsync(new
-            {
-                errores = validationEx.Errors.Select(e => new { campo = e.PropertyName, mensaje = e.ErrorMessage }),
-            });
+            // ValidationException(string) — el patrón "throw new ValidationException(mensaje)"
+            // usado en varios handlers (CrearVenta, CrearCompra, etc.) — deja
+            // Errors VACÍO; solo Message trae el texto real. Sin este fallback
+            // el cliente recibía { errores: [] } y perdía el motivo.
+            var errores = validationEx.Errors.Any()
+                ? validationEx.Errors.Select(e => new { campo = e.PropertyName, mensaje = e.ErrorMessage })
+                : new[] { new { campo = "", mensaje = validationEx.Message } }.AsEnumerable();
+            await context.Response.WriteAsJsonAsync(new { errores });
             return;
         }
 

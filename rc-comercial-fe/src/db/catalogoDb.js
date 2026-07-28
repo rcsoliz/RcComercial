@@ -83,3 +83,20 @@ export async function contarProductosLocal() {
   const db = await abrirDb()
   return db.count(ALMACEN_PRODUCTOS)
 }
+
+/**
+ * Descuento OPTIMISTA de stock local tras una venta offline: el backend es
+ * quien de verdad valida/descuenta al sincronizar, esto es solo para que el
+ * cajero vea el catálogo local reflejar la venta de inmediato (evita vender
+ * "de más" por no ver el descuento hasta la próxima sincronización).
+ */
+export async function descontarStockOptimista(productoId, cantidadBase) {
+  const db = await abrirDb()
+  const tx = db.transaction(ALMACEN_PRODUCTOS, 'readwrite')
+  const producto = await tx.store.get(productoId)
+  if (producto) {
+    producto.stockTotal = Math.max(0, (producto.stockTotal ?? 0) - cantidadBase)
+    await tx.store.put(producto)
+  }
+  await tx.done
+}

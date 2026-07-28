@@ -17,6 +17,7 @@ const routes = [
       { path: '', redirect: '/pos' },
       { path: 'panel', name: 'panel', component: () => import('@/views/PanelView.vue'), meta: { titulo: 'Panel del dueño', permiso: Permisos.ReportesVer } },
       { path: 'pos', name: 'pos', component: () => import('@/views/VentaView.vue'), meta: { titulo: 'Punto de venta' } },
+      { path: 'pos/revisar', name: 'ventas-revisar', component: () => import('@/views/VentasRevisarView.vue'), meta: { titulo: 'Ventas por revisar' } },
       { path: 'productos', name: 'productos', component: () => import('@/views/ProductosView.vue'), meta: { titulo: 'Productos' } },
       { path: 'productos/nuevo', name: 'productos-nuevo', component: () => import('@/views/ProductoFormView.vue'), meta: { titulo: 'Nuevo producto' } },
       { path: 'productos/:id', name: 'productos-editar', component: () => import('@/views/ProductoFormView.vue'), meta: { titulo: 'Editar producto' }, props: true },
