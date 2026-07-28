@@ -15,8 +15,16 @@ public static class VentasEndpoints
         var group = app.MapGroup("/ventas");
 
         group.MapPost("/", async (CrearVentaCommand command, IMediator mediator) =>
-            Results.Ok(await mediator.Send(command)))
-            .RequireAuthorization(Permisos.VentasCrear);
+        {
+            // Numero es SOLO para el lote interno de sincronización offline
+            // (POST /api/sync/ventas, que arma el comando a mano server-side).
+            // Este endpoint es alcanzable directo desde cualquier cliente HTTP:
+            // si "numero" viniera en el body, igual se descarta acá y SIEMPRE
+            // se asigna por la secuencia atómica — el cliente jamás numera una
+            // venta online.
+            var comandoSeguro = command.Numero is null ? command : command with { Numero = null };
+            return Results.Ok(await mediator.Send(comandoSeguro));
+        }).RequireAuthorization(Permisos.VentasCrear);
 
         group.MapPost("/{id:guid}/anular", async (Guid id, AnularVentaRequest request, IMediator mediator) =>
         {

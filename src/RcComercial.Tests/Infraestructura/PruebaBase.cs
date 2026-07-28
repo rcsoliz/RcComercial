@@ -22,9 +22,9 @@ public abstract class PruebaBase(PostgresContainerFixture fixture) : IAsyncLifet
 {
     protected readonly PostgresContainerFixture Fixture = fixture;
 
-    public Task InitializeAsync() => Fixture.ResetearAsync();
+    public virtual Task InitializeAsync() => Fixture.ResetearAsync();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public virtual Task DisposeAsync() => Task.CompletedTask;
 
     protected AppDbContext CrearContexto(FakeCurrentUserService usuario) =>
         FabricaContexto.Crear(Fixture.ConnectionString, usuario);

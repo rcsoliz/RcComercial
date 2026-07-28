@@ -174,3 +174,8 @@ api.MapProveedoresEndpoints();
 api.MapSyncEndpoints();
 
 app.Run();
+
+// Marcador requerido por WebApplicationFactory<Program> (tests HTTP reales
+// de endpoints, ver RcComercial.Tests/Infraestructura/ApiWebFactory.cs):
+// un Program de top-level statements no es referenciable desde afuera sin esto.
+public partial class Program { }
