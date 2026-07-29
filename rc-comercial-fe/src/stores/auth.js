@@ -36,6 +36,13 @@ export const useAuthStore = defineStore('auth', {
       if (!permiso) return []
       return Array.isArray(permiso) ? permiso : [permiso]
     },
+
+    // El backend también lo exige (OnTokenValidated en Program.cs): esto es
+    // solo para redirigir antes de que el usuario choque contra un 401.
+    debeCambiarPassword: (state) => {
+      const payload = state.accessToken ? decodificarPayloadJwt(state.accessToken) : null
+      return payload?.debe_cambiar_password === 'true'
+    },
   },
 
   actions: {
@@ -49,6 +56,13 @@ export const useAuthStore = defineStore('auth', {
 
     async iniciarSesion(usuarioLogin, password) {
       const { data } = await http.post('/auth/login', { usuarioLogin, password })
+      this.accessToken = data.accessToken
+      this.refreshToken = data.refreshToken
+      this._persistir()
+    },
+
+    async cambiarPasswordObligatorio(passwordActual, passwordNueva) {
+      const { data } = await http.post('/auth/cambiar-password-obligatorio', { passwordActual, passwordNueva })
       this.accessToken = data.accessToken
       this.refreshToken = data.refreshToken
       this._persistir()

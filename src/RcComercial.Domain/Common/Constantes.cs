@@ -46,6 +46,13 @@ public static class TiposMovimiento
     public const string InventarioInicial = "INVENTARIO_INICIAL";
 }
 
+/// <summary>Claves de empresa_configuracion (clave-valor): agregar una acá no pide ALTER TABLE.</summary>
+public static class ClavesConfiguracion
+{
+    public const string VentaPermiteStockNegativo = "venta.permite_stock_negativo";
+    public const string NotificacionesHoraResumen = "notificaciones.hora_resumen";
+}
+
 public static class TiposNotificacion
 {
     public const string FacturaCliente = "FACTURA_CLIENTE";

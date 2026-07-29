@@ -10,6 +10,12 @@ const routes = [
     meta: { publica: true },
   },
   {
+    path: '/cambiar-password',
+    name: 'cambiar-password',
+    component: () => import('@/views/CambiarPasswordView.vue'),
+    meta: { requiereAuth: true },
+  },
+  {
     path: '/',
     component: () => import('@/layouts/AppShell.vue'),
     meta: { requiereAuth: true },
@@ -29,7 +35,14 @@ const routes = [
       { path: 'proveedores', name: 'proveedores', component: () => import('@/views/ProveedoresView.vue'), meta: { titulo: 'Proveedores' } },
       { path: 'proveedores/nuevo', name: 'proveedores-nuevo', component: () => import('@/views/ProveedorFormView.vue'), meta: { titulo: 'Nuevo proveedor' } },
       { path: 'proveedores/:id', name: 'proveedores-editar', component: () => import('@/views/ProveedorFormView.vue'), meta: { titulo: 'Editar proveedor' }, props: true },
-      { path: 'ajustes', name: 'ajustes', component: () => import('@/views/PlaceholderView.vue'), meta: { titulo: 'Ajustes' } },
+      { path: 'ajustes', name: 'ajustes', component: () => import('@/views/AjustesView.vue'), meta: { titulo: 'Ajustes' } },
+      { path: 'usuarios', name: 'usuarios', component: () => import('@/views/UsuariosView.vue'), meta: { titulo: 'Usuarios', permiso: Permisos.AdminUsuarios } },
+      { path: 'usuarios/nuevo', name: 'usuarios-nuevo', component: () => import('@/views/UsuarioFormView.vue'), meta: { titulo: 'Nuevo usuario', permiso: Permisos.AdminUsuarios } },
+      { path: 'usuarios/:id', name: 'usuarios-editar', component: () => import('@/views/UsuarioFormView.vue'), meta: { titulo: 'Editar usuario', permiso: Permisos.AdminUsuarios }, props: true },
+      { path: 'roles', name: 'roles', component: () => import('@/views/RolesView.vue'), meta: { titulo: 'Roles y permisos', permiso: Permisos.AdminRoles } },
+      { path: 'catalogos', name: 'catalogos', component: () => import('@/views/CatalogosView.vue'), meta: { titulo: 'Categorías y marcas', permiso: Permisos.ProductosCrearEditar } },
+      { path: 'sucursales', name: 'sucursales', component: () => import('@/views/SucursalesView.vue'), meta: { titulo: 'Sucursales', permiso: Permisos.AdminSucursales } },
+      { path: 'configuracion', name: 'configuracion', component: () => import('@/views/ConfiguracionView.vue'), meta: { titulo: 'Configuración', permiso: Permisos.AdminConfiguracion } },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/pos' },
@@ -45,6 +58,15 @@ router.beforeEach((to) => {
 
   if (to.meta.requiereAuth && !auth.autenticado) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  // Primer ingreso / contraseña restablecida: no se puede usar nada más
+  // hasta cambiarla (el backend también lo bloquea, ver Program.cs).
+  if (auth.autenticado && auth.debeCambiarPassword && to.name !== 'cambiar-password') {
+    return { name: 'cambiar-password' }
+  }
+  if (to.name === 'cambiar-password' && auth.autenticado && !auth.debeCambiarPassword) {
+    return { path: '/pos' }
   }
 
   if (to.meta.permiso && !auth.tienePermiso(to.meta.permiso)) {

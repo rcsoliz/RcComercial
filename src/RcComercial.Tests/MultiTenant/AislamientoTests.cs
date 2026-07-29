@@ -5,6 +5,10 @@ using RcComercial.Application.Clientes.Queries;
 using RcComercial.Application.Panel;
 using RcComercial.Application.Proveedores.Commands;
 using RcComercial.Application.Proveedores.Queries;
+using RcComercial.Application.Roles.Commands;
+using RcComercial.Application.Roles.Queries;
+using RcComercial.Application.Usuarios.Commands;
+using RcComercial.Application.Usuarios.Queries;
 using RcComercial.Application.Ventas.Commands.AnularVenta;
 using RcComercial.Application.Ventas.Commands.CrearVenta;
 using RcComercial.Domain.Common;
@@ -14,6 +18,50 @@ namespace RcComercial.Tests.MultiTenant;
 
 public class AislamientoTests(PostgresContainerFixture fixture) : PruebaBase(fixture)
 {
+    [Fact]
+    public async Task Usuarios_DeUnaEmpresa_SonInvisiblesParaOtraYNoSePuedenEditar()
+    {
+        var empresaA = await CrearEmpresaDePruebaAsync();
+        var empresaB = await CrearEmpresaDePruebaAsync();
+
+        var usuarioA = await EnviarComoAsync(empresaA, empresaA.Dueno, null,
+            new CrearUsuarioCommand("Empleado A", "empleado.a", RolesSistema.Vendedor, null, null));
+
+        var vistoDesdeB = await EnviarComoAsync(empresaB, empresaB.Dueno, null, new ObtenerUsuarioQuery(usuarioA.Usuario.Id));
+        vistoDesdeB.Should().BeNull("el filtro multi-tenant debe hacer que un Id ajeno simplemente no exista");
+
+        // Intento de edición cruzada (IDOR): tampoco debe encontrarlo.
+        var editadoDesdeB = await EnviarComoAsync(empresaB, empresaB.Dueno, null,
+            new EditarUsuarioCommand(usuarioA.Usuario.Id, "Hackeado", "hackeado", RolesSistema.Dueno, null, null));
+        editadoDesdeB.Should().BeNull();
+
+        using var dbComoA = CrearContextoComo(empresaA, empresaA.Dueno);
+        var original = await dbComoA.Usuarios.FirstAsync(u => u.Id == usuarioA.Usuario.Id);
+        original.Nombre.Should().Be("Empleado A", "el intento cruzado no debe haber tocado nada");
+    }
+
+    [Fact]
+    public async Task RolPropio_DeUnaEmpresa_NoLoPuedeEditarOtraEmpresaAunqueLeAcierteElId()
+    {
+        var empresaA = await CrearEmpresaDePruebaAsync();
+        var empresaB = await CrearEmpresaDePruebaAsync();
+
+        var catalogo = await EnviarComoAsync(empresaA, empresaA.Dueno, null, new ListarPermisosQuery());
+        var ventasCrearId = catalogo.Single(p => p.Codigo == Permisos.VentasCrear).Id;
+        var adminUsuariosId = catalogo.Single(p => p.Codigo == Permisos.AdminUsuarios).Id;
+
+        var rolA = await EnviarComoAsync(empresaA, empresaA.Dueno, null,
+            new CrearRolCommand("Rol de A", [ventasCrearId]));
+
+        var editadoDesdeB = await EnviarComoAsync(empresaB, empresaB.Dueno, null,
+            new EditarRolCommand(rolA.Id, "Secuestrado", [adminUsuariosId]));
+        editadoDesdeB.Should().BeNull("Rol no tiene ITenantEntity: sin el filtro explícito, esto sería un IDOR");
+
+        using var dbComoA = CrearContextoComo(empresaA, empresaA.Dueno);
+        var original = await dbComoA.Roles.IgnoreQueryFilters().FirstAsync(r => r.Id == rolA.Id);
+        original.Nombre.Should().Be("Rol de A");
+    }
+
     [Fact]
     public async Task Clientes_DeUnaEmpresa_NuncaAparecenEnLaBusquedaDeOtra()
     {

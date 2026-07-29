@@ -58,6 +58,33 @@ public class AuthService(
         return new LoginResult(true, LoginError.Ninguno, null, accessToken, rawRefreshToken, expiraEn);
     }
 
+    public async Task<LoginResult> CambiarPasswordObligatorioAsync(
+        Guid usuarioId, string passwordActual, string passwordNueva, string? ip, string? userAgent,
+        CancellationToken ct = default)
+    {
+        var usuario = await db.Usuarios
+            .Include(u => u.Rol).ThenInclude(r => r.Permisos).ThenInclude(rp => rp.Permiso)
+            .FirstOrDefaultAsync(u => u.Id == usuarioId && u.Activo, ct);
+
+        if (usuario is null)
+            return new LoginResult(false, LoginError.CredencialesInvalidas, null, null, null, null);
+
+        if (!passwordHasher.Verify(passwordActual, usuario.PasswordHash))
+            return new LoginResult(false, LoginError.CredencialesInvalidas, null, null, null, null);
+
+        usuario.PasswordHash = passwordHasher.Hash(passwordNueva);
+        usuario.DebeCambiarPassword = false;
+
+        var permisos = usuario.Rol.Permisos.Select(rp => rp.Permiso.Codigo).ToList();
+        var (accessToken, expiraEn) = tokenService.GenerarAccessToken(usuario, permisos);
+        var (_, rawRefreshToken) = CrearRefreshToken(usuario.Id, ip, userAgent);
+
+        RegistrarAuditoria(usuario.EmpresaId, usuario.Id, "auth.password_cambiada", ip);
+        await db.SaveChangesAsync(ct);
+
+        return new LoginResult(true, LoginError.Ninguno, null, accessToken, rawRefreshToken, expiraEn);
+    }
+
     public async Task<RefreshResult> RefreshAsync(
         string refreshToken, string? ip, string? userAgent, CancellationToken ct = default)
     {

@@ -1,26 +1,33 @@
-using Microsoft.EntityFrameworkCore;
+using MediatR;
+using RcComercial.Application.Sucursales.Commands;
+using RcComercial.Application.Sucursales.Queries;
 using RcComercial.Domain.Common;
-using RcComercial.Infrastructure.Persistence;
 
 namespace RcComercial.Api.Endpoints;
 
-/// <summary>
-/// Endpoint mínimo para listar sucursales de la empresa actual. Sirve además
-/// como verificación de la Fase 1: prueba en runtime que el query filter
-/// multi-tenant y las policies por permiso funcionan de punta a punta,
-/// sin adelantar alcance del módulo de productos (Fase 2).
-/// </summary>
 public static class SucursalesEndpoints
 {
     public static void MapSucursalesEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/sucursales", async (AppDbContext db) =>
+        var group = app.MapGroup("/sucursales").RequireAuthorization(Permisos.AdminSucursales);
+
+        group.MapGet("/", async (string? estado, IMediator mediator) =>
+            Results.Ok(await mediator.Send(new ListarSucursalesQuery(estado))));
+
+        group.MapPost("/", async (CrearSucursalCommand command, IMediator mediator) =>
+            Results.Ok(await mediator.Send(command)));
+
+        group.MapPut("/{id:guid}", async (Guid id, EditarSucursalCommand command, IMediator mediator) =>
         {
-            var sucursales = await db.Sucursales
-                .Where(s => s.Activo)
-                .Select(s => new { s.Id, s.Nombre, s.Direccion })
-                .ToListAsync();
-            return Results.Ok(sucursales);
-        }).RequireAuthorization(Permisos.AdminSucursales);
+            if (id != command.Id) return Results.BadRequest();
+            var resultado = await mediator.Send(command);
+            return resultado is null ? Results.NotFound() : Results.Ok(resultado);
+        });
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var ok = await mediator.Send(new DesactivarSucursalCommand(id));
+            return ok ? Results.Ok() : Results.NotFound();
+        });
     }
 }

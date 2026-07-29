@@ -74,7 +74,19 @@ builder.Services
                     });
 
                 if (permisosVersionActual is null || permisosVersionActual != permisosVersionDelToken)
+                {
                     context.Fail("Los permisos del usuario cambiaron; vuelva a iniciar sesión.");
+                    return;
+                }
+
+                // Con contraseña temporal, el token solo sirve para cambiarla:
+                // el bloqueo real vive acá (el redirect del frontend es solo
+                // comodidad, no seguridad — un cliente hostil podría ignorarlo).
+                var debeCambiarPassword = context.Principal?.FindFirstValue("debe_cambiar_password") == "true";
+                var esRutaDeCambioDePassword = context.HttpContext.Request.Path
+                    .Equals("/api/auth/cambiar-password-obligatorio", StringComparison.OrdinalIgnoreCase);
+                if (debeCambiarPassword && !esRutaDeCambioDePassword)
+                    context.Fail("Debe cambiar su contraseña antes de continuar.");
             },
         };
     });
@@ -161,6 +173,9 @@ var api = app.MapGroup("/api").AddEndpointFilter<AuditoriaPermisosSensiblesFilte
 api.MapAuthEndpoints();
 api.MapSucursalesEndpoints();
 api.MapEmpresasEndpoints();
+api.MapUsuariosEndpoints();
+api.MapRolesEndpoints();
+api.MapConfiguracionEndpoints();
 api.MapUnidadesMedidaEndpoints();
 api.MapProductosEndpoints();
 api.MapCategoriasEndpoints();

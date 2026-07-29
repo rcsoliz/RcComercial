@@ -17,7 +17,7 @@ public class ObtenerEmpresaActualQueryHandler(IApplicationDbContext db, ICurrent
         return empresa is null
             ? null
             : new EmpresaActualDto(
-                empresa.Id, empresa.Nombre, empresa.RubroId, empresa.Rubro.Nombre,
+                empresa.Id, empresa.Nombre, empresa.Nit, empresa.TelefonoWhatsapp, empresa.RubroId, empresa.Rubro.Nombre,
                 empresa.Rubro.UsaLotesPorDefecto, empresa.Rubro.UsaControlados,
                 empresa.Rubro.UsaFichaFarmacia, empresa.Rubro.UsaDecimalesPorDefecto);
     }

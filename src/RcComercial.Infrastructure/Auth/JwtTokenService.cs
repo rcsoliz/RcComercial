@@ -24,6 +24,7 @@ public class JwtTokenService(IOptions<JwtSettings> options) : ITokenService
             new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new("empresa_id", usuario.EmpresaId.ToString()),
             new("permisos_version", usuario.PermisosVersion.ToString()),
+            new("debe_cambiar_password", usuario.DebeCambiarPassword ? "true" : "false"),
         };
         if (usuario.SucursalId is { } sucursalId)
             claims.Add(new Claim("sucursal_id", sucursalId.ToString()));

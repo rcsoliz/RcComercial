@@ -185,7 +185,7 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
         IApplicationDbContext db, Guid empresaId, CancellationToken ct)
     {
         var valor = await db.EmpresaConfiguraciones
-            .Where(c => c.EmpresaId == empresaId && c.Clave == "venta.permite_stock_negativo")
+            .Where(c => c.EmpresaId == empresaId && c.Clave == ClavesConfiguracion.VentaPermiteStockNegativo)
             .Select(c => c.Valor)
             .FirstOrDefaultAsync(ct);
         return valor is not null && bool.TryParse(valor, out var b) && b;

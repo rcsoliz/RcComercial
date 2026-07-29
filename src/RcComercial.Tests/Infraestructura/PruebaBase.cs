@@ -195,6 +195,7 @@ public abstract class PruebaBase(PostgresContainerFixture fixture) : IAsyncLifet
         var services = new ServiceCollection();
         services.AddApplication();
         services.AddSingleton<ICurrentUserService>(currentUser);
+        services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped(_ => FabricaContexto.Crear(Fixture.ConnectionString, currentUser));
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
