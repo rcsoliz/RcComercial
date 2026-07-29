@@ -13,6 +13,7 @@ public interface IApplicationDbContext
     DbSet<Empresa> Empresas { get; }
     DbSet<Usuario> Usuarios { get; }
     DbSet<Rol> Roles { get; }
+    DbSet<Rubro> Rubros { get; }
     DbSet<Permiso> Permisos { get; }
     DbSet<RolPermiso> RolPermisos { get; }
     DbSet<RefreshToken> RefreshTokens { get; }

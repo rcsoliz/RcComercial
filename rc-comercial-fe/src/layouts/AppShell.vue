@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
-import { LogOut } from 'lucide-vue-next'
+import { LogOut, ShieldAlert } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import TemaToggle from '@/components/ui/TemaToggle.vue'
 import IndicadorConexion from '@/components/ui/IndicadorConexion.vue'
@@ -42,6 +42,20 @@ function cerrarSesion() {
           {{ item.label }}
         </RouterLink>
       </nav>
+
+      <!-- Back-office del proveedor SaaS: separado a propósito del resto de
+           la navegación (borde punteado + acento peligro), visible solo para
+           es_superadmin — no es "una pantalla más de la empresa". -->
+      <div v-if="auth.esSuperadmin" class="px-4 pb-2">
+        <RouterLink
+          to="/plataforma"
+          class="flex items-center gap-3 rounded-s border border-dashed border-peligro/40 px-4 py-3 text-peligro transition-colors hover:bg-peligro-tenue"
+          :class="{ 'bg-peligro-tenue font-bold': route.path.startsWith('/plataforma') }"
+        >
+          <ShieldAlert class="h-5 w-5" />
+          Plataforma
+        </RouterLink>
+      </div>
 
       <div class="flex items-center gap-2 border-t border-linea p-4">
         <button

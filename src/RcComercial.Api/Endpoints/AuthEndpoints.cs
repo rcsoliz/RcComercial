@@ -23,11 +23,15 @@ public static class AuthEndpoints
 
             if (!result.Exitoso)
             {
-                return result.Error == LoginError.CuentaBloqueada
-                    ? Results.Json(
+                return result.Error switch
+                {
+                    LoginError.CuentaBloqueada => Results.Json(
                         new { error = "cuenta_bloqueada", bloqueadoHasta = result.BloqueadoHasta },
-                        statusCode: StatusCodes.Status423Locked)
-                    : Results.Unauthorized();
+                        statusCode: StatusCodes.Status423Locked),
+                    LoginError.EmpresaSuspendida => Results.Json(
+                        new { error = "empresa_suspendida" }, statusCode: StatusCodes.Status403Forbidden),
+                    _ => Results.Unauthorized(),
+                };
             }
 
             return Results.Ok(new

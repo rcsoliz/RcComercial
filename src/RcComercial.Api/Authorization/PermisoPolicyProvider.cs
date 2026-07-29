@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using RcComercial.Domain.Common;
 
 namespace RcComercial.Api.Authorization;
 
@@ -7,6 +8,10 @@ namespace RcComercial.Api.Authorization;
 /// un código de permiso (ej. "admin.usuarios") y se valida contra el claim
 /// "permiso" del JWT. Así [Authorize(Policy = Permisos.XXX)] funciona sin
 /// tener que registrar cada policy a mano en Program.cs.
+///
+/// Excepción: PoliciesEspeciales.SoloPlataforma no es un código de permiso
+/// (no vive en rol_permiso, ninguna empresa lo "tiene") — valida contra el
+/// claim "es_superadmin" en cambio.
 /// </summary>
 public class PermisoPolicyProvider : IAuthorizationPolicyProvider
 {
@@ -18,10 +23,10 @@ public class PermisoPolicyProvider : IAuthorizationPolicyProvider
 
     public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
-        var policy = new AuthorizationPolicyBuilder()
-            .RequireAuthenticatedUser()
-            .RequireClaim("permiso", policyName)
-            .Build();
-        return Task.FromResult<AuthorizationPolicy?>(policy);
+        var builder = new AuthorizationPolicyBuilder().RequireAuthenticatedUser();
+        builder = policyName == PoliciesEspeciales.SoloPlataforma
+            ? builder.RequireClaim("es_superadmin", "true")
+            : builder.RequireClaim("permiso", policyName);
+        return Task.FromResult<AuthorizationPolicy?>(builder.Build());
     }
 }

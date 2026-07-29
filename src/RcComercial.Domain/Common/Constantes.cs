@@ -113,3 +113,13 @@ public static class Permisos
     public const string AdminConfiguracion = "admin.configuracion";
     public const string AdminSucursales = "admin.sucursales";
 }
+
+/// <summary>
+/// Policies que NO son un código de permiso.modulo del catálogo (no viven en
+/// rol_permiso, no las tiene ninguna empresa): PermisoPolicyProvider las
+/// resuelve como caso especial, contra el claim "es_superadmin" del JWT.
+/// </summary>
+public static class PoliciesEspeciales
+{
+    public const string SoloPlataforma = "SoloPlataforma";
+}

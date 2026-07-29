@@ -188,6 +188,7 @@ api.MapPanelEndpoints();
 api.MapComprasEndpoints();
 api.MapProveedoresEndpoints();
 api.MapSyncEndpoints();
+api.MapPlataformaEndpoints();
 
 app.Run();
 

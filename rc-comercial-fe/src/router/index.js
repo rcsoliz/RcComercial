@@ -43,6 +43,7 @@ const routes = [
       { path: 'catalogos', name: 'catalogos', component: () => import('@/views/CatalogosView.vue'), meta: { titulo: 'Categorías y marcas', permiso: Permisos.ProductosCrearEditar } },
       { path: 'sucursales', name: 'sucursales', component: () => import('@/views/SucursalesView.vue'), meta: { titulo: 'Sucursales', permiso: Permisos.AdminSucursales } },
       { path: 'configuracion', name: 'configuracion', component: () => import('@/views/ConfiguracionView.vue'), meta: { titulo: 'Configuración', permiso: Permisos.AdminConfiguracion } },
+      { path: 'plataforma', name: 'plataforma', component: () => import('@/views/PlataformaView.vue'), meta: { titulo: 'Plataforma', soloSuperadmin: true } },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/pos' },
@@ -70,6 +71,13 @@ router.beforeEach((to) => {
   }
 
   if (to.meta.permiso && !auth.tienePermiso(to.meta.permiso)) {
+    return { name: 'pos' }
+  }
+
+  // /plataforma es el back-office del proveedor SaaS: ni siquiera un Dueño
+  // normal entra acá, solo es_superadmin (el backend lo exige igual, con la
+  // policy SoloPlataforma — esto es nada más para no mostrar la pantalla).
+  if (to.meta.soloSuperadmin && !auth.esSuperadmin) {
     return { name: 'pos' }
   }
 

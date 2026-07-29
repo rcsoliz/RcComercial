@@ -5,6 +5,7 @@ public enum LoginError
     Ninguno,
     CredencialesInvalidas,
     CuentaBloqueada,
+    EmpresaSuspendida,
 }
 
 public record LoginResult(

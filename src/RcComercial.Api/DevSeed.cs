@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RcComercial.Application.Common;
 using RcComercial.Application.Common.Interfaces;
 using RcComercial.Domain.Common;
 using RcComercial.Domain.Entities;
@@ -44,6 +45,31 @@ public static class DevSeed
                 DebeCambiarPassword = false,
             });
 
+        // Empresa "de sistema" que hospeda al superadmin: Activo = true a
+        // propósito (si no, el bloqueo de "empresa suspendida no loguea"
+        // dejaría afuera al propio superadmin) — "inactiva para comercio"
+        // significa que nunca se le crean productos/ventas, no que activo=false.
+        var empresaPlataforma = new Empresa { Nombre = "SysCenterS Plataforma", RubroId = 1, Activo = true };
+        var passwordSuperadmin = GeneradorPassword.Temporal();
+        db.Empresas.Add(empresaPlataforma);
+        db.Usuarios.Add(new Usuario
+        {
+            EmpresaId = empresaPlataforma.Id,
+            SucursalId = null,
+            Nombre = "Superadmin",
+            UsuarioLogin = "superadmin",
+            PasswordHash = hasher.Hash(passwordSuperadmin),
+            RolId = RolesSistema.Dueno,
+            DebeCambiarPassword = true,
+            EsSuperadmin = true,
+        });
+
         await db.SaveChangesAsync();
+
+        Console.WriteLine("============================================================");
+        Console.WriteLine(" Superadmin de plataforma sembrado (solo entorno Development)");
+        Console.WriteLine($"   usuario:  superadmin");
+        Console.WriteLine($"   password: {passwordSuperadmin}  (temporal — pedirá cambiarla al entrar)");
+        Console.WriteLine("============================================================");
     }
 }

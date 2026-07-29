@@ -18,4 +18,12 @@ public class Usuario : BaseEntity, ITenantEntity
     public bool DebeCambiarPassword { get; set; } = true;
     public int PermisosVersion { get; set; } = 1;
     public DateTimeOffset? UltimoLogin { get; set; }
+
+    /// <summary>
+    /// Acceso al back-office de la plataforma (/api/plataforma), fuera del
+    /// sistema de roles/permisos por empresa. Deliberadamente SIN setter
+    /// expuesto en ningún comando (CrearUsuarioCommand/EditarUsuarioCommand
+    /// no tienen este campo): solo se escribe por seed o SQL manual.
+    /// </summary>
+    public bool EsSuperadmin { get; set; }
 }

@@ -44,6 +44,19 @@ public class AuthService(
             return new LoginResult(false, LoginError.CredencialesInvalidas, usuario.BloqueadoHasta, null, null, null);
         }
 
+        // Después de verificar la clave (no antes: así un intento con clave
+        // incorrecta no revela si la empresa está suspendida).
+        var empresaActiva = await db.Empresas.IgnoreQueryFilters()
+            .Where(e => e.Id == usuario.EmpresaId)
+            .Select(e => e.Activo)
+            .FirstOrDefaultAsync(ct);
+        if (!empresaActiva)
+        {
+            RegistrarAuditoria(usuario.EmpresaId, usuario.Id, "login.fallido", ip);
+            await db.SaveChangesAsync(ct);
+            return new LoginResult(false, LoginError.EmpresaSuspendida, null, null, null, null);
+        }
+
         usuario.IntentosFallidos = 0;
         usuario.BloqueadoHasta = null;
         usuario.UltimoLogin = ahora;
@@ -121,6 +134,17 @@ public class AuthService(
             .FirstOrDefaultAsync(u => u.Id == existente.UsuarioId && u.Activo, ct);
 
         if (usuario is null)
+            return new RefreshResult(false, RefreshError.TokenInvalido, null, null, null);
+
+        // Sin esto, una empresa suspendida después de un login ya hecho
+        // podría seguir refrescando sesión indefinidamente sin volver a
+        // pasar por LoginAsync (que sí valida esto). El mensaje específico
+        // ("empresa_suspendida") lo ve recién en el próximo login real.
+        var empresaActiva = await db.Empresas.IgnoreQueryFilters()
+            .Where(e => e.Id == usuario.EmpresaId)
+            .Select(e => e.Activo)
+            .FirstOrDefaultAsync(ct);
+        if (!empresaActiva)
             return new RefreshResult(false, RefreshError.TokenInvalido, null, null, null);
 
         var (nuevoRefreshId, nuevoRefreshRaw) = CrearRefreshToken(usuario.Id, ip, userAgent);
