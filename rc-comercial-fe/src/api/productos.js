@@ -4,6 +4,18 @@ export function buscarProductos(texto, pagina = 1) {
   return http.get('/productos', { params: { buscar: texto || undefined, pagina } }).then((r) => r.data)
 }
 
+/**
+ * Paralela a buscarProductos() (esa la usan el POS y Compras para
+ * autocompletar y no cambia): esta es para el listado de ProductosView,
+ * con paginado real (con total) y filtro de estado.
+ * estado: 'activos' (default) | 'inactivos' | 'todos'.
+ */
+export function listarProductos(texto, pagina = 1, estado = 'activos') {
+  return http
+    .get('/productos/listado', { params: { buscar: texto || undefined, pagina, estado } })
+    .then((r) => r.data)
+}
+
 export function obtenerProductoPorId(id) {
   return http.get(`/productos/${id}`).then((r) => r.data)
 }

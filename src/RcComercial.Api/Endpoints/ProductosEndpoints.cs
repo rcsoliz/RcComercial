@@ -8,6 +8,7 @@ using RcComercial.Application.Productos.Commands.CrearProducto;
 using RcComercial.Application.Productos.Commands.DesactivarProducto;
 using RcComercial.Application.Productos.Commands.ImportarProductos;
 using RcComercial.Application.Productos.Queries.BuscarProductos;
+using RcComercial.Application.Productos.Queries.ListarProductos;
 using RcComercial.Application.Productos.Queries.ObtenerProducto;
 using RcComercial.Application.Productos.Queries.ObtenerProductoPorCodigoBarras;
 using RcComercial.Domain.Common;
@@ -24,6 +25,13 @@ public static class ProductosEndpoints
 
         group.MapGet("/", async (string? buscar, int? pagina, IMediator mediator) =>
             Results.Ok(await mediator.Send(new BuscarProductosQuery(buscar, pagina ?? 1))))
+            .RequireAuthorization();
+
+        // Paralelo a GET "/" (que sigue igual, lo usan VentaView/ComprasView
+        // para autocompletar): este es para el listado de ProductosView, con
+        // paginado real (con total) y filtro de estado.
+        group.MapGet("/listado", async (string? buscar, int? pagina, string? estado, IMediator mediator) =>
+            Results.Ok(await mediator.Send(new ListarProductosQuery(buscar, pagina ?? 1, estado))))
             .RequireAuthorization();
 
         group.MapGet("/por-codigo/{codigoBarras}", async (string codigoBarras, IMediator mediator) =>

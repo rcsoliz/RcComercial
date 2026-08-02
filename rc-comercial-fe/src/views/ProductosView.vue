@@ -5,22 +5,28 @@ import { watchDebounced } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { ChevronLeft, ChevronRight, Package, Plus, Search } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
-import { buscarProductos, obtenerProductoPorCodigoBarras } from '@/api/productos'
+import { listarProductos, obtenerProductoPorCodigoBarras } from '@/api/productos'
 import { Permisos } from '@/utils/permisos'
 
 const router = useRouter()
 const auth = useAuthStore()
 
 const texto = ref('')
+const estado = ref('activos') // 'activos' | 'inactivos' | 'todos'
 const pagina = ref(1)
 const resultados = ref([])
+const total = ref(0)
+const tamanoPagina = ref(10)
 const cargando = ref(true)
 const yaSeBusco = ref(false)
 
 async function ejecutarBusqueda() {
   cargando.value = true
   try {
-    resultados.value = await buscarProductos(texto.value, pagina.value)
+    const respuesta = await listarProductos(texto.value, pagina.value, estado.value)
+    resultados.value = respuesta.items
+    total.value = respuesta.total
+    tamanoPagina.value = respuesta.tamanoPagina
   } finally {
     cargando.value = false
     yaSeBusco.value = true
@@ -35,6 +41,12 @@ watchDebounced(
   },
   { debounce: 300 },
 )
+
+function elegirEstado(valor) {
+  estado.value = valor
+  pagina.value = 1
+  ejecutarBusqueda()
+}
 
 function irAPagina(delta) {
   pagina.value += delta
@@ -83,7 +95,14 @@ function porcentajeStock(p) {
 }
 
 const sinResultados = computed(() => yaSeBusco.value && !cargando.value && resultados.value.length === 0)
-const catalogoVacio = computed(() => sinResultados.value && !texto.value.trim())
+// "Catálogo vacío" (patrón C, con acción de crear) solo aplica a la vista por
+// defecto — activos, sin texto: si el vacío es por buscar/filtrar, es un
+// "sin resultados para este filtro", no "todavía no hay productos".
+const catalogoVacio = computed(() => sinResultados.value && !texto.value.trim() && estado.value === 'activos')
+
+const totalPaginas = computed(() => Math.max(1, Math.ceil(total.value / tamanoPagina.value)))
+const desde = computed(() => (total.value === 0 ? 0 : (pagina.value - 1) * tamanoPagina.value + 1))
+const hasta = computed(() => Math.min(pagina.value * tamanoPagina.value, total.value))
 
 onMounted(ejecutarBusqueda)
 </script>
@@ -91,16 +110,35 @@ onMounted(ejecutarBusqueda)
 <template>
   <div class="p-4 md:p-6">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-      <div class="relative w-full max-w-[420px]">
-        <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-tinta-3" />
-        <input
-          v-model="texto"
-          type="text"
-          autocomplete="off"
-          placeholder="Buscar producto o código de barras…"
-          class="min-h-11 w-full rounded-s border-[1.5px] border-transparent bg-superficie-2 py-2 pl-10 pr-3 text-[13.6px] text-tinta outline-none transition-colors placeholder:text-tinta-3 focus:border-marca focus:bg-superficie"
-          @keydown.enter.prevent="alPresionarEnterBusqueda"
-        />
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative w-full max-w-[340px]">
+          <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-tinta-3" />
+          <input
+            v-model="texto"
+            type="text"
+            autocomplete="off"
+            placeholder="Buscar producto o código de barras…"
+            class="min-h-11 w-full rounded-s border-[1.5px] border-transparent bg-superficie-2 py-2 pl-10 pr-3 text-[13.6px] text-tinta outline-none transition-colors placeholder:text-tinta-3 focus:border-marca focus:bg-superficie"
+            @keydown.enter.prevent="alPresionarEnterBusqueda"
+          />
+        </div>
+
+        <div class="flex gap-1 rounded-s bg-superficie-2 p-1">
+          <button
+            v-for="opcion in [
+              { valor: 'activos', label: 'Activos' },
+              { valor: 'inactivos', label: 'Inactivos' },
+              { valor: 'todos', label: 'Todos' },
+            ]"
+            :key="opcion.valor"
+            type="button"
+            class="min-h-9 rounded-chip px-3 text-[12.6px] font-semibold transition-colors"
+            :class="estado === opcion.valor ? 'bg-superficie text-marca shadow-sm' : 'text-tinta-2 hover:text-tinta'"
+            @click="elegirEstado(opcion.valor)"
+          >
+            {{ opcion.label }}
+          </button>
+        </div>
       </div>
 
       <button
@@ -147,7 +185,7 @@ onMounted(ejecutarBusqueda)
           <tbody>
             <tr v-if="sinResultados">
               <td colspan="5" class="px-6 py-12 text-center text-[13.6px] text-tinta-3">
-                No se encontraron productos para "{{ texto }}".
+                {{ texto.trim() ? `No se encontraron productos para "${texto}".` : 'No hay productos con este filtro.' }}
               </td>
             </tr>
             <tr
@@ -225,8 +263,14 @@ onMounted(ejecutarBusqueda)
       </div>
 
       <div v-if="!sinResultados" class="flex flex-wrap items-center justify-between gap-4 border-t border-linea px-6 py-4">
-        <p class="text-[13.6px] text-tinta-3">Página <span class="tabular-nums">{{ pagina }}</span></p>
-        <div class="flex gap-2">
+        <p class="text-[13.6px] text-tinta-3">
+          Mostrando <span class="tabular-nums text-tinta-2">{{ desde }}–{{ hasta }}</span> de
+          <span class="tabular-nums text-tinta-2">{{ total }}</span> resultados
+        </p>
+        <div class="flex items-center gap-2">
+          <span class="text-[12.6px] text-tinta-3">
+            Página <span class="tabular-nums">{{ pagina }}</span> de <span class="tabular-nums">{{ totalPaginas }}</span>
+          </span>
           <button
             type="button"
             :disabled="pagina === 1"
@@ -238,7 +282,7 @@ onMounted(ejecutarBusqueda)
           </button>
           <button
             type="button"
-            :disabled="resultados.length < 20"
+            :disabled="pagina >= totalPaginas"
             class="flex min-h-11 min-w-11 items-center justify-center rounded-s border border-linea text-tinta-2 hover:bg-superficie-2 disabled:opacity-40"
             aria-label="Página siguiente"
             @click="irAPagina(1)"
