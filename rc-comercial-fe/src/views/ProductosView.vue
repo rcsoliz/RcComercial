@@ -180,11 +180,12 @@ onMounted(ejecutarBusqueda)
               <th class="px-6 py-3.5 text-right text-[10px] font-bold uppercase tracking-wide text-tinta-3">Precio</th>
               <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Nivel de stock</th>
               <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Estado</th>
+              <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="sinResultados">
-              <td colspan="5" class="px-6 py-12 text-center text-[13.6px] text-tinta-3">
+              <td colspan="6" class="px-6 py-12 text-center text-[13.6px] text-tinta-3">
                 {{ texto.trim() ? `No se encontraron productos para "${texto}".` : 'No hay productos con este filtro.' }}
               </td>
             </tr>
@@ -256,6 +257,15 @@ onMounted(ejecutarBusqueda)
                 >
                   {{ p.activo ? 'activo' : 'inactivo' }}
                 </span>
+              </td>
+              <td class="px-6 py-4 align-middle">
+                <button
+                  type="button"
+                  class="min-h-9 rounded-s border border-linea px-3 text-[12.6px] font-semibold text-tinta-2 transition-colors hover:bg-superficie-2"
+                  @click.stop="abrirProducto(p)"
+                >
+                  Editar
+                </button>
               </td>
             </tr>
           </tbody>

@@ -14,7 +14,7 @@ namespace RcComercial.Application.Productos.Queries.ListarProductos;
 public class ListarProductosQueryHandler(IApplicationDbContext db)
     : IRequestHandler<ListarProductosQuery, ListarProductosResultDto>
 {
-    private const int TamanoPagina = 10;
+    private const int TamanoPagina = 8;
 
     // Mismo umbral calibrado que BuscarProductosQueryHandler (ver ese archivo).
     private const double UmbralSimilitud = 0.15;
