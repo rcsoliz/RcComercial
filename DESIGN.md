@@ -68,7 +68,7 @@ SIEMPRE los tokens, jamás un hex directo.
 
 - Espaciado en escala de 4px (Tailwind estándar). Densidad: cómoda en
   formularios, compacta en tablas y en el ticket.
-- Radios: `--radio: 10px` (tarjetas), `--radio-s: 7px` (botones, inputs), `999px` (chips/badges).
+- Radios: `--radio: 12px` (tarjetas), `--radio-s: 7px` (botones, inputs), `999px` (chips/badges).
 - Sombra única y sutil (`--sombra`); la elevación se comunica con borde + sombra,
   nunca con sombras dramáticas.
 - Targets táctiles mínimos **44×44px** en POS y panel (se usan con el dedo).

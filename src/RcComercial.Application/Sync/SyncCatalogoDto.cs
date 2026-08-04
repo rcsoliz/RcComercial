@@ -14,6 +14,8 @@ public record SyncProductoDto(
     // Stock total de la empresa (todas las sucursales) al momento de sincronizar:
     // referencia para el descuento OPTIMISTA local; el backend revalida el
     // stock real de todas formas al recibir la venta.
-    decimal StockTotal);
+    decimal StockTotal,
+    // Umbral para el badge de "stock bajo" en el grid del POS (Sesión Venta).
+    decimal StockMinimo);
 
 public record SyncCatalogoDto(string Version, List<SyncProductoDto> Productos);

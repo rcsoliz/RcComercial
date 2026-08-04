@@ -2,8 +2,9 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { toast } from 'vue-sonner'
-import { Minus, Plus, Search } from 'lucide-vue-next'
+import { CircleX, Minus, Plus, Receipt, Search, Settings, User } from 'lucide-vue-next'
 import { useVentaStore } from '@/stores/venta'
+import { useAuthStore } from '@/stores/auth'
 import { useConexion } from '@/composables/useConexion'
 import { obtenerSesionAbierta, abrirCaja } from '@/api/caja'
 import { buscarProductos, obtenerProductoPorId, obtenerProductoPorCodigoBarras } from '@/api/productos'
@@ -15,6 +16,7 @@ import ModalCobro from '@/components/pos/ModalCobro.vue'
 import ModalCancelar from '@/components/pos/ModalCancelar.vue'
 
 const venta = useVentaStore()
+const auth = useAuthStore()
 const { enLinea } = useConexion()
 
 // ── Sesión de caja: se verifica al entrar; sin sesión abierta no se puede vender ──
@@ -159,6 +161,28 @@ function fmtBs(n) {
   return 'Bs ' + ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + dec
 }
 
+// Nivel de stock por tarjeta de producto (badge del grid del POS): usa
+// stockTotal/stockMinimo, ya presentes en buscarProductos() y en el
+// catálogo local sincronizado — null si el producto todavía no trae esos
+// campos (catálogo local sin resincronizar).
+function nivelStock(p) {
+  if (p.stockTotal == null) return null
+  if (p.stockTotal <= 0) return 'agotado'
+  if (p.stockMinimo != null && p.stockTotal <= p.stockMinimo) return 'bajo'
+  return 'normal'
+}
+
+function fmtStock(n) {
+  const num = Number(n)
+  return Number.isInteger(num) ? num.toString() : num.toFixed(1)
+}
+
+const inicialesUsuario = computed(() => {
+  const partes = auth.nombreUsuario.trim().split(/\s+/).filter(Boolean)
+  if (partes.length === 0) return ''
+  return (partes[0][0] + (partes[partes.length - 1][0] || '')).toUpperCase()
+})
+
 // ── Cobro / receta / cancelar ──
 const mostrarReceta = ref(false)
 const mostrarCobro = ref(false)
@@ -257,14 +281,23 @@ onUnmounted(() => {
   </div>
 
   <!-- Layout POS -->
-  <div v-else class="fixed inset-x-0 top-0 bottom-28 flex flex-col md:bottom-0 md:left-64 md:flex-row">
-    <!-- Columna izquierda: búsqueda + grid -->
-    <section class="flex min-h-0 flex-1 flex-col p-4 md:p-6" aria-label="Catálogo de productos">
-      <div class="mb-2 flex items-center gap-3">
-        <div class="flex items-center gap-2">
+  <div v-else class="fixed inset-x-0 top-0 bottom-28 flex flex-col md:bottom-0 md:left-64">
+    <!-- Header: barra completa, al ras (sin margen/borde redondeado) -->
+    <header class="flex h-16 flex-shrink-0 items-center justify-between border-b border-linea bg-superficie px-4 md:px-6">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2 rounded-chip bg-superficie-2 px-3 py-1.5">
           <span class="h-2 w-2 animate-pulse rounded-full bg-exito" aria-hidden="true"></span>
-          <span class="text-[11px] font-bold uppercase tracking-wide text-exito">Caja activa</span>
+          <span class="text-[11px] font-bold uppercase tracking-wide text-tinta-2">Caja activa</span>
         </div>
+        <div class="hidden h-4 w-px bg-linea sm:block" aria-hidden="true"></div>
+        <div class="hidden items-center gap-1.5 sm:flex">
+          <User class="h-4 w-4 text-tinta-3" />
+          <span class="text-[13px] text-tinta-2">
+            Operador: <span class="font-bold text-tinta">{{ auth.nombreUsuario || '—' }}</span>
+          </span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
         <RouterLink
           v-if="rechazadasCount > 0"
           :to="{ name: 'ventas-revisar' }"
@@ -272,53 +305,84 @@ onUnmounted(() => {
         >
           {{ rechazadasCount }} por revisar
         </RouterLink>
-      </div>
-
-      <div class="relative mb-4">
-        <Search class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-tinta-3" />
-        <input
-          ref="inputBusqueda"
-          v-model="textoBusqueda"
-          type="text"
-          autocomplete="off"
-          placeholder="Buscar producto o código de barras…"
-          class="min-h-11 w-full rounded border-[1.5px] border-transparent bg-superficie-2 py-3 pl-12 pr-14 text-tinta outline-none transition-colors placeholder:text-tinta-3 focus:border-marca focus:bg-superficie"
-          @keydown.enter.prevent="intentarCodigoBarras"
-        />
-        <span
-          class="absolute right-4 top-1/2 -translate-y-1/2 rounded border border-linea bg-superficie px-1.5 py-0.5 text-[10px] text-tinta-3"
+        <RouterLink
+          :to="{ name: 'ajustes' }"
+          class="text-tinta-2 transition-colors hover:text-marca"
+          aria-label="Ajustes"
         >
-          F2
-        </span>
-      </div>
-
-      <div class="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div v-if="!buscando && resultados.length === 0" class="p-6 text-center text-[13.6px] text-tinta-3">
-          No se encontraron productos.
+          <Settings class="h-5 w-5" />
+        </RouterLink>
+        <div
+          class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-marca-tenue text-[11px] font-bold text-marca"
+          :title="auth.nombreUsuario"
+        >
+          {{ inicialesUsuario }}
         </div>
-        <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr))">
-          <button
-            v-for="p in resultados"
-            :key="p.id"
-            type="button"
-            class="flex min-h-[112px] flex-col rounded border border-linea bg-superficie p-4 text-left transition-colors hover:border-marca"
-            @click="alTocarProducto(p)"
+      </div>
+    </header>
+
+    <!-- Espacio de trabajo: grid de productos + ticket -->
+    <div class="flex min-h-0 flex-1 flex-col md:flex-row">
+      <!-- Columna izquierda: búsqueda + grid -->
+      <section class="flex min-h-0 flex-1 flex-col p-4 md:p-6" aria-label="Catálogo de productos">
+        <div class="relative mb-4">
+          <Search class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-tinta-3" />
+          <input
+            ref="inputBusqueda"
+            v-model="textoBusqueda"
+            type="text"
+            autocomplete="off"
+            placeholder="Buscar producto o código de barras…"
+            class="min-h-11 w-full rounded border-[1.5px] border-transparent bg-superficie-2 py-4 pl-12 pr-14 text-tinta outline-none transition-colors placeholder:text-tinta-3 focus:border-marca focus:bg-superficie"
+            @keydown.enter.prevent="intentarCodigoBarras"
+          />
+          <span
+            class="absolute right-4 top-1/2 -translate-y-1/2 rounded border border-linea bg-superficie px-1.5 py-0.5 text-[10px] text-tinta-3"
           >
-            <span class="font-display text-[15px] font-semibold leading-snug text-tinta">{{ p.nombre }}</span>
-            <span v-if="p.codigo" class="mt-1 font-mono text-[11px] text-tinta-3">{{ p.codigo }}</span>
-            <span class="mt-auto font-semibold tabular-nums text-marca">{{ fmtBs(p.precioBase) }}</span>
-          </button>
+            F2
+          </span>
         </div>
-      </div>
-    </section>
 
-    <!-- Columna derecha: ticket (firma dentada) -->
-    <section
-      class="flex max-h-[46vh] flex-shrink-0 flex-col border-t border-linea bg-papel p-4 md:max-h-none md:w-[400px] md:border-l md:border-t-0 md:p-6"
-      aria-label="Venta en curso"
-    >
+        <div class="min-h-0 flex-1 overflow-y-auto pr-1">
+          <div v-if="!buscando && resultados.length === 0" class="p-6 text-center text-[13.6px] text-tinta-3">
+            No se encontraron productos.
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <button
+              v-for="p in resultados"
+              :key="p.id"
+              type="button"
+              class="flex min-h-[124px] flex-col rounded border-[1.5px] border-linea bg-superficie p-4 text-left transition-all hover:border-marca hover:shadow-sm active:scale-[.98]"
+              @click="alTocarProducto(p)"
+            >
+              <span class="font-display text-[15px] leading-tight text-tinta">{{ p.nombre }}</span>
+              <span v-if="p.codigo" class="mt-1 font-mono text-[11px] text-tinta-3">{{ p.codigo }}</span>
+              <div class="mt-auto flex items-end justify-between gap-2 pt-3">
+                <span class="font-mono text-[16px] tabular-nums text-marca">{{ fmtBs(p.precioBase) }}</span>
+                <span
+                  v-if="nivelStock(p)"
+                  class="whitespace-nowrap rounded-chip px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                  :class="{
+                    'bg-exito-tenue text-exito': nivelStock(p) === 'normal',
+                    'bg-aviso-tenue text-aviso': nivelStock(p) === 'bajo',
+                    'bg-peligro-tenue text-peligro': nivelStock(p) === 'agotado',
+                  }"
+                >
+                  {{ fmtStock(p.stockTotal) }} en stock
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Columna derecha: ticket (firma dentada) -->
+      <section
+        class="flex max-h-[46vh] flex-shrink-0 flex-col border-t border-linea bg-papel p-4 md:max-h-none md:w-[400px] md:border-l md:border-t-0 md:p-6"
+        aria-label="Venta en curso"
+      >
       <div class="flex min-h-0 flex-1 flex-col" style="filter: drop-shadow(0 4px 10px rgba(43, 48, 45, 0.08))">
-        <div class="flex min-h-0 flex-1 flex-col rounded-t bg-superficie">
+        <div class="flex min-h-0 flex-1 flex-col rounded-t-lg bg-white">
           <div class="border-b border-dashed border-linea p-5 text-center">
             <h2 class="font-display text-[17px] font-semibold tracking-wide text-tinta">VENTA EN CURSO</h2>
           </div>
@@ -398,7 +462,7 @@ onUnmounted(() => {
         <div
           class="h-2.5 flex-shrink-0"
           style="
-            background: var(--superficie);
+            background: #fff;
             mask: linear-gradient(-45deg, #000 7px, transparent 0), linear-gradient(45deg, #000 7px, transparent 0);
             mask-size: 14px 14px;
             mask-position: left top;
@@ -416,11 +480,12 @@ onUnmounted(() => {
         <button
           type="button"
           :disabled="venta.vacia"
-          class="flex min-h-11 items-center justify-center gap-3 rounded bg-marca font-display font-bold text-sobre-marca transition-transform hover:bg-marca-hover active:scale-[.98] disabled:opacity-50"
+          class="flex items-center justify-center gap-3 rounded bg-[#25514B] py-5 font-display font-bold uppercase tracking-wide text-sobre-marca transition-all hover:bg-[#25514B]/90 active:scale-[.98] disabled:opacity-50"
           @click="iniciarCobro"
         >
+          <Receipt class="h-5 w-5" />
           Cobrar venta
-          <span class="rounded border border-sobre-marca/30 bg-sobre-marca/10 px-1.5 py-0.5 text-[10px]">F12</span>
+          <span class="rounded border border-sobre-marca/30 bg-sobre-marca/10 px-1.5 py-0.5 text-[10px] normal-case">F12</span>
         </button>
         <button
           type="button"
@@ -428,10 +493,12 @@ onUnmounted(() => {
           class="flex min-h-11 items-center justify-center gap-2 rounded border border-linea text-tinta-2 transition-colors hover:text-peligro disabled:opacity-50"
           @click="mostrarCancelar = true"
         >
-          Cancelar operación
+          <CircleX class="h-4 w-4" />
+          Cancelar Operación
         </button>
       </div>
-    </section>
+      </section>
+    </div>
   </div>
 
   <ModalPresentacion

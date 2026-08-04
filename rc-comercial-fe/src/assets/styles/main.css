@@ -27,14 +27,26 @@
   --font-ui: var(--f-ui);
   --font-mono: var(--f-mono);
 
-  --radius-DEFAULT: var(--radio);
-  --radius-s: var(--radio-s);
   --radius-chip: var(--radio-chip);
 
   --shadow-DEFAULT: var(--sombra);
 
   /* Punto único de colapso sidebar→tab bar / POS 2 columnas (DESIGN.md §6) */
   --breakpoint-md: 900px;
+}
+
+/* Tailwind v4 no permite re-temar `rounded` (utilidad fija de fábrica,
+   0.25rem) y `rounded-s` colisiona con su propia utilidad de fábrica
+   "redondear el lado start" (border-start-start-radius/border-end-start-radius,
+   NO "small") — con igual especificidad, la de Tailwind gana por ir después
+   en el CSS generado. Estas reglas van SIN @layer a propósito: fuera de
+   cualquier capa nombrada, así que ganan la cascada sobre la capa
+   "utilities" de Tailwind sin importar el orden de generación. */
+.rounded {
+  border-radius: var(--radio);
+}
+.rounded-s {
+  border-radius: var(--radio-s);
 }
 
 @layer base {

@@ -50,6 +50,11 @@ export const useAuthStore = defineStore('auth', {
       const payload = state.accessToken ? decodificarPayloadJwt(state.accessToken) : null
       return payload?.es_superadmin === 'true'
     },
+
+    nombreUsuario: (state) => {
+      const payload = state.accessToken ? decodificarPayloadJwt(state.accessToken) : null
+      return payload?.nombre ?? ''
+    },
   },
 
   actions: {

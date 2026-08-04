@@ -35,7 +35,7 @@ public class ObtenerCatalogoSyncQueryHandler(IApplicationDbContext db)
                 p.Presentaciones.Select(pr => new SyncPresentacionDto(
                     pr.Id, pr.Nombre, pr.Factor, pr.CodigoBarras,
                     pr.Precio, pr.PrecioMayorista, pr.CantidadMinMayorista, pr.EsPredeterminada)).ToList(),
-                stockPorProducto.GetValueOrDefault(p.Id)))
+                stockPorProducto.GetValueOrDefault(p.Id), p.StockMinimo))
             .ToList();
 
         return new SyncCatalogoDto(version.ToString("O"), productosDto);

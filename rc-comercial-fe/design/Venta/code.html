@@ -1,0 +1,564 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&amp;family=Instrument+Sans:wght@400;500;700&amp;family=Spline+Sans+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "papel": "#EDECE6",
+                    "on-error": "#ffffff",
+                    "surface-dim": "#dbdad4",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#b9e9c6",
+                    "secondary-fixed-dim": "#e9c07e",
+                    "tinta-2": "#5F6763",
+                    "tinta-3": "#8B928D",
+                    "linea": "#D4D3CA",
+                    "inverse-primary": "#a2cfc8",
+                    "on-surface-variant": "#404847",
+                    "on-primary-fixed-variant": "#224e48",
+                    "tinta": "#2B302D",
+                    "tertiary-container": "#3f6b4f",
+                    "surface-tint": "#3b6660",
+                    "secondary": "#785921",
+                    "background": "#fbf9f3",
+                    "on-primary-container": "#b9e7df",
+                    "superficie": "#F6F5F0",
+                    "primary-container": "#3e6963",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#a2cfc8",
+                    "inverse-on-surface": "#f2f1eb",
+                    "noche-linea": "#363D3A",
+                    "noche-papel": "#1D2220",
+                    "surface-variant": "#e3e3dd",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#5d420b",
+                    "outline": "#717977",
+                    "on-tertiary-fixed-variant": "#244f35",
+                    "on-secondary": "#ffffff",
+                    "sobre-marca": "#F2F5F3",
+                    "surface-container": "#efeee8",
+                    "superficie-2": "#E4E3DC",
+                    "marca-tenue": "#DCE5E1",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#a2d2b0",
+                    "surface-container-low": "#f5f4ee",
+                    "primary-fixed": "#beece4",
+                    "on-secondary-fixed": "#271900",
+                    "noche-superficie": "#262C29",
+                    "tertiary-fixed": "#beeecb",
+                    "primary": "#25514b",
+                    "on-secondary-container": "#785a22",
+                    "tertiary": "#275338",
+                    "on-background": "#1b1c19",
+                    "inverse-surface": "#30312d",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#1b1c19",
+                    "secondary-container": "#fed490",
+                    "outline-variant": "#c0c8c6",
+                    "on-tertiary-fixed": "#002110",
+                    "surface-bright": "#fbf9f3",
+                    "surface-container-high": "#e9e8e2",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#ffdeab",
+                    "surface": "#fbf9f3",
+                    "surface-container-highest": "#e3e3dd",
+                    "on-primary-fixed": "#00201d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "24px",
+                    "sm": "0.5rem",
+                    "gutter": "16px",
+                    "base": "4px",
+                    "xs": "0.25rem",
+                    "xl": "2.5rem",
+                    "lg": "1.5rem",
+                    "md": "1rem",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "data-mono": ["Spline Sans Mono"],
+                    "headline-lg": ["Bricolage Grotesque"],
+                    "display-hero": ["Bricolage Grotesque"],
+                    "body-sm": ["Instrument Sans"],
+                    "headline-sm": ["Bricolage Grotesque"],
+                    "body-md": ["Instrument Sans"],
+                    "label-caps": ["Instrument Sans"]
+            },
+            "fontSize": {
+                    "data-mono": ["13px", {"lineHeight": "1", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "display-hero": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["13.6px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-sm": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "body-md": ["15px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.06em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .ticket-jagged {
+            position: relative;
+            background: #ffffff;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+        }
+        
+        .ticket-jagged::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-color: transparent;
+            background-image: linear-gradient(-45deg, #ffffff 5px, transparent 0), linear-gradient(45deg, #ffffff 5px, transparent 0);
+            background-size: 10px 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D4D3CA;
+            border-radius: 10px;
+        }
+
+        /* Keyboard shortcut hint styling */
+        .kbd-hint {
+            border: 1px solid #D4D3CA;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #8B928D;
+            background: #F6F5F0;
+        }
+    </style>
+</head>
+<body class="bg-papel text-tinta font-body-md min-h-screen flex overflow-hidden">
+<!-- Sidebar Navigation (Desktop Only) -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r border-linea bg-papel flex flex-col z-40 hidden md:flex">
+<div class="p-6">
+<h1 class="font-headline-sm text-headline-sm text-primary font-bold">SysCenterS</h1>
+<p class="text-[11px] text-tinta-3 tracking-widest uppercase mt-1">Pharma POS v1.0</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-marca-tenue text-primary font-bold rounded-lg transition-transform duration-200 active:translate-x-1" href="#">
+<span class="material-symbols-outlined">point_of_sale</span>
+<span class="font-body-md text-body-md">Punto de Venta (POS)</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-tinta-2 hover:bg-superficie-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-tinta-2 hover:bg-superficie-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md text-body-md">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-tinta-2 hover:bg-superficie-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Clients</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-tinta-2 hover:bg-superficie-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">manage_accounts</span>
+<span class="font-body-md text-body-md">User Management</span>
+</a>
+</nav>
+<div class="p-4 border-t border-linea">
+<button class="flex items-center gap-3 px-4 py-3 text-tinta-2 hover:bg-superficie-2 w-full rounded-lg transition-colors">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md text-body-md">Log Out</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col h-screen">
+<!-- Top Bar -->
+<header class="h-16 flex items-center justify-between px-margin-desktop bg-superficie border-b border-linea">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-superficie-2 rounded-full">
+<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-tinta-2">Caja 1 - Activa</span>
+</div>
+<div class="h-4 w-px bg-linea"></div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tinta-3 text-sm">person</span>
+<span class="font-body-sm text-body-sm text-tinta-2">Operador: <span class="font-bold text-tinta">Dr. Roberto S.</span></span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-tinta-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-tinta-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-marca-tenue flex items-center justify-center text-primary font-bold text-xs">RS</div>
+</div>
+</div>
+</header>
+<!-- POS Workspace -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Column: Product Grid -->
+<section class="flex-1 flex flex-col p-6 min-w-0">
+<!-- Search Bar Row -->
+<div class="relative group mb-6">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-tinta-3 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="w-full bg-superficie-2 border-transparent focus:border-primary focus:ring-0 focus:bg-superficie py-4 pl-12 pr-16 rounded-xl transition-all font-body-md text-tinta placeholder:text-tinta-3" placeholder="Buscar producto, laboratorio o código de barras..." type="text">
+<div class="absolute inset-y-0 right-4 flex items-center">
+<span class="kbd-hint">F2</span>
+</div>
+</div>
+<!-- Product Grid (Scrollable) -->
+<div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-12">
+<!-- Product Cards - Repeated for density -->
+<script>
+                            const products = [
+                                { name: "Ibuprofeno 600mg", lab: "Bayer", price: "$12.50", stock: "82 en stock", status: "ok" },
+                                { name: "Amoxicilina 500mg", lab: "Sandoz", price: "$24.90", stock: "12 en stock", status: "low" },
+                                { name: "Paracetamol 1g", lab: "GSK", price: "$8.20", stock: "145 en stock", status: "ok" },
+                                { name: "Loratadina 10mg", lab: "Cinfa", price: "$15.00", stock: "0 en stock", status: "out" },
+                                { name: "Omeprazol 20mg", lab: "Teva", price: "$18.75", stock: "45 en stock", status: "ok" },
+                                { name: "Atorvastatina 20mg", lab: "Pfizer", price: "$32.40", stock: "21 en stock", status: "ok" },
+                                { name: "Vitamina C + Zinc", lab: "Redoxon", price: "$21.15", stock: "9 en stock", status: "low" },
+                                { name: "Metformina 850mg", lab: "Merck", price: "$14.30", stock: "60 en stock", status: "ok" },
+                                { name: "Diclofenaco Gel", lab: "Voltaren", price: "$22.50", stock: "33 en stock", status: "ok" },
+                                { name: "Insulina Glargina", lab: "Sanofi", price: "$89.00", stock: "5 en stock", status: "low" },
+                                { name: "Sertralina 50mg", lab: "Pfizer", price: "$41.20", stock: "18 en stock", status: "ok" },
+                                { name: "Aspirina 100mg", lab: "Bayer", price: "$6.50", stock: "200+ en stock", status: "ok" }
+                            ];
+
+                            products.forEach(p => {
+                                let stockColor = "text-green-600 bg-green-50";
+                                if(p.status === 'low') stockColor = "text-amber-600 bg-amber-50";
+                                if(p.status === 'out') stockColor = "text-error bg-error-container";
+
+                                document.write(`
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">${p.name}</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">${p.lab}</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">${p.price}</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${stockColor}">${p.stock}</span>
+                                        </div>
+                                    </button>
+                                `);
+                            });
+                        </script>
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Ibuprofeno 600mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Bayer</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$12.50</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">82 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Amoxicilina 500mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Sandoz</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$24.90</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50">12 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Paracetamol 1g</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">GSK</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$8.20</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">145 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Loratadina 10mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Cinfa</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$15.00</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-error bg-error-container">0 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Omeprazol 20mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Teva</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$18.75</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">45 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Atorvastatina 20mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Pfizer</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$32.40</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">21 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Vitamina C + Zinc</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Redoxon</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$21.15</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50">9 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Metformina 850mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Merck</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$14.30</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">60 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Diclofenaco Gel</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Voltaren</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$22.50</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">33 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Insulina Glargina</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Sanofi</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$89.00</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50">5 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Sertralina 50mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Pfizer</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$41.20</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">18 en stock</span>
+                                        </div>
+                                    </button>
+                                
+                                    <button class="flex flex-col text-left p-4 bg-superficie rounded-xl border border-linea hover:border-primary hover:shadow-sm transition-all group active:scale-[0.98]">
+                                        <div class="flex-1">
+                                            <p class="font-headline-sm text-[15px] text-tinta mb-1 leading-tight">Aspirina 100mg</p>
+                                            <p class="font-body-sm text-[12px] text-tinta-3 mb-3">Bayer</p>
+                                        </div>
+                                        <div class="flex items-end justify-between w-full mt-auto">
+                                            <p class="font-data-mono text-[16px] text-primary">$6.50</p>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50">200+ en stock</span>
+                                        </div>
+                                    </button>
+                                
+</div>
+</div>
+</section>
+<!-- Right Column: Ticket -->
+<section class="w-[400px] bg-papel border-l border-linea p-6 flex flex-col">
+<div class="ticket-jagged flex-1 flex flex-col rounded-t-lg overflow-hidden border-x border-t border-linea">
+<!-- Ticket Header -->
+<div class="p-6 text-center border-b border-dashed border-linea">
+<h2 class="font-headline-sm text-tinta mb-1">VENTA EN CURSO</h2>
+<p class="font-data-mono text-[11px] text-tinta-3">ORDEN: #8821-XP-24</p>
+</div>
+<!-- Ticket Body (Items) -->
+<div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+<table class="w-full">
+<thead class="sticky top-0 bg-white">
+<tr class="text-[10px] font-bold text-tinta-3 uppercase border-b border-linea">
+<th class="text-left py-2">DESCRIPCIÓN</th>
+<th class="text-center py-2">CANT</th>
+<th class="text-right py-2">TOTAL</th>
+</tr>
+</thead>
+<tbody class="text-body-sm">
+<tr class="border-b border-linea/50 group">
+<td class="py-3">
+<p class="text-tinta font-medium">Ibuprofeno 600mg</p>
+<p class="text-[11px] text-tinta-3">Bayer • $12.50/u</p>
+</td>
+<td class="py-3 text-center">
+<div class="flex items-center justify-center gap-2">
+<button class="w-5 h-5 flex items-center justify-center rounded-full bg-superficie hover:bg-linea">
+<span class="material-symbols-outlined text-xs">remove</span>
+</button>
+<span class="font-data-mono">2</span>
+<button class="w-5 h-5 flex items-center justify-center rounded-full bg-superficie hover:bg-linea">
+<span class="material-symbols-outlined text-xs">add</span>
+</button>
+</div>
+</td>
+<td class="py-3 text-right font-data-mono text-tinta">$25.00</td>
+</tr>
+<tr class="border-b border-linea/50">
+<td class="py-3">
+<p class="text-tinta font-medium">Amoxicilina 500mg</p>
+<p class="text-[11px] text-tinta-3">Sandoz • $24.90/u</p>
+</td>
+<td class="py-3 text-center">
+<div class="flex items-center justify-center gap-2">
+<button class="w-5 h-5 flex items-center justify-center rounded-full bg-superficie">
+<span class="material-symbols-outlined text-xs">remove</span>
+</button>
+<span class="font-data-mono">1</span>
+<button class="w-5 h-5 flex items-center justify-center rounded-full bg-superficie">
+<span class="material-symbols-outlined text-xs">add</span>
+</button>
+</div>
+</td>
+<td class="py-3 text-right font-data-mono text-tinta">$24.90</td>
+</tr>
+<tr class="border-b border-linea/50">
+<td class="py-3">
+<p class="text-tinta font-medium">Diclofenaco Gel</p>
+<p class="text-[11px] text-tinta-3">Voltaren • $22.50/u</p>
+</td>
+<td class="py-3 text-center">
+<div class="flex items-center justify-center gap-2">
+<button class="w-5 h-5 flex items-center justify-center rounded-full bg-superficie">
+<span class="material-symbols-outlined text-xs">remove</span>
+</button>
+<span class="font-data-mono">1</span>
+<button class="w-5 h-5 flex items-center justify-center rounded-full bg-superficie">
+<span class="material-symbols-outlined text-xs">add</span>
+</button>
+</div>
+</td>
+<td class="py-3 text-right font-data-mono text-tinta">$22.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Ticket Totals -->
+<div class="p-6 bg-superficie border-t border-dashed border-linea space-y-2">
+<div class="flex justify-between text-body-sm text-tinta-3">
+<span class="">Subtotal</span>
+<span class="font-data-mono">$72.40</span>
+</div>
+<div class="flex justify-between text-body-sm text-tinta-3">
+<span class="">IVA (16%)</span>
+<span class="font-data-mono">$11.58</span>
+</div>
+<div class="flex justify-between items-end pt-4">
+<span class="font-headline-sm text-tinta">TOTAL</span>
+<span class="font-data-mono text-[28px] leading-none text-primary font-bold">$83.98</span>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<div class="mt-8 space-y-3">
+<button class="w-full bg-primary text-white py-5 rounded-xl font-headline-sm flex items-center justify-center gap-3 shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform group">
+<span class="material-symbols-outlined font-bold group-hover:translate-x-1 transition-transform">point_of_sale</span>
+                        COBRAR VENTA
+                        <span class="kbd-hint border-white/20 bg-white/10 text-white ml-2">F12</span>
+</button>
+<button class="w-full bg-superficie-2 text-tinta-2 py-3 rounded-xl font-body-md border border-linea hover:bg-superficie-container hover:text-error transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">cancel</span>
+                        Cancelar Operación
+                    </button>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Nav for Mobile -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-superficie border-t border-linea md:hidden">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-caps text-[9px] mt-1">VENTA</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tinta-3 p-2">
+<span class="material-symbols-outlined">trending_up</span>
+<span class="font-label-caps text-[9px] mt-1">TENDENCIAS</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tinta-3 p-2">
+<span class="material-symbols-outlined">inventory</span>
+<span class="font-label-caps text-[9px] mt-1">STOCK</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tinta-3 p-2">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-[9px] mt-1">USUARIO</span>
+</button>
+</nav>
+<!-- Floating Action for Mobile (Hidden on Desktop) -->
+<button class="fixed right-6 bottom-20 w-14 h-14 bg-primary text-white rounded-full shadow-xl flex md:hidden items-center justify-center active:scale-95 transition-transform z-40">
+<span class="material-symbols-outlined text-[28px]">barcode_scanner</span>
+</button>
+<script>
+        // Simple micro-interactions for keyboard shortcuts simulation
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                document.querySelector('input[type="text"]').focus();
+            }
+            if (e.key === 'F12') {
+                e.preventDefault();
+                alert('Iniciando proceso de cobro...');
+            }
+        });
+
+        // Add visual feedback to product buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.opacity = '0.8';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.opacity = '1';
+            });
+        });
+    </script>
+
+
+</body></html>

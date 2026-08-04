@@ -22,6 +22,7 @@ public class JwtTokenService(IOptions<JwtSettings> options) : ITokenService
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+            new("nombre", usuario.Nombre),
             new("empresa_id", usuario.EmpresaId.ToString()),
             new("permisos_version", usuario.PermisosVersion.ToString()),
             new("debe_cambiar_password", usuario.DebeCambiarPassword ? "true" : "false"),
