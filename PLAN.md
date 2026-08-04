@@ -288,6 +288,26 @@ FASE 9, sesión 2 — receptor de webhooks y UI. Requiere 9.1 aprobada.
    el SiatFakeAdapter sin credenciales reales.
 7. Al terminar: reporte de cierre de la Fase 9 y del PLAN completo.
 
+## Backlog futuro (fuera de las fases numeradas)
+
+**Reset de contraseña self-service ("¿Olvidaste tu contraseña?")**
+Hoy el link del login solo indica "contacta a tu administrador" — reusa el
+flujo ya existente de `UsuariosView` (admin.usuarios → restablecer
+contraseña → temporal + `DebeCambiarPassword`), sin código nuevo. Un reset
+self-service de verdad requiere:
+- Un canal capaz de entregar el mensaje sin intervención humana. Hoy
+  `WaLinkSender` (Fase 5) genera un enlace wa.me que el cajero debe tocar
+  manualmente — no sirve para esto. Depende de que se construya
+  `WhatsappCloudApiSender` (Meta Cloud API, ya previsto en Fase 5 pero no
+  implementado: requiere cuenta de negocio y plantillas pre-aprobadas por
+  Meta) o de agregar email (campo `Email` en `Usuario` + proveedor SMTP).
+- Tabla de tokens de reset (mismo patrón que `RefreshToken`: hash,
+  expiración corta, un solo uso).
+- `POST /auth/solicitar-reset` y `POST /auth/confirmar-reset`, con
+  respuesta idéntica exista o no el usuario (no filtrar información) y
+  rate limiting (grupo `auth` ya existente).
+- Invalidar refresh tokens vigentes del usuario al confirmar el reset.
+
 ## Recordatorios permanentes
 - Una fase por sesión. Compilar y probar criterios ANTES de commit.
 - Parches mínimos; no tocar infraestructura compartida sin avisar.

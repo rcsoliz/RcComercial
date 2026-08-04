@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SysCenterS | Gestión de Inventario</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&amp;family=Instrument+Sans:wght@400;500;700&amp;family=Spline+Sans+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "marca-tenue": "#DCE5E1",
+                    "primary-fixed": "#beece4",
+                    "inverse-surface": "#30312d",
+                    "noche-linea": "#363D3A",
+                    "secondary-fixed-dim": "#e9c07e",
+                    "sobre-marca": "#F2F5F3",
+                    "on-primary-container": "#b9e7df",
+                    "inverse-on-surface": "#f2f1eb",
+                    "surface-dim": "#dbdad4",
+                    "on-primary-fixed": "#00201d",
+                    "secondary": "#785921",
+                    "on-secondary-fixed-variant": "#5d420b",
+                    "on-secondary-container": "#785a22",
+                    "tertiary-fixed": "#beeecb",
+                    "on-primary": "#ffffff",
+                    "on-surface-variant": "#404847",
+                    "surface-variant": "#e3e3dd",
+                    "on-error": "#ffffff",
+                    "outline": "#717977",
+                    "primary-fixed-dim": "#a2cfc8",
+                    "on-tertiary-container": "#b9e9c6",
+                    "tertiary-fixed-dim": "#a2d2b0",
+                    "secondary-container": "#fed490",
+                    "papel": "#EDECE6",
+                    "error-container": "#ffdad6",
+                    "outline-variant": "#c0c8c6",
+                    "secondary-fixed": "#ffdeab",
+                    "surface-container-high": "#e9e8e2",
+                    "surface-tint": "#3b6660",
+                    "surface-container-highest": "#e3e3dd",
+                    "on-background": "#1b1c19",
+                    "superficie-2": "#E4E3DC",
+                    "surface": "#fbf9f3",
+                    "on-tertiary-fixed": "#002110",
+                    "on-surface": "#1b1c19",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#3f6b4f",
+                    "superficie": "#F6F5F0",
+                    "on-secondary-fixed": "#271900",
+                    "primary-container": "#3e6963",
+                    "linea": "#D4D3CA",
+                    "background": "#fbf9f3",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#a2cfc8",
+                    "tinta": "#2B302D",
+                    "on-tertiary-fixed-variant": "#244f35",
+                    "on-primary-fixed-variant": "#224e48",
+                    "noche-superficie": "#262C29",
+                    "tinta-2": "#5F6763",
+                    "noche-papel": "#1D2220",
+                    "surface-container-low": "#f5f4ee",
+                    "error": "#ba1a1a",
+                    "tinta-3": "#8B928D",
+                    "tertiary": "#275338",
+                    "surface-bright": "#fbf9f3",
+                    "primary": "#25514b",
+                    "surface-container": "#efeee8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "0.25rem",
+                    "base": "4px",
+                    "md": "1rem",
+                    "margin-mobile": "16px",
+                    "xl": "2.5rem",
+                    "gutter": "16px",
+                    "sm": "0.5rem",
+                    "margin-desktop": "24px",
+                    "lg": "1.5rem"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Bricolage Grotesque"],
+                    "display-hero": ["Bricolage Grotesque"],
+                    "data-mono": ["Spline Sans Mono"],
+                    "body-md": ["Instrument Sans"],
+                    "label-caps": ["Instrument Sans"],
+                    "headline-sm": ["Bricolage Grotesque"],
+                    "body-sm": ["Instrument Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "display-hero": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "data-mono": ["13px", {"lineHeight": "1", "fontWeight": "500"}],
+                    "body-md": ["15px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.06em", "fontWeight": "700"}],
+                    "headline-sm": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "body-sm": ["13.6px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #EDECE6; color: #1b1c19; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        /* Ticket Signature Effect */
+        .ticket-edge {
+            position: relative;
+            background: #F6F5F0;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.04));
+        }
+        .ticket-edge::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background-image: radial-gradient(circle at 4px 8px, transparent 4px, #F6F5F0 4px);
+            background-size: 8px 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4D3CA; border-radius: 10px; }
+
+        @media (max-width: 900px) {
+            .sidebar-hide { display: none; }
+            .content-expand { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-hidden">
+<!-- Sidebar Navigation (SideNavBar) -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r border-linea bg-papel flex flex-col z-40 sidebar-hide">
+<!-- Brand Header -->
+<div class="px-6 py-8">
+<h1 class="font-headline-sm text-headline-sm text-primary font-bold">SysCenterS</h1>
+<p class="text-tinta-3 text-xs uppercase tracking-widest mt-1">Pharma POS v1.0</p>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-tinta-2 hover:bg-superficie-2 transition-colors" href="#">
+<span class="material-symbols-outlined">point_of_sale</span>
+<span>POS Terminal</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-tinta-2 hover:bg-superficie-2 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-marca-tenue text-primary font-bold" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-tinta-2 hover:bg-superficie-2 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Clients</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-tinta-2 hover:bg-superficie-2 transition-colors" href="#">
+<span class="material-symbols-outlined">manage_accounts</span>
+<span>User Management</span>
+</a>
+</nav>
+<!-- User Section Footer -->
+<div class="p-4 border-t border-linea">
+<div class="flex items-center gap-3 p-2">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">PO</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold truncate">Pharmacy Owner</p>
+<p class="text-[10px] text-tinta-3 truncate">ID: #8829-X</p>
+</div>
+<button class="text-tinta-3 hover:text-error transition-colors">
+<span class="material-symbols-outlined text-lg">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 h-screen flex flex-col bg-background content-expand transition-all duration-300">
+<!-- TopNavBar Anchor -->
+<header class="h-16 flex items-center justify-between px-margin-desktop bg-superficie border-b border-linea">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-tinta-3">search</span>
+<input class="w-full bg-superficie-2 border-none rounded-lg pl-10 pr-20 py-2 focus:ring-1 focus:ring-primary text-sm" placeholder="Buscar productos, SKUs..." type="text"/>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-40 pointer-events-none">
+<span class="text-[10px] border border-tinta-3 px-1 rounded font-data-mono">KBD</span>
+<span class="text-[10px] border border-tinta-3 px-1 rounded font-data-mono">F2</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary text-white">Activos</button>
+<button class="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-superficie-2 text-tinta-2 hover:bg-linea transition-colors">Inactivos</button>
+<button class="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-error-container text-on-error-container">Stock Bajo</button>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative text-tinta-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-tinta-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-linea"></div>
+<button class="bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-lg">add</span>
+                    Nuevo Producto
+                </button>
+</div>
+</header>
+<div class="flex-1 overflow-hidden flex flex-col p-6 space-y-6">
+<!-- Summary Stats Bar -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-superficie border border-linea p-5 rounded-xl flex items-center justify-between">
+<div>
+<p class="text-tinta-3 font-label-caps text-label-caps mb-1">TOTAL PRODUCTOS (SKUs)</p>
+<h2 class="font-headline-lg text-headline-lg text-tinta">1,248</h2>
+</div>
+<div class="w-12 h-12 rounded-full bg-marca-tenue flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">inventory</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-superficie border border-linea p-5 rounded-xl flex items-center justify-between">
+<div>
+<p class="text-tinta-3 font-label-caps text-label-caps mb-1">ALERTAS STOCK BAJO</p>
+<h2 class="font-headline-lg text-headline-lg text-error">12</h2>
+</div>
+<div class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined">warning</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-superficie border border-linea p-5 rounded-xl flex items-center justify-between">
+<div>
+<p class="text-tinta-3 font-label-caps text-label-caps mb-1">VALUACIÓN TOTAL</p>
+<h2 class="font-headline-lg text-headline-lg text-tinta">$42,850.00</h2>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+</div>
+</section>
+<!-- Table Layout -->
+<div class="flex-1 flex gap-6 overflow-hidden">
+<!-- Main Inventory Grid -->
+<section class="flex-1 bg-superficie rounded-xl border border-linea flex flex-col overflow-hidden shadow-sm">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-superficie border-b border-linea z-10">
+<tr>
+<th class="p-4 font-label-caps text-label-caps text-tinta-3">PRODUCTO &amp; SKU</th>
+<th class="p-4 font-label-caps text-label-caps text-tinta-3">CATEGORÍA / MARCA</th>
+<th class="p-4 font-label-caps text-label-caps text-tinta-3 text-right">PRECIO UNIT.</th>
+<th class="p-4 font-label-caps text-label-caps text-tinta-3">STOCK NIVEL</th>
+<th class="p-4 font-label-caps text-label-caps text-tinta-3">ESTADO</th>
+<th class="p-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-linea">
+<!-- Row 1 -->
+<tr class="hover:bg-marca-tenue transition-colors group">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-superficie-2 flex-shrink-0">
+<img class="w-full h-full object-cover rounded" data-alt="Close-up photograph of professional pharmaceutical packaging for Paracetamol 500mg, clean medical design, studio lighting, soft neutral background, focus on typography and high-end texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_WOpKf9EMgVrHHdNc55PNkh_PE6ApnRMA_j7osi6GFkFdqtfQkwqdoZEpXJd9H4ONKUpr66sMlodWEpZXqPCpW-gBK6gW9Qsao67S3kpdSOhzdiJISpb4i8guYN-EombzFn1nFUP2qeziD85gXeUfKvK7DbPwAyKPUoGiPSCTP27AglUam4q27ebMJ1SNT8escO2nlfSImbr7NoiG8hb9eBRsb5onkeL5_vp9-o9_XVz60WlUI-F8"/>
+</div>
+<div>
+<p class="font-bold text-tinta">Paracetamol 500mg</p>
+<p class="text-xs font-data-mono text-tinta-3">SKU: PH-772910</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<p class="text-sm font-semibold">Analgésicos</p>
+<p class="text-xs text-tinta-3">Bayer Pharma</p>
+</td>
+<td class="p-4 text-right font-data-mono text-sm">$12.50</td>
+<td class="p-4">
+<div class="w-32">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold">450 u.</span>
+<span class="text-[10px] text-tinta-3">Normal</span>
+</div>
+<div class="h-1.5 w-full bg-superficie-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 85%"></div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-marca-tenue text-primary">Activo</span>
+</td>
+<td class="p-4 text-right">
+<button class="text-tinta-3 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 (Low Stock) -->
+<tr class="hover:bg-marca-tenue transition-colors group bg-error-container/5">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-superficie-2 flex-shrink-0">
+<img class="w-full h-full object-cover rounded" data-alt="High-quality medical macro photography of insulin vials in a glass-door refrigerator, soft sterile blue lighting, realistic pharmacy storage environment, emphasizing professional logistics and healthcare precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4WWDSu3gnmYXclnnOMUq035bjP0hqVpjHKSvO3PC9W6yhP_O4DzVCNyEd3q9zneXiTKUayNljwjcLGf85CFZgh73VQEFgZ6_Gl5RuqWjvA2-UlWBp7vjWbHRXq-l6Biu5oi59kLPb_wSuJTkTgzZqtoob6rHuUD8XdtV4g775bStovJ0ps-6SxJtlN3qkAN3FncMenAvZh5oCe8VpIUyEWvI8xrPNgyt-7wVI7kPmmvp0X57QkRSW"/>
+</div>
+<div>
+<p class="font-bold text-tinta">Insulina Glargina</p>
+<p class="text-xs font-data-mono text-tinta-3">SKU: PH-110293</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<p class="text-sm font-semibold">Diabetes</p>
+<p class="text-xs text-tinta-3">Sanofi</p>
+</td>
+<td class="p-4 text-right font-data-mono text-sm">$89.90</td>
+<td class="p-4">
+<div class="w-32">
+<div class="flex justify-between items-center mb-1 text-error">
+<span class="text-[10px] font-bold">8 u.</span>
+<span class="text-[10px]">Bajo</span>
+</div>
+<div class="h-1.5 w-full bg-error-container rounded-full overflow-hidden">
+<div class="h-full bg-error" style="width: 15%"></div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-error-container text-error">Stock Bajo</span>
+</td>
+<td class="p-4 text-right">
+<button class="text-tinta-3 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-marca-tenue transition-colors group">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-superficie-2 flex-shrink-0">
+<img class="w-full h-full object-cover rounded" data-alt="Minimalist top-down view of generic white pill bottles with clean black and white labels on a wooden pharmacy counter, warm natural lighting, professional medical atmosphere, serene and organized." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjyzY5GiprlrODI4dECmlUH1J_OWrqxtx2nXm3zGdpLgggeS-M3-1_3LxUxhinyqBTHerC0U7PRvgVkAyk49SWbLJ7IAz9HMo-9TGsSKl0wUJ7ykVdGNfOMwV0B-cCb34-ujgb64brnBFGjExJ-7TOiDv1uYmg8Cfs-KksT0JDm1BnHVouMRf38Lng6PhNMp1HabBrp_LXzLVpb_tNpzgzzCtznpmj-JNrnpJqxkJQMHWRk5Asl-6M"/>
+</div>
+<div>
+<p class="font-bold text-tinta">Amoxicilina 250mg</p>
+<p class="text-xs font-data-mono text-tinta-3">SKU: PH-445822</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<p class="text-sm font-semibold">Antibióticos</p>
+<p class="text-xs text-tinta-3">Genfar</p>
+</td>
+<td class="p-4 text-right font-data-mono text-sm">$6.20</td>
+<td class="p-4">
+<div class="w-32">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold">120 u.</span>
+<span class="text-[10px] text-tinta-3">Normal</span>
+</div>
+<div class="h-1.5 w-full bg-superficie-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 40%"></div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-marca-tenue text-primary">Activo</span>
+</td>
+<td class="p-4 text-right">
+<button class="text-tinta-3 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 (Disabled) -->
+<tr class="hover:bg-marca-tenue transition-colors group opacity-60">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-superficie-2 flex-shrink-0 grayscale">
+<img class="w-full h-full object-cover rounded" data-alt="A macro shot of medical syrup bottles with droppers, clean glass texture, soft shadows on a beige background, pharma-grade precision, warm muted tones, professional laboratory style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR4KG3-6RTbfW-RYllfXBKkZgr8aSNo5xDEBx1NKZIhsHYtMnH5LS2sRcfZVRJ1i1OHLR8SCxpkX72qpIgYP1gcd_xRh6Q3NLHLKAxIVTBbMgy4ABG9KFWHzFCYlHwzJpKb1mwntYlMC-MJGb-jE-DW_sDDxfRrqbCp9J5HWWaCDaut3cWHTUN2uQ31nP7GGNJyzvGcpbYlQncvItJdZntllR50JHKJNrElzXsVqD99Wzsu-n7j9BX"/>
+</div>
+<div>
+<p class="font-bold text-tinta">Jarabe Antitusivo 120ml</p>
+<p class="text-xs font-data-mono text-tinta-3">SKU: PH-990182</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<p class="text-sm font-semibold">Respiratorio</p>
+<p class="text-xs text-tinta-3">Mk Labs</p>
+</td>
+<td class="p-4 text-right font-data-mono text-sm">$15.75</td>
+<td class="p-4">
+<div class="w-32">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold">0 u.</span>
+<span class="text-[10px] text-tinta-3">Sin Stock</span>
+</div>
+<div class="h-1.5 w-full bg-superficie-2 rounded-full overflow-hidden">
+<div class="h-full bg-tinta-3" style="width: 0%"></div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-superficie-2 text-tinta-3">Desactivado</span>
+</td>
+<td class="p-4 text-right">
+<button class="text-tinta-3 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="p-4 border-t border-linea bg-superficie flex items-center justify-between">
+<p class="text-xs text-tinta-3">Mostrando 1-10 de 1,248 productos</p>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-linea text-tinta-2 hover:bg-superficie-2"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white text-xs font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-linea text-tinta-2 hover:bg-superficie-2 text-xs font-bold">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-linea text-tinta-2 hover:bg-superficie-2 text-xs font-bold">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-linea text-tinta-2 hover:bg-superficie-2"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</section>
+<!-- Sidebar Log (The Ticket) -->
+<aside class="w-80 flex flex-col gap-4 sidebar-hide">
+<div class="ticket-edge p-6 rounded-t-sm">
+<h3 class="font-headline-sm text-headline-sm text-tinta mb-4">Registro de Movimientos</h3>
+<div class="space-y-6">
+<div class="relative pl-4 border-l-2 border-primary/20">
+<div class="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-primary"></div>
+<p class="text-[10px] text-tinta-3 font-data-mono uppercase">HACE 10 MIN</p>
+<p class="text-sm font-bold">Venta POS #8821</p>
+<p class="text-xs text-tinta-2">-2 Paracetamol 500mg</p>
+<p class="text-xs text-tinta-3">Operador: J. Pérez</p>
+</div>
+<div class="relative pl-4 border-l-2 border-secondary/20">
+<div class="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-secondary"></div>
+<p class="text-[10px] text-tinta-3 font-data-mono uppercase">HOY, 09:15 AM</p>
+<p class="text-sm font-bold">Reabastecimiento</p>
+<p class="text-xs text-tinta-2">+50 Insulina Glargina</p>
+<p class="text-xs text-tinta-3">Proveedor: Sanofi Dist.</p>
+</div>
+<div class="border-t border-dashed border-linea my-4"></div>
+<div class="relative pl-4 border-l-2 border-error/20">
+<div class="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-error"></div>
+<p class="text-[10px] text-tinta-3 font-data-mono uppercase">AYER, 18:40 PM</p>
+<p class="text-sm font-bold text-error">Ajuste de Stock</p>
+<p class="text-xs text-tinta-2">-5 Amoxicilina (Vencido)</p>
+<p class="text-xs text-tinta-3">Aprobado por: Admin</p>
+</div>
+</div>
+<div class="mt-8 bg-superficie-2 p-3 rounded text-center">
+<button class="text-xs font-bold text-primary hover:underline">Ver Historial Completo</button>
+</div>
+</div>
+<div class="bg-superficie border border-linea p-4 rounded-xl flex items-center gap-4">
+<img alt="Reference UI" class="w-16 h-16 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4H_HJT-smFvOL74CMt3w73Gyf-Udou7KHW3FcRphcjwOp7extmSsDoaLICxQR4zmlv9pRB1g5mfUZ6-2NB2Zud-GeO6L9_AA4lW6kiitJEIaG41oDGIhLdMy4VoXTzJMJ8ytg8o7tDE9YrLl18TYNOOXPEefh93s7irkoe95mZ2nZdpaGlvcfoqRIcHg5Vga3lfaQaEpe6nsGYUY4Z4sjiAEkQr7PVJtQoVH3FVIj7cCQZg65NZBDU1FynXkt3VN71w"/>
+<div>
+<p class="text-[10px] font-bold text-tinta-3 uppercase">Vista Previa</p>
+<p class="text-xs text-tinta-2 leading-tight">Referencia del sistema anterior para migración de datos.</p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+<!-- Mobile Navigation (BottomNavBar) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-superficie border-t border-linea shadow-md">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-1 px-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory</span>
+<span class="font-label-caps text-[9px] uppercase mt-1">Stock</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tinta-2 p-1 px-3">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-caps text-[9px] uppercase mt-1">Sale</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tinta-2 p-1 px-3">
+<span class="material-symbols-outlined">trending_up</span>
+<span class="font-label-caps text-[9px] uppercase mt-1">Trends</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tinta-2 p-1 px-3">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-[9px] uppercase mt-1">User</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction: Esc key clears search or focus
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                document.querySelector('input[type="text"]').focus();
+            }
+        });
+        
+        // Tab switching logic (Simulated)
+        const filterButtons = document.querySelectorAll('button[class*="rounded-full"]');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    if (!b.classList.contains('bg-error-container')) {
+                        b.classList.add('bg-superficie-2', 'text-tinta-2');
+                    }
+                });
+                if (!btn.classList.contains('bg-error-container')) {
+                    btn.classList.add('bg-primary', 'text-white');
+                    btn.classList.remove('bg-superficie-2', 'text-tinta-2');
+                }
+            });
+        });
+    </script>
+</body></html>

@@ -1,8 +1,9 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { LogOut, ShieldAlert } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
+import { obtenerEmpresaActual } from '@/api/empresa'
 import TemaToggle from '@/components/ui/TemaToggle.vue'
 import IndicadorConexion from '@/components/ui/IndicadorConexion.vue'
 import { navegacion } from './navegacion'
@@ -16,6 +17,18 @@ const navegacionVisible = computed(() =>
 )
 const navegacionMovil = computed(() => navegacionVisible.value.filter((item) => !item.soloEscritorio))
 
+// Nombre real de la empresa del usuario logueado, no un texto fijo — cada
+// tenant debe ver el suyo (incluida "SysCenterS Plataforma" si es superadmin).
+const nombreEmpresa = ref('')
+onMounted(async () => {
+  try {
+    const empresa = await obtenerEmpresaActual()
+    nombreEmpresa.value = empresa.nombre
+  } catch {
+    // Sin conexión al montar el shell: se deja vacío, no es crítico.
+  }
+})
+
 function cerrarSesion() {
   auth.cerrarSesion()
   router.push('/login')
@@ -26,7 +39,7 @@ function cerrarSesion() {
   <div class="min-h-dvh bg-papel">
     <aside class="fixed left-0 top-0 hidden h-dvh w-64 flex-col border-r border-linea bg-papel md:flex">
       <div class="flex flex-col gap-3 p-6">
-        <h1 class="font-display text-[17px] font-bold text-marca">SysCenterS</h1>
+        <h1 class="font-display text-[17px] font-bold text-marca">{{ nombreEmpresa || 'SysCenterS' }}</h1>
         <IndicadorConexion />
       </div>
 

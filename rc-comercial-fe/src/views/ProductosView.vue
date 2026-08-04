@@ -170,7 +170,7 @@ onMounted(ejecutarBusqueda)
       </button>
     </div>
 
-    <div v-else class="overflow-hidden rounded border border-linea bg-superficie">
+    <div v-else class="overflow-hidden rounded border border-linea bg-superficie shadow">
       <div class="overflow-x-auto">
         <table class="w-full border-collapse text-left">
           <thead>
@@ -218,8 +218,7 @@ onMounted(ejecutarBusqueda)
                       class="h-full rounded-chip"
                       :class="{
                         'bg-marca': estadoStock(p) === 'normal',
-                        'bg-aviso': estadoStock(p) === 'bajo',
-                        'bg-peligro': estadoStock(p) === 'agotado',
+                        'bg-peligro': estadoStock(p) === 'bajo' || estadoStock(p) === 'agotado',
                       }"
                       :style="{ width: porcentajeStock(p) + '%' }"
                     ></div>
@@ -229,15 +228,14 @@ onMounted(ejecutarBusqueda)
                       class="tabular-nums text-[13.6px] font-bold"
                       :class="{
                         'text-tinta': estadoStock(p) === 'normal',
-                        'text-aviso': estadoStock(p) === 'bajo',
-                        'text-peligro': estadoStock(p) === 'agotado',
+                        'text-peligro': estadoStock(p) === 'bajo' || estadoStock(p) === 'agotado',
                       }"
                     >
                       {{ p.stockTotal }}
                     </span>
                     <span
                       v-if="estadoStock(p) === 'bajo'"
-                      class="block text-[10px] font-bold uppercase tracking-wide text-aviso"
+                      class="block text-[10px] font-bold uppercase tracking-wide text-peligro"
                     >
                       Stock bajo
                     </span>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Instrument+Sans:wght@400;500;700&family=Spline+Sans+Mono:wght@500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@100..900&family=Instrument+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .ticket-jagged-edge {
+            position: relative;
+            background: var(--tw-bg-opacity);
+        }
+
+        .ticket-jagged-edge::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-image: linear-gradient(135deg, transparent 33.33%, #F6F5F0 33.33%, #F6F5F0 66.66%, transparent 66.66%), 
+                              linear-gradient(45deg, transparent 33.33%, #F6F5F0 33.33%, #F6F5F0 66.66%, transparent 66.66%);
+            background-size: 12px 24px;
+            z-index: 10;
+        }
+
+        .inner-glow {
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.03);
+        }
+        
+        body {
+            background-color: #EDECE6; /* papel */
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "papel": "#EDECE6",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#dbdad4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#b9e9c6",
+                        "secondary-fixed-dim": "#e9c07e",
+                        "tinta-2": "#5F6763",
+                        "tinta-3": "#8B928D",
+                        "linea": "#D4D3CA",
+                        "inverse-primary": "#a2cfc8",
+                        "on-surface-variant": "#404847",
+                        "on-primary-fixed-variant": "#224e48",
+                        "tinta": "#2B302D",
+                        "tertiary-container": "#3f6b4f",
+                        "surface-tint": "#3b6660",
+                        "secondary": "#785921",
+                        "background": "#fbf9f3",
+                        "on-primary-container": "#b9e7df",
+                        "superficie": "#F6F5F0",
+                        "primary-container": "#3e6963",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#a2cfc8",
+                        "inverse-on-surface": "#f2f1eb",
+                        "noche-linea": "#363D3A",
+                        "noche-papel": "#1D2220",
+                        "surface-variant": "#e3e3dd",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5d420b",
+                        "outline": "#717977",
+                        "on-tertiary-fixed-variant": "#244f35",
+                        "on-secondary": "#ffffff",
+                        "sobre-marca": "#F2F5F3",
+                        "surface-container": "#efeee8",
+                        "superficie-2": "#E4E3DC",
+                        "marca-tenue": "#DCE5E1",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#a2d2b0",
+                        "surface-container-low": "#f5f4ee",
+                        "primary-fixed": "#beece4",
+                        "on-secondary-fixed": "#271900",
+                        "noche-superficie": "#262C29",
+                        "tertiary-fixed": "#beeecb",
+                        "primary": "#25514b",
+                        "on-secondary-container": "#785a22",
+                        "tertiary": "#275338",
+                        "on-background": "#1b1c19",
+                        "inverse-surface": "#30312d",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#1b1c19",
+                        "secondary-container": "#fed490",
+                        "outline-variant": "#c0c8c6",
+                        "on-tertiary-fixed": "#002110",
+                        "surface-bright": "#fbf9f3",
+                        "surface-container-high": "#e9e8e2",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#ffdeab",
+                        "surface": "#fbf9f3",
+                        "surface-container-highest": "#e3e3dd",
+                        "on-primary-fixed": "#00201d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "24px",
+                        "sm": "0.5rem",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "xs": "0.25rem",
+                        "xl": "2.5rem",
+                        "lg": "1.5rem",
+                        "md": "1rem",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["Spline Sans Mono"],
+                        "headline-lg": ["Bricolage Grotesque"],
+                        "display-hero": ["Bricolage Grotesque"],
+                        "body-sm": ["Instrument Sans"],
+                        "headline-sm": ["Bricolage Grotesque"],
+                        "body-md": ["Instrument Sans"],
+                        "label-caps": ["Instrument Sans"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["13px", {"lineHeight": "1", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "display-hero": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["13.6px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-sm": ["17px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "body-md": ["15px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.06em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop font-body-md text-tinta selection:bg-primary-container selection:text-on-primary-container">
+<main class="w-full max-w-[440px] relative">
+<!-- Decoration / Atmospheric Element -->
+<div class="absolute -top-16 -left-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-16 -right-16 w-64 h-64 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Main Card -->
+<div class="ticket-jagged-edge bg-superficie rounded-t-lg shadow-sm overflow-visible border-x border-t border-linea relative z-10 transition-all duration-300">
+<!-- Header Section -->
+<div class="px-8 pt-10 pb-6 text-center">
+<div class="mb-6 flex justify-center">
+<div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center shadow-md rotate-3 hover:rotate-0 transition-transform duration-500 cursor-default">
+<span class="font-headline-lg text-white text-[32px]">S</span>
+</div>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">SysCenterS</h1>
+<p class="font-body-sm text-tinta-3 mt-1 uppercase tracking-widest text-[10px]">Portal de Gestión Farmacéutica</p>
+</div>
+<!-- Form Section -->
+<form action="#" class="px-8 pb-12 space-y-5" method="POST" onsubmit="return false">
+<div class="space-y-1.5">
+<label class="font-label-caps text-label-caps text-tinta-2 ml-1" for="username">Usuario</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-tinta-3 text-[20px]">person</span>
+<input class="w-full pl-10 pr-4 py-3 bg-superficie-2 border border-transparent rounded-lg font-body-md text-tinta placeholder:text-tinta-3 focus:bg-superficie focus:border-primary focus:ring-0 transition-all duration-200 inner-glow" id="username" name="username" placeholder="ej. farmaceutico_01" type="text"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center px-1">
+<label class="font-label-caps text-label-caps text-tinta-2" for="password">Contraseña</label>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-tinta-3 text-[20px]">lock</span>
+<input class="w-full pl-10 pr-12 py-3 bg-superficie-2 border border-error/40 rounded-lg font-body-md text-tinta placeholder:text-tinta-3 focus:bg-superficie focus:border-error focus:ring-0 transition-all duration-200 inner-glow" id="password" name="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-tinta-3 hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<!-- Error State Message -->
+<div class="flex items-start gap-2 mt-2 bg-error-container/30 p-3 rounded-lg border border-error/10">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0">error</span>
+<p class="font-body-sm text-error text-[13px] leading-snug">
+                            La contraseña no es correcta. Te quedan 3 intentos.
+                        </p>
+</div>
+</div>
+<div class="pt-2">
+<button class="w-full bg-primary text-white py-3.5 rounded-lg font-headline-sm text-headline-sm shadow-md hover:bg-primary/90 active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2 group" type="submit">
+                        Acceder al Sistema
+                        <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="flex flex-col items-center gap-4 pt-4">
+<a class="font-body-sm text-primary hover:text-secondary underline underline-offset-4 decoration-primary/20 transition-colors" href="#">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+<div class="flex items-center gap-2 w-full">
+<div class="h-px bg-linea grow"></div>
+<span class="font-data-mono text-[10px] text-tinta-3 uppercase">Ver: 2.4.0</span>
+<div class="h-px bg-linea grow"></div>
+</div>
+</div>
+</form>
+</div>
+<!-- Footer Visual Reference -->
+<div class="mt-12 text-center">
+<p class="font-body-sm text-tinta-3 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">security</span>
+                Conexión segura cifrada de punto a punto
+            </p>
+<div class="mt-8 flex justify-center gap-6 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+<img class="h-6" data-alt="A minimalist professional logo of a healthcare certification body, vector style, monochromatic dark gray on a warm light background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJzAQU2m1qmCUwzb7jWV0uSblU5oJ4SmDpyr2gEiqe2X81Ywsp3-u42zfKhFn7lsLjsu5TVWRk-EQAP22ynepKke0_JWewMy6F9TCVGw947i3CwhXOGufMAxRCPzMuw6JnWblBY7nxdiNJjtOLrMyXauxAD0MHzuAm3a39yvL_tnznCZpSSGhJd5lQa7GT89Gf_4Hr2AIAOqotqt7DjR-D_Af8BaqYumH7x091n3OIT7GuBFBr2afLRvFSPyLxpVJaAoEuGiHtBoU"/>
+<img class="h-6" data-alt="A clean, modern technical stamp showing ISO 27001 certification, high-quality vector graphic, utilitarian and corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9_nSh4jc-1xr-7jIUhFQNQmiGglUsQDUBNGLihrW7UJSGXljzTKBg1or9W8NjwKezNXEITgavcRHRmpqUu9odBSKcR5ucxpcLZ-GF9G3P0XpSiiOKKhPo7b1CxcFfac_iLRdqTgTMUGBoXdu7A7vYT1bd2v5n89o2HE3u899AHv4yEumy09Eyd3haRtIFeJhp7yAvEpRFW6tD5gb1MOBHfjOxbEWRFMPkvv7O7FWDY2LVggtZd4n3OtjbeTRaVwDrUIE02tWzGuk"/>
+</div>
+</div>
+</main>
+<!-- Background Decoration Script for subtle movement -->
+<script>
+        document.addEventListener('mousemove', (e) => {
+            const card = document.querySelector('.ticket-jagged-edge');
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Subtle parallax or glow effect can be added here if desired
+            // For now, staying true to "Low Visual Consumption"
+        });
+
+        // Basic toggle for password visibility
+        const toggleBtn = document.querySelector('button[type="button"]');
+        const passInput = document.getElementById('password');
+        
+        toggleBtn.addEventListener('click', () => {
+            const isPass = passInput.getAttribute('type') === 'password';
+            passInput.setAttribute('type', isPass ? 'text' : 'password');
+            toggleBtn.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
+        });
+    </script>
+</body></html>
