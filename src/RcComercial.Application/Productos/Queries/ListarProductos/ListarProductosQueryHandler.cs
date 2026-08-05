@@ -51,7 +51,7 @@ public class ListarProductosQueryHandler(IApplicationDbContext db)
             .Select(p => new
             {
                 p.Id, p.Codigo, p.CodigoBarras, p.Nombre, p.PrecioBase, p.Activo,
-                p.CategoriaId, p.MarcaId, p.StockMinimo,
+                p.CategoriaId, p.MarcaId, p.StockMinimo, p.EsServicio,
             })
             .ToListAsync(ct);
 
@@ -78,7 +78,7 @@ public class ListarProductosQueryHandler(IApplicationDbContext db)
                 p.Id, p.Codigo, p.CodigoBarras, p.Nombre, p.PrecioBase, p.Activo,
                 p.CategoriaId is { } catId ? categorias.GetValueOrDefault(catId) : null,
                 p.MarcaId is { } marId ? marcas.GetValueOrDefault(marId) : null,
-                stockPorProducto.GetValueOrDefault(p.Id), p.StockMinimo))
+                stockPorProducto.GetValueOrDefault(p.Id), p.StockMinimo, p.EsServicio))
             .ToList();
 
         return new ListarProductosResultDto(items, total, pagina, TamanoPagina);

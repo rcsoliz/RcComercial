@@ -35,4 +35,5 @@ public record CrearVentaCommand(
     List<CrearVentaDetalleCommand> Detalles,
     List<CrearVentaPagoCommand> Pagos,
     CrearVentaRecetaCommand? Receta,
-    string? Numero = null) : IRequest<VentaDto>;
+    string? Numero = null,
+    Guid? VehiculoId = null) : IRequest<VentaDto>;

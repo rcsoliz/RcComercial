@@ -10,5 +10,9 @@ public class Rubro
     public bool UsaControlados { get; set; }
     public bool UsaFichaFarmacia { get; set; }
     public bool UsaDecimalesPorDefecto { get; set; }
+    // Negocios que venden principalmente servicios (talleres, consultorías):
+    // el frontend usa esto para mostrar "Servicio" en vez de "Producto" en
+    // menú/listado/formulario, y ocultar la columna de stock (no aplica).
+    public bool EsTipoServicio { get; set; }
     public bool Activo { get; set; } = true;
 }

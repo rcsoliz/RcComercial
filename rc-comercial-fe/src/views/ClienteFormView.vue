@@ -6,11 +6,20 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { toast } from 'vue-sonner'
 import dayjs from 'dayjs'
-import { Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { Permisos } from '@/utils/permisos'
-import { crearCliente, desactivarCliente, editarCliente, listarVentasPorCliente, obtenerClientePorId } from '@/api/clientes'
+import {
+  crearCliente,
+  desactivarCliente,
+  editarCliente,
+  listarVehiculosPorCliente,
+  listarVentasPorCliente,
+  obtenerClientePorId,
+} from '@/api/clientes'
+import { desactivarVehiculo } from '@/api/vehiculos'
 import ModalDesactivar from '@/components/ui/ModalDesactivar.vue'
+import ModalVehiculo from '@/components/clientes/ModalVehiculo.vue'
 
 const props = defineProps({
   id: { type: String, default: null },
@@ -23,6 +32,7 @@ const esNuevo = computed(() => !props.id)
 const puedeGuardar = computed(() => auth.tienePermiso(Permisos.ClientesCrearEditar))
 const puedeEliminar = computed(() => auth.tienePermiso(Permisos.ClientesEliminar))
 const puedeVerHistorial = computed(() => auth.tienePermiso(Permisos.VentasVerHistorial))
+const puedeVerVehiculos = computed(() => auth.tienePermiso(Permisos.VehiculosCrearEditar))
 
 const cargando = ref(true)
 const guardando = ref(false)
@@ -30,6 +40,40 @@ const errorGeneral = ref('')
 const clienteOriginal = ref(null)
 const historialVentas = ref([])
 const cargandoHistorial = ref(false)
+
+const vehiculos = ref([])
+const cargandoVehiculos = ref(false)
+const mostrarModalVehiculo = ref(false)
+const vehiculoEditando = ref(null)
+
+async function cargarVehiculos() {
+  cargandoVehiculos.value = true
+  try {
+    vehiculos.value = await listarVehiculosPorCliente(props.id)
+  } finally {
+    cargandoVehiculos.value = false
+  }
+}
+
+function abrirNuevoVehiculo() {
+  vehiculoEditando.value = null
+  mostrarModalVehiculo.value = true
+}
+
+function abrirEditarVehiculo(v) {
+  vehiculoEditando.value = v
+  mostrarModalVehiculo.value = true
+}
+
+async function alDesactivarVehiculo(v) {
+  try {
+    await desactivarVehiculo(v.id)
+    toast.success('Vehículo desactivado.')
+    await cargarVehiculos()
+  } catch {
+    toast.error('No se pudo desactivar el vehículo.')
+  }
+}
 
 const mostrarDesactivar = ref(false)
 const mensajeDesactivar = computed(
@@ -81,6 +125,8 @@ async function cargarDatos() {
           .then((v) => (historialVentas.value = v))
           .finally(() => (cargandoHistorial.value = false))
       }
+
+      if (puedeVerVehiculos.value) cargarVehiculos()
     }
   } finally {
     cargando.value = false
@@ -272,6 +318,58 @@ onMounted(cargarDatos)
           </li>
         </ul>
       </div>
+
+      <!-- Vehículos: taller mecánico — historial de servicios por auto -->
+      <div v-if="!esNuevo && puedeVerVehiculos" class="mt-6 rounded border border-linea bg-superficie p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="font-display text-[15px] font-bold text-tinta">Vehículos</h3>
+          <button
+            type="button"
+            class="flex min-h-9 items-center gap-1.5 rounded-s border border-linea px-3 text-[12.6px] font-semibold text-tinta-2 hover:bg-superficie-2"
+            @click="abrirNuevoVehiculo"
+          >
+            <Plus class="h-4 w-4" />
+            Nuevo vehículo
+          </button>
+        </div>
+        <p v-if="cargandoVehiculos" class="text-[13.6px] text-tinta-2">Cargando…</p>
+        <p v-else-if="vehiculos.length === 0" class="text-[13.6px] text-tinta-2">
+          Este cliente todavía no tiene vehículos registrados.
+        </p>
+        <ul v-else class="flex flex-col gap-2">
+          <li
+            v-for="v in vehiculos"
+            :key="v.id"
+            class="flex items-center justify-between rounded-s border border-linea px-3 py-2.5 text-[13.6px]"
+          >
+            <div>
+              <span class="font-mono text-[12px] font-bold text-tinta">{{ v.placa }}</span>
+              <span v-if="v.marca || v.modelo" class="ml-2 text-tinta-2">
+                {{ [v.marca, v.modelo, v.anio].filter(Boolean).join(' ') }}
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <RouterLink
+                :to="{ name: 'vehiculos-historial', params: { id: v.id } }"
+                class="text-[12px] font-semibold text-marca hover:underline"
+              >
+                Ver historial
+              </RouterLink>
+              <button type="button" class="text-[12px] font-semibold text-marca hover:underline" @click="abrirEditarVehiculo(v)">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="flex min-h-9 min-w-9 items-center justify-center rounded-s text-tinta-3 hover:bg-peligro-tenue hover:text-peligro"
+                aria-label="Desactivar vehículo"
+                @click="alDesactivarVehiculo(v)"
+              >
+                <Trash2 class="h-4 w-4" />
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -282,5 +380,13 @@ onMounted(cargarDatos)
     :nombre="clienteOriginal.nombre"
     :mensaje="mensajeDesactivar"
     @confirmar="confirmarDesactivar"
+  />
+
+  <ModalVehiculo
+    v-if="!esNuevo"
+    v-model="mostrarModalVehiculo"
+    :cliente-id="props.id"
+    :vehiculo="vehiculoEditando"
+    @guardado="cargarVehiculos"
   />
 </template>

@@ -7,6 +7,14 @@ public static class EstadosVenta
     public const string Anulada = "ANULADA";
 }
 
+public static class EstadosProforma
+{
+    public const string Pendiente = "PENDIENTE";
+    public const string Aceptada = "ACEPTADA";
+    public const string Rechazada = "RECHAZADA";
+    public const string Convertida = "CONVERTIDA";
+}
+
 public static class EstadosSiat
 {
     public const string SinFactura = "SIN_FACTURA";
@@ -112,6 +120,10 @@ public static class Permisos
     public const string AdminRoles = "admin.roles";
     public const string AdminConfiguracion = "admin.configuracion";
     public const string AdminSucursales = "admin.sucursales";
+    public const string ProformasCrear = "proformas.crear";
+    public const string ProformasAnular = "proformas.anular";
+    public const string VehiculosCrearEditar = "vehiculos.crear_editar";
+    public const string VehiculosEliminar = "vehiculos.eliminar";
 }
 
 /// <summary>

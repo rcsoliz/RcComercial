@@ -43,6 +43,9 @@ public class AppDbContext(
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();
     public DbSet<Compra> Compras => Set<Compra>();
     public DbSet<CompraDetalle> CompraDetalles => Set<CompraDetalle>();
+    public DbSet<Vehiculo> Vehiculos => Set<Vehiculo>();
+    public DbSet<Proforma> Proformas => Set<Proforma>();
+    public DbSet<ProformaDetalle> ProformaDetalles => Set<ProformaDetalle>();
     // Ventas
     public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<SesionCaja> SesionesCaja => Set<SesionCaja>();

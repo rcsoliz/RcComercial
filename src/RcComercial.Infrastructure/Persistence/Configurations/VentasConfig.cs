@@ -13,6 +13,7 @@ public class VentaConfig : IEntityTypeConfiguration<Venta>
         b.HasIndex(x => new { x.SucursalId, x.Numero }).IsUnique();
         b.HasIndex(x => new { x.EmpresaId, x.Fecha });
         b.HasIndex(x => new { x.EmpresaId, x.Estado, x.Fecha });
+        b.HasIndex(x => x.VehiculoId);
         b.HasMany(x => x.Detalles).WithOne().HasForeignKey(x => x.VentaId);
         b.HasMany(x => x.Pagos).WithOne().HasForeignKey(x => x.VentaId);
         b.Property(x => x.Numero).HasMaxLength(20);

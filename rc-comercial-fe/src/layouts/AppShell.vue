@@ -21,14 +21,22 @@ const navegacionMovil = computed(() => navegacionVisible.value.filter((item) => 
 // Nombre real de la empresa del usuario logueado, no un texto fijo — cada
 // tenant debe ver el suyo (incluida "SysCenterS Plataforma" si es superadmin).
 const nombreEmpresa = ref('')
+// Rubros "de servicio" (talleres, consultorías) no manejan stock: el menú
+// dice "Servicios" en vez de "Productos" — ver navegacion.js (labelServicio).
+const esTipoServicio = ref(false)
 onMounted(async () => {
   try {
     const empresa = await obtenerEmpresaActual()
     nombreEmpresa.value = empresa.nombre
+    esTipoServicio.value = empresa.esTipoServicio
   } catch {
     // Sin conexión al montar el shell: se deja vacío, no es crítico.
   }
 })
+
+function etiquetaNav(item) {
+  return esTipoServicio.value && item.labelServicio ? item.labelServicio : item.label
+}
 
 function cerrarSesion() {
   auth.cerrarSesion()
@@ -53,7 +61,7 @@ function cerrarSesion() {
           :class="{ 'bg-marca-tenue font-bold text-marca': route.path.startsWith(item.to) }"
         >
           <component :is="item.icon" class="h-5 w-5" />
-          {{ item.label }}
+          {{ etiquetaNav(item) }}
         </RouterLink>
       </nav>
 
@@ -105,7 +113,7 @@ function cerrarSesion() {
         :class="{ 'bg-marca-tenue text-marca': route.path.startsWith(item.to) }"
       >
         <component :is="item.icon" class="h-5 w-5" />
-        <span class="text-[9px] font-bold uppercase tracking-wide">{{ item.label }}</span>
+        <span class="text-[9px] font-bold uppercase tracking-wide">{{ etiquetaNav(item) }}</span>
       </RouterLink>
     </nav>
   </div>

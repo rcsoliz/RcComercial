@@ -12,6 +12,7 @@ public class Venta : BaseEntity, ITenantEntity
     public Guid SucursalId { get; set; }
     public Guid? SesionCajaId { get; set; }
     public Guid? ClienteId { get; set; } // NULL = consumidor final S/N
+    public Guid? VehiculoId { get; set; } // taller mecánico: qué auto se atendió
     public string Numero { get; set; } = default!;
     public DateTimeOffset Fecha { get; set; } = DateTimeOffset.UtcNow;
     public string Estado { get; set; } = EstadosVenta.Completada;

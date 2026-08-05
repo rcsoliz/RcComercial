@@ -24,9 +24,11 @@ public class ActualizarProductoCommandHandler(IApplicationDbContext db)
         producto.MarcaId = request.MarcaId;
         producto.UnidadBaseId = request.UnidadBaseId;
         producto.StockMinimo = request.StockMinimo;
-        producto.ManejaLote = request.ManejaLote;
+        // Un servicio nunca maneja lote, sin importar lo que mande el cliente.
+        producto.ManejaLote = request.EsServicio ? false : request.ManejaLote;
         producto.EsControlado = request.EsControlado;
         producto.PermiteDecimales = request.PermiteDecimales;
+        producto.EsServicio = request.EsServicio;
         producto.CodigoProductoSin = request.CodigoProductoSin;
         producto.CodigoUnidadSin = request.CodigoUnidadSin;
 

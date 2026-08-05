@@ -21,6 +21,7 @@ public class Producto : BaseEntity, ITenantEntity, IAuditable
     public bool ManejaLote { get; set; }
     public bool EsControlado { get; set; }
     public bool PermiteDecimales { get; set; }
+    public bool EsServicio { get; set; } // mano de obra: nunca descuenta stock ni genera kardex
     public bool Activo { get; set; } = true;
     public Guid? ProductoMaestroId { get; set; }
 

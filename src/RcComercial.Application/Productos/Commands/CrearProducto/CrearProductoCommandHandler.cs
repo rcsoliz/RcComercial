@@ -21,9 +21,13 @@ public class CrearProductoCommandHandler(IApplicationDbContext db, ICurrentUserS
             UnidadBaseId = request.UnidadBaseId,
             PrecioBase = request.PrecioBase,
             StockMinimo = request.StockMinimo,
-            ManejaLote = request.ManejaLote,
+            // Un servicio nunca maneja lote, sin importar lo que mande el cliente
+            // (el validator ya lo rechaza si vienen ambos, esto es la red de
+            // seguridad del lado servidor).
+            ManejaLote = request.EsServicio ? false : request.ManejaLote,
             EsControlado = request.EsControlado,
             PermiteDecimales = request.PermiteDecimales,
+            EsServicio = request.EsServicio,
             CodigoProductoSin = request.CodigoProductoSin,
             CodigoUnidadSin = request.CodigoUnidadSin,
         };

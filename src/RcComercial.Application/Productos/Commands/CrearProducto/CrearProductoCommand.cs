@@ -33,6 +33,7 @@ public record CrearProductoCommand(
     bool ManejaLote,
     bool EsControlado,
     bool PermiteDecimales,
+    bool EsServicio,
     int? CodigoProductoSin,
     int? CodigoUnidadSin,
     List<CrearProductoPresentacion> Presentaciones,

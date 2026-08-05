@@ -7,6 +7,7 @@ import { useVentaStore } from '@/stores/venta'
 import { useCajaStore } from '@/stores/caja'
 import { useConexion } from '@/composables/useConexion'
 import { buscarProductos, obtenerProductoPorId, obtenerProductoPorCodigoBarras } from '@/api/productos'
+import { obtenerEmpresaActual } from '@/api/empresa'
 import { buscarEnCatalogoLocal, obtenerProductoLocalPorId, obtenerProductoLocalPorCodigoBarras } from '@/db/catalogoDb'
 import { contarVentasRechazadas } from '@/db/ventasDb'
 import ModalPresentacion from '@/components/pos/ModalPresentacion.vue'
@@ -17,6 +18,15 @@ import ModalCancelar from '@/components/pos/ModalCancelar.vue'
 const venta = useVentaStore()
 const caja = useCajaStore()
 const { enLinea } = useConexion()
+
+// Rubros "de servicio" no manejan stock: el badge de nivel de stock no
+// aplica en el grid del POS.
+const esTipoServicio = ref(false)
+obtenerEmpresaActual()
+  .then((empresa) => (esTipoServicio.value = empresa.esTipoServicio))
+  .catch(() => {
+    // Sin conexión: se asume catálogo normal, no es crítico.
+  })
 
 // ── Sesión de caja: se verifica al entrar; sin sesión abierta no se puede
 // vender. El estado en sí (caja.sesion) es compartido vía store — el
@@ -274,7 +284,7 @@ onUnmounted(() => {
             v-model="textoBusqueda"
             type="text"
             autocomplete="off"
-            placeholder="Buscar producto o código de barras…"
+            :placeholder="esTipoServicio ? 'Buscar servicio…' : 'Buscar producto o código de barras…'"
             class="min-h-11 w-full rounded border-[1.5px] border-transparent bg-superficie-2 py-4 pl-12 pr-14 text-tinta outline-none transition-colors placeholder:text-tinta-3 focus:border-marca focus:bg-superficie"
             @keydown.enter.prevent="intentarCodigoBarras"
           />
@@ -287,7 +297,7 @@ onUnmounted(() => {
 
         <div class="min-h-0 flex-1 overflow-y-auto pr-1">
           <div v-if="!buscando && resultados.length === 0" class="p-6 text-center text-[13.6px] text-tinta-3">
-            No se encontraron productos.
+            {{ esTipoServicio ? 'No se encontraron servicios.' : 'No se encontraron productos.' }}
           </div>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <button
@@ -302,7 +312,7 @@ onUnmounted(() => {
               <div class="mt-auto flex items-end justify-between gap-2 pt-3">
                 <span class="font-mono text-[16px] tabular-nums text-marca">{{ fmtBs(p.precioBase) }}</span>
                 <span
-                  v-if="nivelStock(p)"
+                  v-if="!esTipoServicio && nivelStock(p)"
                   class="whitespace-nowrap rounded-[4px] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
                   :class="{
                     'bg-[#F0FDF4] text-[#16A34A]': nivelStock(p) === 'normal',

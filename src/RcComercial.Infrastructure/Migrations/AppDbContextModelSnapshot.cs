@@ -1040,6 +1040,10 @@ namespace RcComercial.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("es_controlado");
 
+                    b.Property<bool>("EsServicio")
+                        .HasColumnType("boolean")
+                        .HasColumnName("es_servicio");
+
                     b.Property<bool>("ManejaLote")
                         .HasColumnType("boolean")
                         .HasColumnName("maneja_lote");
@@ -1290,6 +1294,146 @@ namespace RcComercial.Infrastructure.Migrations
                         .HasDatabaseName("ix_producto_presentacion_producto_id");
 
                     b.ToTable("producto_presentacion", (string)null);
+                });
+
+            modelBuilder.Entity("RcComercial.Domain.Entities.Proforma", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ClienteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cliente_id");
+
+                    b.Property<decimal>("Descuento")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)")
+                        .HasColumnName("descuento");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("estado");
+
+                    b.Property<DateTimeOffset>("Fecha")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha");
+
+                    b.Property<string>("MotivoRechazo")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("motivo_rechazo");
+
+                    b.Property<string>("Numero")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("numero");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)")
+                        .HasColumnName("subtotal");
+
+                    b.Property<Guid>("SucursalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("sucursal_id");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)")
+                        .HasColumnName("total");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.Property<DateOnly?>("ValidaHasta")
+                        .HasColumnType("date")
+                        .HasColumnName("valida_hasta");
+
+                    b.Property<Guid?>("VehiculoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vehiculo_id");
+
+                    b.Property<Guid?>("VentaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("venta_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_proforma");
+
+                    b.HasIndex("ClienteId")
+                        .HasDatabaseName("ix_proforma_cliente_id");
+
+                    b.HasIndex("VehiculoId")
+                        .HasDatabaseName("ix_proforma_vehiculo_id");
+
+                    b.HasIndex("SucursalId", "Numero")
+                        .IsUnique()
+                        .HasDatabaseName("ix_proforma_sucursal_id_numero");
+
+                    b.ToTable("proforma", (string)null);
+                });
+
+            modelBuilder.Entity("RcComercial.Domain.Entities.ProformaDetalle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Cantidad")
+                        .HasPrecision(14, 3)
+                        .HasColumnType("numeric(14,3)")
+                        .HasColumnName("cantidad");
+
+                    b.Property<decimal>("CantidadBase")
+                        .HasPrecision(14, 3)
+                        .HasColumnType("numeric(14,3)")
+                        .HasColumnName("cantidad_base");
+
+                    b.Property<decimal>("Descuento")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)")
+                        .HasColumnName("descuento");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)")
+                        .HasColumnName("precio_unitario");
+
+                    b.Property<Guid?>("PresentacionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("presentacion_id");
+
+                    b.Property<Guid>("ProductoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("producto_id");
+
+                    b.Property<Guid>("ProformaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proforma_id");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)")
+                        .HasColumnName("total");
+
+                    b.HasKey("Id")
+                        .HasName("pk_proforma_detalle");
+
+                    b.HasIndex("ProformaId")
+                        .HasDatabaseName("ix_proforma_detalle_proforma_id");
+
+                    b.ToTable("proforma_detalle", (string)null);
                 });
 
             modelBuilder.Entity("RcComercial.Domain.Entities.Proveedor", b =>
@@ -1787,6 +1931,10 @@ namespace RcComercial.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("codigo");
 
+                    b.Property<bool>("EsTipoServicio")
+                        .HasColumnType("boolean")
+                        .HasColumnName("es_tipo_servicio");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1824,6 +1972,7 @@ namespace RcComercial.Infrastructure.Migrations
                             Id = (short)1,
                             Activo = true,
                             Codigo = "ALMACEN",
+                            EsTipoServicio = false,
                             Nombre = "Almacén / Tienda de barrio",
                             UsaControlados = false,
                             UsaDecimalesPorDefecto = false,
@@ -1835,6 +1984,7 @@ namespace RcComercial.Infrastructure.Migrations
                             Id = (short)2,
                             Activo = true,
                             Codigo = "FARMACIA",
+                            EsTipoServicio = false,
                             Nombre = "Farmacia",
                             UsaControlados = true,
                             UsaDecimalesPorDefecto = false,
@@ -1846,6 +1996,7 @@ namespace RcComercial.Infrastructure.Migrations
                             Id = (short)3,
                             Activo = true,
                             Codigo = "FERRETERIA",
+                            EsTipoServicio = false,
                             Nombre = "Ferretería",
                             UsaControlados = false,
                             UsaDecimalesPorDefecto = true,
@@ -1857,6 +2008,7 @@ namespace RcComercial.Infrastructure.Migrations
                             Id = (short)4,
                             Activo = true,
                             Codigo = "LICORERIA",
+                            EsTipoServicio = false,
                             Nombre = "Licorería",
                             UsaControlados = false,
                             UsaDecimalesPorDefecto = false,
@@ -1868,7 +2020,20 @@ namespace RcComercial.Infrastructure.Migrations
                             Id = (short)5,
                             Activo = true,
                             Codigo = "MINIMARKET",
+                            EsTipoServicio = false,
                             Nombre = "Minimarket",
+                            UsaControlados = false,
+                            UsaDecimalesPorDefecto = false,
+                            UsaFichaFarmacia = false,
+                            UsaLotesPorDefecto = false
+                        },
+                        new
+                        {
+                            Id = (short)6,
+                            Activo = true,
+                            Codigo = "TALLER",
+                            EsTipoServicio = true,
+                            Nombre = "Taller mecánico",
                             UsaControlados = false,
                             UsaDecimalesPorDefecto = false,
                             UsaFichaFarmacia = false,
@@ -2300,6 +2465,71 @@ namespace RcComercial.Infrastructure.Migrations
                     b.ToTable("usuario", (string)null);
                 });
 
+            modelBuilder.Entity("RcComercial.Domain.Entities.Vehiculo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
+
+                    b.Property<short?>("Anio")
+                        .HasColumnType("smallint")
+                        .HasColumnName("anio");
+
+                    b.Property<Guid>("ClienteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cliente_id");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("color");
+
+                    b.Property<DateTimeOffset>("CreadoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("creado_en");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("Marca")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("marca");
+
+                    b.Property<string>("Modelo")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("modelo");
+
+                    b.Property<string>("NumeroChasis")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("numero_chasis");
+
+                    b.Property<string>("Placa")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("placa");
+
+                    b.HasKey("Id")
+                        .HasName("pk_vehiculo");
+
+                    b.HasIndex("ClienteId")
+                        .HasDatabaseName("ix_vehiculo_cliente_id");
+
+                    b.HasIndex("EmpresaId", "Placa")
+                        .HasDatabaseName("ix_vehiculo_empresa_id_placa");
+
+                    b.ToTable("vehiculo", (string)null);
+                });
+
             modelBuilder.Entity("RcComercial.Domain.Entities.Venta", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2394,8 +2624,15 @@ namespace RcComercial.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("usuario_id");
 
+                    b.Property<Guid?>("VehiculoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vehiculo_id");
+
                     b.HasKey("Id")
                         .HasName("pk_venta");
+
+                    b.HasIndex("VehiculoId")
+                        .HasDatabaseName("ix_venta_vehiculo_id");
 
                     b.HasIndex("EmpresaId", "Fecha")
                         .HasDatabaseName("ix_venta_empresa_id_fecha");
@@ -2531,6 +2768,16 @@ namespace RcComercial.Infrastructure.Migrations
                         .HasConstraintName("fk_producto_presentacion_producto_producto_id");
                 });
 
+            modelBuilder.Entity("RcComercial.Domain.Entities.ProformaDetalle", b =>
+                {
+                    b.HasOne("RcComercial.Domain.Entities.Proforma", null)
+                        .WithMany("Detalles")
+                        .HasForeignKey("ProformaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proforma_detalle_proforma_proforma_id");
+                });
+
             modelBuilder.Entity("RcComercial.Domain.Entities.RolPermiso", b =>
                 {
                     b.HasOne("RcComercial.Domain.Entities.Permiso", "Permiso")
@@ -2612,6 +2859,11 @@ namespace RcComercial.Infrastructure.Migrations
                     b.Navigation("FichaFarmacia");
 
                     b.Navigation("Presentaciones");
+                });
+
+            modelBuilder.Entity("RcComercial.Domain.Entities.Proforma", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("RcComercial.Domain.Entities.Rol", b =>

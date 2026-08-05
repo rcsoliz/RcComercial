@@ -32,6 +32,7 @@ public record ProductoDto(
     bool ManejaLote,
     bool EsControlado,
     bool PermiteDecimales,
+    bool EsServicio,
     bool Activo,
     int? CodigoProductoSin,
     int? CodigoUnidadSin,
@@ -40,7 +41,7 @@ public record ProductoDto(
 
 public record ProductoListItemDto(
     Guid Id, string? Codigo, string? CodigoBarras, string Nombre, decimal PrecioBase, bool Activo,
-    string? CategoriaNombre, string? MarcaNombre, decimal StockTotal, decimal StockMinimo);
+    string? CategoriaNombre, string? MarcaNombre, decimal StockTotal, decimal StockMinimo, bool EsServicio);
 
 public record ProductoMaestroDto(
     Guid Id, string CodigoBarras, string Nombre, string? Marca, string? Contenido, short? RubroId);

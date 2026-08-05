@@ -6,10 +6,23 @@ import { toast } from 'vue-sonner'
 import { ChevronLeft, ChevronRight, Package, Plus, Search } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { listarProductos, obtenerProductoPorCodigoBarras } from '@/api/productos'
+import { obtenerEmpresaActual } from '@/api/empresa'
 import { Permisos } from '@/utils/permisos'
 
 const router = useRouter()
 const auth = useAuthStore()
+
+// Rubros "de servicio" (talleres, consultorías) no manejan stock: el
+// catálogo se llama "Servicios" en vez de "Productos" en toda esta pantalla.
+const esTipoServicio = ref(false)
+onMounted(async () => {
+  try {
+    const empresa = await obtenerEmpresaActual()
+    esTipoServicio.value = empresa.esTipoServicio
+  } catch {
+    // Sin conexión: se asume catálogo normal, no es crítico.
+  }
+})
 
 const texto = ref('')
 const estado = ref('activos') // 'activos' | 'inactivos' | 'todos'
@@ -117,7 +130,7 @@ onMounted(ejecutarBusqueda)
             v-model="texto"
             type="text"
             autocomplete="off"
-            placeholder="Buscar producto o código de barras…"
+            :placeholder="esTipoServicio ? 'Buscar servicio…' : 'Buscar producto o código de barras…'"
             class="min-h-11 w-full rounded-s border-[1.5px] border-transparent bg-superficie-2 py-2 pl-10 pr-3 text-[13.6px] text-tinta outline-none transition-colors placeholder:text-tinta-3 focus:border-marca focus:bg-superficie"
             @keydown.enter.prevent="alPresionarEnterBusqueda"
           />
@@ -148,16 +161,22 @@ onMounted(ejecutarBusqueda)
         @click="router.push({ name: 'productos-nuevo' })"
       >
         <Plus class="h-5 w-5" />
-        Nuevo producto
+        {{ esTipoServicio ? 'Nuevo servicio' : 'Nuevo producto' }}
       </button>
     </div>
 
     <!-- Estado vacío: catálogo sin productos (patrón C) -->
     <div v-if="catalogoVacio" class="flex flex-col items-center gap-3 rounded border border-linea bg-superficie px-6 py-16 text-center">
       <Package class="h-10 w-10 text-tinta-3" />
-      <p class="font-display text-[19.2px] font-bold text-tinta">Todavía no hay productos</p>
+      <p class="font-display text-[19.2px] font-bold text-tinta">
+        {{ esTipoServicio ? 'Todavía no hay servicios' : 'Todavía no hay productos' }}
+      </p>
       <p class="max-w-[360px] text-[13.6px] text-tinta-2">
-        Crea el primero manualmente o escanea un código de barras en el buscador de arriba.
+        {{
+          esTipoServicio
+            ? 'Crea el primero desde el botón de arriba.'
+            : 'Crea el primero manualmente o escanea un código de barras en el buscador de arriba.'
+        }}
       </p>
       <button
         v-if="auth.tienePermiso(Permisos.ProductosCrearEditar)"
@@ -166,7 +185,7 @@ onMounted(ejecutarBusqueda)
         @click="router.push({ name: 'productos-nuevo' })"
       >
         <Plus class="h-5 w-5" />
-        Crear el primer producto
+        {{ esTipoServicio ? 'Crear el primer servicio' : 'Crear el primer producto' }}
       </button>
     </div>
 
@@ -175,18 +194,26 @@ onMounted(ejecutarBusqueda)
         <table class="w-full border-collapse text-left">
           <thead>
             <tr class="border-b border-linea bg-superficie-2">
-              <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Producto</th>
+              <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">
+                {{ esTipoServicio ? 'Servicio' : 'Producto' }}
+              </th>
               <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Categoría / Marca</th>
               <th class="px-6 py-3.5 text-right text-[10px] font-bold uppercase tracking-wide text-tinta-3">Precio</th>
-              <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Nivel de stock</th>
+              <th v-if="!esTipoServicio" class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">
+                Nivel de stock
+              </th>
               <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Estado</th>
               <th class="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wide text-tinta-3">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="sinResultados">
-              <td colspan="6" class="px-6 py-12 text-center text-[13.6px] text-tinta-3">
-                {{ texto.trim() ? `No se encontraron productos para "${texto}".` : 'No hay productos con este filtro.' }}
+              <td :colspan="esTipoServicio ? 5 : 6" class="px-6 py-12 text-center text-[13.6px] text-tinta-3">
+                {{
+                  texto.trim()
+                    ? `No se encontraron ${esTipoServicio ? 'servicios' : 'productos'} para "${texto}".`
+                    : `No hay ${esTipoServicio ? 'servicios' : 'productos'} con este filtro.`
+                }}
               </td>
             </tr>
             <tr
@@ -211,7 +238,7 @@ onMounted(ejecutarBusqueda)
               <td class="px-6 py-4 text-right align-middle font-semibold tabular-nums text-tinta">
                 {{ fmtBs(p.precioBase) }}
               </td>
-              <td class="px-6 py-4 align-middle">
+              <td v-if="!esTipoServicio" class="px-6 py-4 align-middle">
                 <div class="flex min-w-[180px] items-center gap-3">
                   <div class="h-1.5 w-24 flex-shrink-0 overflow-hidden rounded-chip bg-superficie-2">
                     <div

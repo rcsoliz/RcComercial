@@ -35,3 +35,7 @@ export function desactivarCliente(id) {
 export function listarVentasPorCliente(clienteId, pagina = 1) {
   return http.get(`/clientes/${clienteId}/ventas`, { params: { pagina } }).then((r) => r.data)
 }
+
+export function listarVehiculosPorCliente(clienteId) {
+  return http.get(`/clientes/${clienteId}/vehiculos`).then((r) => r.data)
+}

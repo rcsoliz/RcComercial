@@ -10,4 +10,5 @@ public record EmpresaActualDto(
     bool UsaLotesPorDefecto,
     bool UsaControlados,
     bool UsaFichaFarmacia,
-    bool UsaDecimalesPorDefecto);
+    bool UsaDecimalesPorDefecto,
+    bool EsTipoServicio);

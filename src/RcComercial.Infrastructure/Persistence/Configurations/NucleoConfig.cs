@@ -50,7 +50,8 @@ public class RubroConfig : IEntityTypeConfiguration<Rubro>
             new Rubro { Id = 2, Codigo = "FARMACIA", Nombre = "Farmacia", UsaLotesPorDefecto = true, UsaControlados = true, UsaFichaFarmacia = true, Activo = true },
             new Rubro { Id = 3, Codigo = "FERRETERIA", Nombre = "Ferretería", UsaDecimalesPorDefecto = true, Activo = true },
             new Rubro { Id = 4, Codigo = "LICORERIA", Nombre = "Licorería", Activo = true },
-            new Rubro { Id = 5, Codigo = "MINIMARKET", Nombre = "Minimarket", Activo = true });
+            new Rubro { Id = 5, Codigo = "MINIMARKET", Nombre = "Minimarket", Activo = true },
+            new Rubro { Id = 6, Codigo = "TALLER", Nombre = "Taller mecánico", EsTipoServicio = true, Activo = true });
     }
 }
 

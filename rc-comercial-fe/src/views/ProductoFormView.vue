@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -26,6 +26,7 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const esNuevo = computed(() => !props.id)
+const esTipoServicio = computed(() => empresaActual.value?.esTipoServicio)
 const puedeGuardar = computed(() => auth.tienePermiso(Permisos.ProductosCrearEditar))
 const puedeCambiarPrecio = computed(() => auth.tienePermiso(Permisos.ProductosCambiarPrecios))
 const puedeEliminar = computed(() => auth.tienePermiso(Permisos.ProductosEliminar))
@@ -73,6 +74,7 @@ const esquema = toTypedSchema(
     manejaLote: z.boolean().default(false),
     esControlado: z.boolean().default(false),
     permiteDecimales: z.boolean().default(false),
+    esServicio: z.boolean().default(false),
   }),
 )
 
@@ -89,6 +91,14 @@ const [stockMinimo, stockMinimoAttrs] = defineField('stockMinimo')
 const [manejaLote] = defineField('manejaLote')
 const [esControlado] = defineField('esControlado')
 const [permiteDecimales] = defineField('permiteDecimales')
+const [esServicio] = defineField('esServicio')
+
+// Un servicio nunca maneja lote (no tiene sentido: no hay stock físico que
+// vencer). El backend también lo fuerza, esto solo evita el parpadeo de un
+// checkbox marcado que se apagaría solo al guardar.
+watch(esServicio, (valor) => {
+  if (valor) manejaLote.value = false
+})
 
 function limpiarNumero(n) {
   return n === null || n === undefined || n === '' ? '' : n
@@ -122,6 +132,7 @@ async function cargarDatos() {
         manejaLote: producto.manejaLote,
         esControlado: producto.esControlado,
         permiteDecimales: producto.permiteDecimales,
+        esServicio: producto.esServicio,
       })
       presentaciones.value = producto.presentaciones.map((p) => ({
         nombre: p.nombre,
@@ -145,6 +156,9 @@ async function cargarDatos() {
         codigoBarras: route.query.codigoBarras || '',
         nombre: route.query.nombre || '',
         marcaId: marcaSugerida?.id || '',
+        // Rubro de servicio: casi todo lo que se carga acá es mano de obra,
+        // así que arranca marcado (el usuario lo puede destildar si es un insumo).
+        esServicio: empresa.esTipoServicio,
       })
     }
   } finally {
@@ -166,6 +180,7 @@ function aComando(valores) {
     manejaLote: valores.manejaLote,
     esControlado: valores.esControlado,
     permiteDecimales: valores.permiteDecimales,
+    esServicio: valores.esServicio,
     codigoProductoSin: null,
     codigoUnidadSin: null,
     presentaciones: presentaciones.value.map((p) => ({
@@ -238,7 +253,8 @@ function fmtBs(n) {
   <div class="p-4 md:p-6">
     <div class="mx-auto w-full max-w-[640px]">
       <h2 class="mb-6 font-display text-[24px] font-bold text-tinta">
-        {{ esNuevo ? 'Nuevo producto' : 'Editar producto' }}
+        <template v-if="esTipoServicio">{{ esNuevo ? 'Nuevo servicio' : 'Editar servicio' }}</template>
+        <template v-else>{{ esNuevo ? 'Nuevo producto' : 'Editar producto' }}</template>
       </h2>
 
       <div v-if="cargando" class="rounded border border-linea bg-superficie p-8 text-center text-tinta-2">
@@ -268,7 +284,7 @@ function fmtBs(n) {
 
         <div class="flex flex-col gap-4">
           <label class="flex flex-col gap-1.5">
-            <span class="text-[0.8rem] font-semibold text-tinta-2">Nombre del producto</span>
+            <span class="text-[0.8rem] font-semibold text-tinta-2">{{ esTipoServicio ? 'Nombre del servicio' : 'Nombre del producto' }}</span>
             <input
               v-model="nombre"
               v-bind="nombreAttrs"
@@ -340,7 +356,7 @@ function fmtBs(n) {
               <span v-if="errors.unidadBaseId" class="text-[12px] text-peligro">{{ errors.unidadBaseId }}</span>
             </label>
 
-            <label class="flex flex-col gap-1.5">
+            <label v-if="!esServicio" class="flex flex-col gap-1.5">
               <span class="text-[0.8rem] font-semibold text-tinta-2">Stock mínimo</span>
               <input
                 v-model="stockMinimo"
@@ -370,6 +386,18 @@ function fmtBs(n) {
           <!-- Checkboxes-tarjeta -->
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label
+              class="flex cursor-pointer items-start gap-3 rounded-s border-[1.5px] p-4 transition-colors"
+              :class="esServicio ? 'border-marca bg-marca-tenue' : 'border-linea bg-superficie-2'"
+            >
+              <input v-model="esServicio" type="checkbox" class="mt-0.5 h-4 w-4 accent-marca" />
+              <span>
+                <span class="block text-[13.6px] font-semibold text-tinta">Es un servicio</span>
+                <span class="block text-[12px] text-tinta-2">Mano de obra: no descuenta stock ("cambio de aceite", "diagnóstico").</span>
+              </span>
+            </label>
+
+            <label
+              v-if="!esServicio"
               class="flex cursor-pointer items-start gap-3 rounded-s border-[1.5px] p-4 transition-colors"
               :class="manejaLote ? 'border-marca bg-marca-tenue' : 'border-linea bg-superficie-2'"
             >
@@ -470,7 +498,7 @@ function fmtBs(n) {
             @click="mostrarDesactivar = true"
           >
             <Trash2 class="h-4 w-4" />
-            Desactivar producto
+            {{ esTipoServicio ? 'Desactivar servicio' : 'Desactivar producto' }}
           </button>
           <span v-else></span>
 
@@ -488,7 +516,7 @@ function fmtBs(n) {
               :disabled="guardando"
               class="min-h-11 rounded-s bg-marca px-5 font-display font-bold text-sobre-marca hover:bg-marca-hover disabled:opacity-60"
             >
-              {{ guardando ? 'Guardando…' : 'Guardar producto' }}
+              {{ guardando ? 'Guardando…' : esTipoServicio ? 'Guardar servicio' : 'Guardar producto' }}
             </button>
           </div>
         </div>

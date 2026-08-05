@@ -189,6 +189,8 @@ api.MapComprasEndpoints();
 api.MapProveedoresEndpoints();
 api.MapSyncEndpoints();
 api.MapPlataformaEndpoints();
+api.MapVehiculosEndpoints();
+api.MapProformasEndpoints();
 
 app.Run();
 

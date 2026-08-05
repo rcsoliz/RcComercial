@@ -25,4 +25,8 @@ export const Permisos = {
   AdminRoles: 'admin.roles',
   AdminConfiguracion: 'admin.configuracion',
   AdminSucursales: 'admin.sucursales',
+  ProformasCrear: 'proformas.crear',
+  ProformasAnular: 'proformas.anular',
+  VehiculosCrearEditar: 'vehiculos.crear_editar',
+  VehiculosEliminar: 'vehiculos.eliminar',
 }

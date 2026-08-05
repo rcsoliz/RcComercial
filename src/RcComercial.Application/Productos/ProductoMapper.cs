@@ -7,7 +7,7 @@ internal static class ProductoMapper
 {
     public static ProductoDto ToDto(Producto p) => new(
         p.Id, p.Codigo, p.CodigoBarras, p.Nombre, p.CategoriaId, p.MarcaId, p.UnidadBaseId,
-        p.PrecioBase, p.StockMinimo, p.ManejaLote, p.EsControlado, p.PermiteDecimales, p.Activo,
+        p.PrecioBase, p.StockMinimo, p.ManejaLote, p.EsControlado, p.PermiteDecimales, p.EsServicio, p.Activo,
         p.CodigoProductoSin, p.CodigoUnidadSin,
         p.Presentaciones.Select(pr => new PresentacionDto(
             pr.Id, pr.Nombre, pr.Factor, pr.CodigoBarras, pr.Precio,

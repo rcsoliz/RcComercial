@@ -12,6 +12,8 @@ public class CrearProductoCommandValidator : AbstractValidator<CrearProductoComm
         RuleFor(x => x.UnidadBaseId).GreaterThan((short)0);
         RuleFor(x => x.PrecioBase).GreaterThanOrEqualTo(0);
         RuleFor(x => x.StockMinimo).GreaterThanOrEqualTo(0);
+        RuleFor(x => x).Must(c => !c.EsServicio || !c.ManejaLote)
+            .WithMessage("Un servicio no puede manejar lote.");
 
         RuleForEach(x => x.Presentaciones).ChildRules(p =>
         {

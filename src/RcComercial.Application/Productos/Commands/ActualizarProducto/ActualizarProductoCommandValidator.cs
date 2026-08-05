@@ -9,6 +9,8 @@ public class ActualizarProductoCommandValidator : AbstractValidator<ActualizarPr
         RuleFor(x => x.Nombre).NotEmpty().MaximumLength(200);
         RuleFor(x => x.UnidadBaseId).GreaterThan((short)0);
         RuleFor(x => x.StockMinimo).GreaterThanOrEqualTo(0);
+        RuleFor(x => x).Must(c => !c.EsServicio || !c.ManejaLote)
+            .WithMessage("Un servicio no puede manejar lote.");
 
         RuleForEach(x => x.Presentaciones).ChildRules(p =>
         {

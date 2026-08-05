@@ -2,6 +2,7 @@ using MediatR;
 using RcComercial.Application.Clientes.Commands;
 using RcComercial.Application.Clientes.Queries;
 using RcComercial.Application.Clientes.Queries.ListarClientes;
+using RcComercial.Application.Vehiculos.Queries;
 using RcComercial.Application.Ventas.Queries;
 using RcComercial.Domain.Common;
 
@@ -30,6 +31,10 @@ public static class ClientesEndpoints
         group.MapGet("/{id:guid}/ventas", async (Guid id, int? pagina, IMediator mediator) =>
             Results.Ok(await mediator.Send(new ListarVentasPorClienteQuery(id, pagina ?? 1))))
             .RequireAuthorization(Permisos.VentasVerHistorial);
+
+        group.MapGet("/{id:guid}/vehiculos", async (Guid id, IMediator mediator) =>
+            Results.Ok(await mediator.Send(new ListarVehiculosPorClienteQuery(id))))
+            .RequireAuthorization();
 
         group.MapPost("/", async (CrearClienteCommand command, IMediator mediator) =>
             Results.Ok(await mediator.Send(command)))

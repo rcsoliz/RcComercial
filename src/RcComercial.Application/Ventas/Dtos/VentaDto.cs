@@ -19,6 +19,7 @@ public record VentaDto(
     DateTimeOffset Fecha,
     string Estado,
     Guid? ClienteId,
+    Guid? VehiculoId,
     decimal Subtotal,
     decimal Descuento,
     decimal Total,

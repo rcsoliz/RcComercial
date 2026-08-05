@@ -55,6 +55,7 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
             SucursalId = sesion.SucursalId,
             SesionCajaId = sesion.Id,
             ClienteId = request.ClienteId,
+            VehiculoId = request.VehiculoId,
             Numero = numero,
             UsuarioId = usuarioId,
             CreadoOffline = request.Numero is not null,
@@ -77,32 +78,35 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
             var cantidadBase = d.Cantidad * factor;
 
             Guid? loteId = null;
-            if (producto.ManejaLote)
+            if (!producto.EsServicio)
             {
-                var reserva = await ReservarStockLoteFefoAsync(
-                    db, sesion.SucursalId, producto.Id, cantidadBase, permiteStockNegativo, ct);
-                if (reserva is null)
-                    throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
-                loteId = reserva.Value.LoteId;
-            }
-            else
-            {
-                var stock = await db.Stocks.FirstOrDefaultAsync(
-                    s => s.SucursalId == sesion.SucursalId && s.ProductoId == producto.Id && s.LoteId == null, ct);
-                if (stock is null)
+                if (producto.ManejaLote)
                 {
-                    if (!permiteStockNegativo)
+                    var reserva = await ReservarStockLoteFefoAsync(
+                        db, sesion.SucursalId, producto.Id, cantidadBase, permiteStockNegativo, ct);
+                    if (reserva is null)
                         throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
-                    db.Stocks.Add(new Stock
-                    {
-                        SucursalId = sesion.SucursalId, ProductoId = producto.Id, Cantidad = -cantidadBase,
-                    });
+                    loteId = reserva.Value.LoteId;
                 }
                 else
                 {
-                    var resultado = await db.AjustarStockAsync(stock.Id, -cantidadBase, permiteStockNegativo, ct);
-                    if (resultado is null)
-                        throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
+                    var stock = await db.Stocks.FirstOrDefaultAsync(
+                        s => s.SucursalId == sesion.SucursalId && s.ProductoId == producto.Id && s.LoteId == null, ct);
+                    if (stock is null)
+                    {
+                        if (!permiteStockNegativo)
+                            throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
+                        db.Stocks.Add(new Stock
+                        {
+                            SucursalId = sesion.SucursalId, ProductoId = producto.Id, Cantidad = -cantidadBase,
+                        });
+                    }
+                    else
+                    {
+                        var resultado = await db.AjustarStockAsync(stock.Id, -cantidadBase, permiteStockNegativo, ct);
+                        if (resultado is null)
+                            throw new ValidationException($"Stock insuficiente para '{producto.Nombre}'.");
+                    }
                 }
             }
 
@@ -119,19 +123,22 @@ public class CrearVentaCommandHandler(IApplicationDbContext db, ICurrentUserServ
                 Total = (d.Cantidad * d.PrecioUnitario) - d.Descuento,
             });
 
-            db.MovimientosInventario.Add(new MovimientoInventario
+            if (!producto.EsServicio)
             {
-                EmpresaId = empresaId,
-                SucursalId = sesion.SucursalId,
-                ProductoId = producto.Id,
-                LoteId = loteId,
-                Tipo = TiposMovimiento.Venta,
-                Cantidad = -cantidadBase,
-                CostoUnitario = producto.CostoPromedio,
-                ReferenciaTipo = "VENTA",
-                ReferenciaId = venta.Id,
-                UsuarioId = usuarioId,
-            });
+                db.MovimientosInventario.Add(new MovimientoInventario
+                {
+                    EmpresaId = empresaId,
+                    SucursalId = sesion.SucursalId,
+                    ProductoId = producto.Id,
+                    LoteId = loteId,
+                    Tipo = TiposMovimiento.Venta,
+                    Cantidad = -cantidadBase,
+                    CostoUnitario = producto.CostoPromedio,
+                    ReferenciaTipo = "VENTA",
+                    ReferenciaId = venta.Id,
+                    UsuarioId = usuarioId,
+                });
+            }
         }
 
         foreach (var p in request.Pagos)
