@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import { obtenerEmpresaActual } from '@/api/empresa'
 import TemaToggle from '@/components/ui/TemaToggle.vue'
 import IndicadorConexion from '@/components/ui/IndicadorConexion.vue'
+import TopBar from '@/components/layout/TopBar.vue'
 import { navegacion } from './navegacion'
 
 const auth = useAuthStore()
@@ -85,7 +86,9 @@ function cerrarSesion() {
     <TemaToggle class="fixed right-2 top-2 z-40 bg-papel md:hidden" />
     <IndicadorConexion compacto class="fixed left-2 top-2 z-40 md:hidden" />
 
-    <main class="min-h-dvh pb-28 md:ml-64 md:pb-0">
+    <TopBar class="fixed left-64 right-0 top-0 z-30 hidden md:flex" />
+
+    <main class="min-h-dvh pb-28 md:ml-64 md:pb-0 md:pt-16">
       <RouterView />
     </main>
 

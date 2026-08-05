@@ -98,6 +98,8 @@ async function desactivar(item) {
     toast.error('No se pudo desactivar.')
   }
 }
+
+onMounted(cargar)
 </script>
 
 <template>

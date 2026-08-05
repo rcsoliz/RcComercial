@@ -1,12 +1,11 @@
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { toast } from 'vue-sonner'
-import { CircleX, Minus, Plus, Receipt, Search, Settings, User } from 'lucide-vue-next'
+import { CircleX, Minus, Plus, Receipt, Search } from 'lucide-vue-next'
 import { useVentaStore } from '@/stores/venta'
-import { useAuthStore } from '@/stores/auth'
+import { useCajaStore } from '@/stores/caja'
 import { useConexion } from '@/composables/useConexion'
-import { obtenerSesionAbierta, abrirCaja } from '@/api/caja'
 import { buscarProductos, obtenerProductoPorId, obtenerProductoPorCodigoBarras } from '@/api/productos'
 import { buscarEnCatalogoLocal, obtenerProductoLocalPorId, obtenerProductoLocalPorCodigoBarras } from '@/db/catalogoDb'
 import { contarVentasRechazadas } from '@/db/ventasDb'
@@ -16,42 +15,22 @@ import ModalCobro from '@/components/pos/ModalCobro.vue'
 import ModalCancelar from '@/components/pos/ModalCancelar.vue'
 
 const venta = useVentaStore()
-const auth = useAuthStore()
+const caja = useCajaStore()
 const { enLinea } = useConexion()
 
-// ── Sesión de caja: se verifica al entrar; sin sesión abierta no se puede vender ──
-const CLAVE_SESION_CAJA_CACHE = 'syscenters-caja-abierta-cache'
-const cargandoCaja = ref(true)
-const sesionCaja = ref(null)
+// ── Sesión de caja: se verifica al entrar; sin sesión abierta no se puede
+// vender. El estado en sí (caja.sesion) es compartido vía store — el
+// header con "Caja activa" ya lo muestra AppShell en todas las vistas.
 const montoInicial = ref('')
 const abriendoCaja = ref(false)
 const errorCaja = ref('')
-
-async function cargarSesionCaja() {
-  cargandoCaja.value = true
-  try {
-    sesionCaja.value = await obtenerSesionAbierta()
-    if (sesionCaja.value) localStorage.setItem(CLAVE_SESION_CAJA_CACHE, JSON.stringify(sesionCaja.value))
-    else localStorage.removeItem(CLAVE_SESION_CAJA_CACHE)
-  } catch {
-    // Sin red no se puede confirmar el estado real de la caja: si el
-    // cajero ya la había abierto en línea, seguimos con esa última sesión
-    // conocida en vez de bloquear el POS entero por no tener conexión.
-    const cache = localStorage.getItem(CLAVE_SESION_CAJA_CACHE)
-    sesionCaja.value = cache ? JSON.parse(cache) : null
-    if (sesionCaja.value) toast.info('Sin conexión: se usa la última sesión de caja conocida.')
-  } finally {
-    cargandoCaja.value = false
-  }
-}
 
 async function abrirCajaAhora() {
   errorCaja.value = ''
   const monto = Number(montoInicial.value || 0)
   abriendoCaja.value = true
   try {
-    sesionCaja.value = await abrirCaja(monto, null)
-    localStorage.setItem(CLAVE_SESION_CAJA_CACHE, JSON.stringify(sesionCaja.value))
+    await caja.abrir(monto)
   } catch (error) {
     const mensajes = error.response?.data?.errores?.map((e) => e.mensaje)
     errorCaja.value = mensajes?.join(' ') || 'No se pudo abrir la caja.'
@@ -177,12 +156,6 @@ function fmtStock(n) {
   return Number.isInteger(num) ? num.toString() : num.toFixed(1)
 }
 
-const inicialesUsuario = computed(() => {
-  const partes = auth.nombreUsuario.trim().split(/\s+/).filter(Boolean)
-  if (partes.length === 0) return ''
-  return (partes[0][0] + (partes[partes.length - 1][0] || '')).toUpperCase()
-})
-
 // ── Cobro / receta / cancelar ──
 const mostrarReceta = ref(false)
 const mostrarCobro = ref(false)
@@ -233,7 +206,7 @@ async function actualizarRechazadasCount() {
 }
 
 onMounted(() => {
-  cargarSesionCaja()
+  caja.cargarSesion()
   ejecutarBusqueda()
   actualizarRechazadasCount()
   temporizadorRechazadas = setInterval(actualizarRechazadasCount, 30_000)
@@ -247,9 +220,9 @@ onUnmounted(() => {
 
 <template>
   <!-- Verificación de sesión de caja al entrar -->
-  <div v-if="cargandoCaja" class="flex h-full items-center justify-center p-6 text-tinta-2">Verificando caja…</div>
+  <div v-if="caja.cargando" class="flex h-full items-center justify-center p-6 text-tinta-2">Verificando caja…</div>
 
-  <div v-else-if="!sesionCaja" class="flex h-full items-center justify-center px-4">
+  <div v-else-if="!caja.sesion" class="flex h-full items-center justify-center px-4">
     <div class="w-full max-w-[360px] rounded border border-linea bg-superficie p-6 text-center shadow">
       <p class="font-display text-[19.2px] font-bold text-tinta">Abrir caja</p>
       <p class="mt-1 text-[13.6px] text-tinta-2">Necesitas una sesión de caja abierta para empezar a vender.</p>
@@ -281,50 +254,19 @@ onUnmounted(() => {
   </div>
 
   <!-- Layout POS -->
-  <div v-else class="fixed inset-x-0 top-0 bottom-28 flex flex-col md:bottom-0 md:left-64">
-    <!-- Header: barra completa, al ras (sin margen/borde redondeado) -->
-    <header class="flex h-16 flex-shrink-0 items-center justify-between border-b border-linea bg-superficie px-4 md:px-6">
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="flex items-center gap-2 rounded-chip bg-superficie-2 px-3 py-1.5">
-          <span class="h-2 w-2 animate-pulse rounded-full bg-exito" aria-hidden="true"></span>
-          <span class="text-[11px] font-bold uppercase tracking-wide text-tinta-2">Caja activa</span>
-        </div>
-        <div class="hidden h-4 w-px bg-linea sm:block" aria-hidden="true"></div>
-        <div class="hidden items-center gap-1.5 sm:flex">
-          <User class="h-4 w-4 text-tinta-3" />
-          <span class="text-[13px] text-tinta-2">
-            Operador: <span class="font-bold text-tinta">{{ auth.nombreUsuario || '—' }}</span>
-          </span>
-        </div>
-      </div>
-      <div class="flex items-center gap-4">
-        <RouterLink
-          v-if="rechazadasCount > 0"
-          :to="{ name: 'ventas-revisar' }"
-          class="rounded-chip bg-peligro-tenue px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-peligro hover:underline"
-        >
-          {{ rechazadasCount }} por revisar
-        </RouterLink>
-        <RouterLink
-          :to="{ name: 'ajustes' }"
-          class="text-tinta-2 transition-colors hover:text-marca"
-          aria-label="Ajustes"
-        >
-          <Settings class="h-5 w-5" />
-        </RouterLink>
-        <div
-          class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-marca-tenue text-[11px] font-bold text-marca"
-          :title="auth.nombreUsuario"
-        >
-          {{ inicialesUsuario }}
-        </div>
-      </div>
-    </header>
-
+  <div v-else class="fixed inset-x-0 top-0 bottom-28 flex flex-col md:bottom-0 md:left-64 md:top-16">
     <!-- Espacio de trabajo: grid de productos + ticket -->
     <div class="flex min-h-0 flex-1 flex-col md:flex-row">
       <!-- Columna izquierda: búsqueda + grid -->
       <section class="flex min-h-0 flex-1 flex-col p-4 md:p-6" aria-label="Catálogo de productos">
+        <RouterLink
+          v-if="rechazadasCount > 0"
+          :to="{ name: 'ventas-revisar' }"
+          class="mb-3 inline-flex w-fit items-center rounded-chip bg-peligro-tenue px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-peligro hover:underline"
+        >
+          {{ rechazadasCount }} por revisar
+        </RouterLink>
+
         <div class="relative mb-4">
           <Search class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-tinta-3" />
           <input
@@ -361,11 +303,11 @@ onUnmounted(() => {
                 <span class="font-mono text-[16px] tabular-nums text-marca">{{ fmtBs(p.precioBase) }}</span>
                 <span
                   v-if="nivelStock(p)"
-                  class="whitespace-nowrap rounded-chip px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                  class="whitespace-nowrap rounded-[4px] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
                   :class="{
-                    'bg-exito-tenue text-exito': nivelStock(p) === 'normal',
-                    'bg-aviso-tenue text-aviso': nivelStock(p) === 'bajo',
-                    'bg-peligro-tenue text-peligro': nivelStock(p) === 'agotado',
+                    'bg-[#F0FDF4] text-[#16A34A]': nivelStock(p) === 'normal',
+                    'bg-[#FFFBEB] text-[#D97706]': nivelStock(p) === 'bajo',
+                    'bg-[#FFDAD6] text-[#BA1A1A]': nivelStock(p) === 'agotado',
                   }"
                 >
                   {{ fmtStock(p.stockTotal) }} en stock

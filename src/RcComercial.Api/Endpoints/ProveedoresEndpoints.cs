@@ -1,6 +1,7 @@
 using MediatR;
 using RcComercial.Application.Proveedores.Commands;
 using RcComercial.Application.Proveedores.Queries;
+using RcComercial.Application.Proveedores.Queries.ListarProveedores;
 using RcComercial.Domain.Common;
 
 namespace RcComercial.Api.Endpoints;
@@ -13,6 +14,10 @@ public static class ProveedoresEndpoints
 
         group.MapGet("/", async (string? buscar, string? estado, int? pagina, IMediator mediator) =>
             Results.Ok(await mediator.Send(new BuscarProveedoresQuery(buscar, estado, pagina ?? 1))))
+            .RequireAuthorization();
+
+        group.MapGet("/listado", async (string? buscar, string? estado, int? pagina, IMediator mediator) =>
+            Results.Ok(await mediator.Send(new ListarProveedoresQuery(buscar, pagina ?? 1, estado))))
             .RequireAuthorization();
 
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator) =>
